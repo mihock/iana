@@ -1,3 +1,5 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
-Readme.md
+^\.git$
+^README\.md$
+^\.gitignore$
