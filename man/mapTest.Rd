@@ -1,0 +1,68 @@
+\name{mapTest}
+\alias{mapTest}
+\title{Velicer's MAP Test}
+\usage{
+  mapTest(x, n = 20)
+}
+\arguments{
+  \item{x}{a data frame containing the variables (items) to
+  be analyzed}
+
+  \item{n}{the maximum number of factors to consider
+  (default: 20)}
+}
+\value{
+  A vector of class 'mapTest' containing the average
+  squared (partial) correlations. The first element of the
+  vector is the average squared correlation with no
+  component removed.
+}
+\description{
+  Perform Velicer's Minimum Average Partial test for the
+  variables (usually items) in a data frame.
+}
+\details{
+  The \code{plot} method produces a graphical
+  representation of the squared correlations.
+}
+\examples{
+local({
+set.seed(1234)
+#
+# Simulate 2 factors (f1, f2) underlying 6 items (x1 to x6).
+#
+n <- 200
+f1 <- rnorm(n)
+f2 <- rnorm(n)
+Df <- data.frame(x1 = f1 + rnorm(n),
+                 x2 = f1 + rnorm(n),
+                 x3 = f1 + rnorm(n),
+                 x4 = f2 + rnorm(n),
+                 x5 = f2 + rnorm(n),
+                 x6 = f2 + rnorm(n))
+mt <- mapTest(Df)
+print(mt)
+plot(mt)
+
+#
+# If we remove 1 item the MAP test suggests the wrong number of factors...
+#
+Df2 <- subset(Df, select = -x6)
+mt2 <- mapTest(Df2)
+print(mt2)
+plot(mt2)
+factanal(Df2, 2)
+})
+}
+\author{
+  Computation: William Revelle, see \code{\link{psych}},
+  specifically \code{\link{VSS}}.
+
+  Plot: Michael Hock, \email{michael.hock@uni-bamberg.de}
+}
+\references{
+  Velicer, W. (1976) Determining the number of components
+  from the matrix of partial correlations.
+  \emph{Psychometrika, 41,} 321-327.
+}
+

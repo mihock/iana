@@ -1,0 +1,20 @@
+\name{frequencies}
+\alias{frequencies}
+\title{Frequencies}
+\usage{
+  frequencies(x, max.unique = 10)
+}
+\arguments{
+  \item{x}{a data frame}
+
+  \item{max.unique}{print only variables with at most this
+  number of unique values}
+}
+\description{
+  Print tables with frequency counts of the unique values
+  of the variables in a data frame.
+}
+\author{
+  Michael Hock \email{michael.hock@uni-bamberg.de}
+}
+

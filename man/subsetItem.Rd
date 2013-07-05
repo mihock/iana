@@ -1,0 +1,28 @@
+\name{subsetItem}
+\alias{subsetItem}
+\title{Subsetting Items}
+\usage{
+  subsetItem(x, ...)
+}
+\arguments{
+  \item{x}{a data frame containing the items to be
+  subsetted}
+
+  \item{...}{arguments passed to \code{\link{subset}}}
+}
+\value{
+  a data frame containing the subsetted items
+}
+\description{
+  Returns a subset of items in a data frame with the
+  \code{item.text} attribute preserved.
+}
+\author{
+  Michael Hock \email{michael.hock@uni-bamberg.de}
+}
+\seealso{
+  \code{\link{setItemText}} for setting and
+  \code{\link{getItemText}} for retrieving \code{item.text}
+  attributes.
+}
+

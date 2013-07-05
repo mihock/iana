@@ -1,0 +1,20 @@
+\name{getItemText}
+\alias{getItemText}
+\title{Return the labels associated with items}
+\usage{
+  getItemText(x)
+}
+\arguments{
+  \item{x}{a data frame}
+}
+\value{
+  a character vector of class 'itemText' containing the
+  labels of the items
+}
+\description{
+  Return the labels associated with items in a data frame.
+}
+\author{
+  Michael Hock \email{michael.hock@uni-bamberg.de}
+}
+
