@@ -269,7 +269,7 @@ shinyServer(function(input, output) {
             cat("") # needed for shiny
         } else {
             cmdLog("reliability(myData)\n")
-            reliability(x, dfname = input$selectedDf)
+            iana::reliability(x, dfname = input$selectedDf)
         }
     })
     
@@ -585,24 +585,24 @@ shinyServer(function(input, output) {
     
     computePCM <- reactive({
         log.output("RASCH")
-        if (input$mainTabset != "Rasch") return()
-        if (input$fitrasch == FALSE) return()
-
-        x <- getSubset(checkedVars(), input$selectedDf, 3)
-        if (is.null(x)) return()
-        x <- na.omit(x) ####
+        #### if (input$mainTabset != "Rasch") return() # not needed anymore
+        if (input$fitrasch == 0) return()
         
-        if (input$raschmodel == "pcm") res <- PCM(x)
-        else if (input$raschmodel == "rsm") res <- RSM(x)
-        else res <- RM(x)
-        pp <- person.parameter(res)
-        log.output("RASCH done")
-        #sumscore <- rowSums(x)
-        cases <- nrow(x)
-        
-        #x <- list(res = res, pp = pp, sumscore = sumscore, cases = cases)
-        x <- list(res = res, pp = pp, cases = cases)
-        x
+        isolate({
+            x <- getSubset(checkedVars(), input$selectedDf, 3)
+            if (is.null(x)) return()
+            x <- na.omit(x) ####
+            
+            if (input$raschmodel == "pcm") res <- PCM(x)
+            else if (input$raschmodel == "rsm") res <- RSM(x)
+            else res <- RM(x)
+            pp <- person.parameter(res)
+            log.output("RASCH done")
+            cases <- nrow(x)
+            
+            x <- list(res = res, pp = pp, cases = cases)
+            x
+        })
     })
     
     output$pcm <- renderPrint({
@@ -669,7 +669,7 @@ shinyServer(function(input, output) {
     
     output$pcm.pimap <- renderPlot({
         log.output("RASCH, PI Map")
-        if (input$fitrasch == FALSE) return()
+###        if (input$fitrasch == FALSE) return()
 
         x <- computePCM()
         if (is.null(x)) return()
@@ -681,7 +681,7 @@ shinyServer(function(input, output) {
     
     output$rasch.icc <- renderPlot({
         log.output("RASCH, ICC")
-        if (input$fitrasch == FALSE) return()
+###        if (input$fitrasch == FALSE) return()
         if (input$raschmodel != "rasch") return()
         
         x <- computePCM()
@@ -695,7 +695,7 @@ shinyServer(function(input, output) {
     
     output$pcm.info <- renderPlot({
         log.output("PCM, Info")
-        if (input$fitrasch == FALSE) return()
+###        if (input$fitrasch == FALSE) return()
         
         x <- computePCM()
         if (is.null(x)) return()
