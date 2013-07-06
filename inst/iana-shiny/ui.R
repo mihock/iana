@@ -1,11 +1,5 @@
 library(shiny)
 
-###if (!exists(getOption("iana.plotheight"))) getOption("iana.plotheight") <- "800px"
-
-#require(markdown) #?
-
-# Needs getDataFrames()
-
 shinyUI(pageWithSidebar(
     
     # Application title

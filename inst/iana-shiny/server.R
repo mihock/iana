@@ -11,10 +11,7 @@ require(stringr)
 # require(polycor)
 require(psych)
 
-#detachDataFrames()
 load("ExampleData.RData", .GlobalEnv)
-#load(paste(tempdir(), "reliab.RData", sep = "/"), .GlobalEnv)
-#load("~/reliab.RData", .GlobalEnv)
 
 # logFile <- "log_reliab.txt"
 # cat("Log file for reliab\n", file = logFile)
@@ -69,15 +66,12 @@ shinyServer(function(input, output) {
             }
         }
         
-        ### new
         log.output("getlikertlikevars")
         Df <- na.omit(Df) ### should be be done on column level (?)
         ### to do: what do we do if no values are left?
         if (nrow(Df) == 0) return(NULL)
         ###
         
-#         numvars <- sapply(X = Df, FUN = maybeLikert, 
-#                           unique.values = unique.values)
         numvars <- logical(ncol(Df))
         for (i in 1:ncol(Df)) {
             if (maybeLikert(Df[,i], unique.values)) numvars[i] <- TRUE
