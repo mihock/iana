@@ -226,6 +226,7 @@ plot.mapTest <- function(x, ...) {
 #' Performs classical item and reliability analysis of set of items.
 #' 
 #' @param x a numeric data frame in which rows represent persons and columns represent items to be analyzed
+#' @param invert logical specifying whether items with negative loadings on the first principal component of the data should be inverted (default: TRUE)
 #' @param digits number of digits to use in the output
 #' @param dfname name of the data frame (only needed by \code{iana})
 #' 
@@ -234,7 +235,7 @@ plot.mapTest <- function(x, ...) {
 #' @author Michael Hock \email{michael.hock@@uni-bamberg.de}
 #' 
 #' @export
-reliability <- function(x, digits=3, dfname = NULL) {
+reliability <- function(x, invert = TRUE, digits=3, dfname = NULL) {
     if (is.null(dfname)) dfname <- deparse(substitute(x))
     if (!is.data.frame(x)) stop("x must be a data frame.")
     n <- ncol(x)
@@ -267,10 +268,12 @@ reliability <- function(x, digits=3, dfname = NULL) {
         }
         cat("# End of code\n")
         
-        ## Automatically invert items with negative loadings
-        cat("\nNote: For the following analyses, these items were inverted.\n")
-        ### Correct?
-        x[,names(loadings[loadings < 0])] <- maxx - x[,names(loadings[loadings < 0])]
+        ## Invert items with negative loadings
+        if (invert) {
+            cat("\nNote: For the following analyses, these items were inverted.\n")
+            ### Correct?
+            x[,names(loadings[loadings < 0])] <- maxx - x[,names(loadings[loadings < 0])]
+        }
     }
     
     # alpha using variance-covariance matrix

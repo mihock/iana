@@ -23,3 +23,15 @@ w4: Ich habe das Gefühl, dass ich mit den Aufgaben nicht gut zurecht kommen wer
 # Antwortoptionen und -codierung:
 #
 # gar nicht (1), ein wenig (2), ziemlich (3), sehr (4)
+
+# Worry
+# Thoughts about scoring badly go through my mind
+# I am worried
+# I'm concerned about the possibility of getting a poor rating of my performance
+# I feel, I may not do well on these tasks
+
+# Emotionality
+# I am tense
+# I am nervous 
+# I am jittery
+# I have an uneasy feeling

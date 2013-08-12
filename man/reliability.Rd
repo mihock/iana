@@ -2,11 +2,15 @@
 \alias{reliability}
 \title{Reliability}
 \usage{
-  reliability(x, digits = 3, dfname = NULL)
+  reliability(x, invert = TRUE, digits = 3, dfname = NULL)
 }
 \arguments{
   \item{x}{a numeric data frame in which rows represent
   persons and columns represent items to be analyzed}
+
+  \item{invert}{logical specifying whether items with
+  negative loadings on the first principal component of the
+  data should be inverted (default: TRUE)}
 
   \item{digits}{number of digits to use in the output}
 
