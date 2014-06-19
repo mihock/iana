@@ -683,7 +683,8 @@ shinyServer(function(input, output) {
         
         #plotICC.Rasch(x$res, empICC = list("loess"), ask = FALSE,
         #    ncols = input$colsRaschICC)
-        plotICC.RM(x$res, empICC = list(input$rasch.icctype))
+### Does not work anymore
+        ##########plotICC(x$res, empICC = list(input$rasch.icctype))
         
     })
     

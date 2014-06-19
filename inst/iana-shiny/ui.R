@@ -8,6 +8,8 @@ shinyUI(pageWithSidebar(
     sidebarPanel(
         helpText("The dropdown list below contains the data frames present in your R environment. Please select a data frame containing the variables (items) to analyze. You can then select or deselect variables. Notice that only variables coded with integer values are shown."),
         helpText(""),
+
+        actionButton(inputId = "stopIana", label = " Stop "),
         
         selectInput(inputId = "selectedDf", label = "Data frame to use:",
             choices = getDataFrames()),

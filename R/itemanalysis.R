@@ -1,3 +1,249 @@
+count.true <- function(x) {
+  length(x[x])
+}
+
+descriptives <- function(Df, width=8, digits=2) {
+  ##
+  ## Prints descriptive statistics of the variables in a data frame.
+  ## Non-numeric variables are ignored.
+  ##
+  
+  count.false <- function(x) length(x[!x])
+  count.true <- function(x) length(x[x])
+  
+  if (!is.data.frame(Df)) Df <- as.data.frame(Df)
+  ##
+  ## Numeric variables
+  isnum <- sapply(Df, is.numeric)
+  newDf <- subset(Df, select=isnum)
+  if (length(newDf) == 0) {
+    stop("No numeric variables encountered.")
+  }
+  origCol <- 1:ncol(Df)
+  colwidth <- floor(log10(ncol(Df))) + 1
+  Col <- formatC(origCol[isnum], format = "d", width=colwidth)
+  Mean <- apply(newDf, 2, mean, na.rm=TRUE)
+  SD <- apply(newDf, 2, sd, na.rm=TRUE)
+  Min <- apply(newDf, 2, min, na.rm=TRUE)
+  Max <- apply(newDf, 2, max, na.rm=TRUE)
+  Valid <- apply(newDf, 2, complete.cases)
+  Missing <- apply(Valid, 2, count.false)
+  Valid <- apply(Valid, 2, count.true)
+  ##
+  ## Output
+  M <- cbind(Mean, SD, Min, Max)
+  M <- formatC(M, format= "f", width=width, digits=digits)
+  Missing <- formatC(Missing, format = "d", width=width)
+  Valid <- formatC(Valid, format = "d", width=width)
+  M <- cbind(Col, M, Missing, Valid)
+  print(M, quote=FALSE, right=TRUE)
+  ##
+  ## Print names of nonnumeric variables
+  newDf <- subset(Df, select=!isnum)
+  if (length(newDf) > 0) {
+    cat("\nNonnumeric variables:\n")
+    Col <- formatC(origCol[!isnum], format = "d", width=colwidth)
+    Class <- sapply(newDf, function(x) paste(class(x), collapse = ", "))
+    Valid <- apply(newDf, 2, complete.cases)
+    Missing <- apply(Valid, 2, count.false)
+    Valid <- apply(Valid, 2, count.true)
+    Missing <- formatC(Missing, format = "d", width=width)
+    Valid <- formatC(Valid, format = "d", width=width)
+    newDf <- cbind(Col, Class, Missing, Valid)
+    print(newDf, quote=FALSE, right = TRUE)
+  }
+  ##
+  ## Valid cases
+  cat("\n")
+  Valid <- apply(Df, 2, complete.cases)
+  Missing <- apply(Valid, 2, count.false)
+  cat("Variables contain ")
+  if (min(Missing) != max(Missing)) {
+    cat(min(Missing), "to", max(Missing), "cases with missing values.\n")
+  } else {
+    cat(min(Missing), "case(s) with missing values.\n")
+  }
+  cat(nrow(Df), "cases in data frame.\n")
+}
+
+descriptives.groups <- function(Df, groups, width=8, digits=2) {
+  if (!is.data.frame(Df)) Df <- as.data.frame(Df)
+  isnum <- sapply(Df, is.numeric)
+  Df <- subset(Df, select=isnum)
+  groups <- as.factor(groups)
+  l <- length(levels(groups))
+  for (i in 1:l) {
+    Group <- subset(Df, groups == levels(groups)[i])
+    M <- apply(Group, 2, mean, na.rm=TRUE)
+    SD <- apply(Group, 2, sd, na.rm=TRUE)
+    if (i == 1) X <- cbind(M, SD)
+    else X <- cbind(X, M, SD)
+  }
+  cat("Statistics for groups with levels: ", levels(groups), "\n")
+  colnames(X) <- rep(c("M", "SD"), nlevels(groups))
+  X <- formatC(X, format= "f", width=width, digits=digits)
+  print(X, quote=FALSE, right=TRUE)
+}
+
+descriptives.tot.groups <- function(Df, groups, width=8, digits=2) {
+  if (!is.data.frame(Df)) Df <- as.data.frame(Df)
+  isnum <- sapply(Df, is.numeric)
+  Df <- subset(Df, select=isnum)
+  groups <- as.factor(groups)
+  l <- length(levels(groups))
+  M <- apply(Df, 2, mean, na.rm=TRUE)
+  SD <- apply(Df, 2, sd, na.rm=TRUE)
+  X <- cbind(M, SD)
+  for (i in 1:l) {
+    Group <- subset(Df, groups == levels(groups)[i])
+    M <- apply(Group, 2, mean, na.rm=TRUE)
+    SD <- apply(Group, 2, sd, na.rm=TRUE)
+    X <- cbind(X, M, SD)
+  }
+  cat("Statistics for total sample and groups with levels: ", levels(groups), "\n")
+  colnames(X) <- rep(c("M", "SD"), nlevels(groups) + 1)
+  X <- formatC(X, format= "f", width=width, digits=digits)
+  print(X, quote=FALSE, right=TRUE)
+}
+
+
+descriptivesbygroups <- function(Df, groups, width=8, digits=2) {
+  if (!is.data.frame(Df)) Df <- as.data.frame(Df)
+  isnum <- sapply(Df, is.numeric)
+  Df <- subset(Df, select=isnum)
+  M <- apply(Df, 2, mean, na.rm=TRUE)
+  SD <- apply(Df, 2, sd, na.rm=TRUE)
+  X <- cbind(M, SD)
+  groups <- as.factor(groups)
+  l <- length(levels(groups))
+  for (i in 1:l) {
+    Group <- subset(Df, groups == levels(groups)[i])
+    M <- apply(Group, 2, mean, na.rm=TRUE)
+    X <- cbind(X, M)
+  }
+  colnames(X) <- c("M", "SD", levels(groups))
+  X <- formatC(X, format= "f", width=width, digits=digits)
+  print(X, quote=FALSE, right=TRUE)
+}
+
+
+# descriptives <- function (X) {
+#   nvars <- dim(X)[2]
+#   for (i in 1:nvars) {
+#     x <- X[,i]
+#     if (is.numeric(x)) {
+#       xname <- colnames(X)[i]
+#       m <- mean(x,na.rm=T)
+#       stdev <- sd(x,na.rm=T)
+#       cat(formatC(xname, format = "s", width = 15),
+#           formatC(m, format="f", width=8, digits=2),
+#           " & (",
+#           formatC(stdev, format="f", width=8, digits=2),
+#           ") \\\\",
+#           "\n")
+#     }
+#   }
+# }
+
+# descriptivesbygroups <- function (X, Groups) {
+#  nvars <- dim(X)[2]
+#  numGroups <- as.numeric(Groups)
+#  for (i in 1:nvars) {
+#     x <- X[,i]
+#     xname <- colnames(X)[i]
+#     m <- mean(x,na.rm=T)
+#     stdev <- sd(x,na.rm=T)
+#     cat(formatC(xname, format = "s", width = 15),
+#         " & ",
+#         formatC(m, format="f", width=6, digits=2),
+#         " & (",
+#         formatC(stdev, format="f", width=6, digits=2),
+#         ")")
+#     groupmeans <- tapply(x, Groups, mean)
+#     for (j in min(numGroups):max(numGroups)) {
+#       cat(" &", formatC(groupmeans[j], format="f", width=6, digits=2))
+#     }
+#     cat("\\\\", "\n")
+#   }
+# }
+
+# The original
+cor.probOrig <- function(X, dfr = nrow(X) - 2) {
+  R <- cor(X)
+  above <- row(R) < col(R)
+  r2 <- R[above]^2
+  Fstat <- r2 * dfr / (1 - r2)
+  R[above] <- 1 - pf(Fstat, 1, dfr)
+  R
+}
+
+# The nice version
+cor.prob <- function(X, Y=NULL, printprobs=FALSE, omitredundant = TRUE) {
+  # Print correlation matrices with significance stars. If only X is 
+  # given, also print M and SD.
+  
+  # In case X or Y are vectors, remember their names
+  if (is.vector(X)) {
+    myname <- deparse(substitute(X))
+    X <- data.frame(X)
+    colnames(X) <- myname
+  }
+  if (is.vector(Y)) {
+    myname <- deparse(substitute(Y))
+    Y <- data.frame(Y)
+    colnames(Y) <- myname
+  }
+  
+  # Compute correlations (and descriptive stats if only x is given)
+  if (is.null(Y)) {
+    M <- round(colMeans(X), 2)
+    SD <- round(apply(X, 2, sd), 2)
+    R <- cor(X)
+  } else  R <- cor(X, Y)
+  
+  # Compute p values
+  dfr = nrow(X) - 2
+  P <- R^2
+  Fstat <- P * dfr / (1 - P)
+  P <- 1 - pf(Fstat, 1, dfr)
+  
+  # Cosmetics and printout
+  if (is.null(Y)) cat("\nMeans, SDs, and Correlations\n")
+  else cat("\nCorrelations\n")
+  rs <- round(R, 2)
+  sigstars <- sigstars2 <- matrix(nrow=nrow(R), ncol=ncol(R))
+  sigstars <- ifelse(P < 0.05, "*", " ")
+  sigstars2 <- ifelse(P < 0.01, "*", " ")
+  blanks <- ifelse(R >= 0 , " ", "")
+  rs <- paste(blanks, rs, sigstars, sigstars2, sep="")
+  rs <- matrix(rs, nrow=nrow(R))
+  if (is.null(Y)) {
+    if (omitredundant) {
+      ##diag(rs) <- "  "
+      rs[lower.tri(rs, diag = TRUE)] <- "   "
+    } else diag(rs) <- "  1"
+  }
+  
+  rownames(rs) <- rownames(R)
+  colnames(rs) <- colnames(R)
+  if (is.null(Y)) {
+    rs <- cbind(M, SD, rs)
+    if (omitredundant) {
+      rs <- rs[, -3]
+    }
+  }
+  print(rs, quote=FALSE)
+  #cat("________________________________________________________\n")
+  cat("\nNote: *p < .05, **p < .01 (two-tailed). N =", nrow(X), "\n")
+  if (printprobs == TRUE) {
+    cat("\nProbabilities (two-tailed)\n")
+    P <- round(P, 3)
+    print(P)
+  }
+}
+
+
+
 #' GUI for Item Analysis and Scale Construction
 #' 
 #' \code{iana} is a browser-based GUI for classical item and test analysis, factor analysis, and item response modeling with a focus on items with an ordered-category response format.
