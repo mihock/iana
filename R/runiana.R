@@ -1,30 +1,30 @@
 #' Run \code{iana}
-#' 
+#'
 #' Run \code{iana} in the default browser.
-#' 
+#'
 #' @param plotheight An integer value giving the height of multipanel plots in pixels. The default height is 750 pixels, which may not be enough if many (more than 20) items are analyzed. Valid values range from 300 to 2000.
 #' @param port The TCP port the application should listen on, see \code{\link{runApp}}.
-#' 
-#' @details This is the main function of \code{iana}. Invoking \code{runiana()} saves the data you are currently working with (i,e,, the variables in the global R enviroment) to a temporary RData file and launches \code{iana} in the default web browser. The RData file is then loaded by \code{iana}, so that your data are accessible for item and scale analysis. 
-#' 
+#'
+#' @details This is the main function of \code{iana}. Invoking \code{runiana()} saves the data you are currently working with (i,e,, the variables in the global R enviroment) to a temporary RData file and launches \code{iana} in the default web browser. The RData file is then loaded by \code{iana}, so that your data are accessible for item and scale analysis.
+#'
 #' Before running \code{iana}, you should create one or more data frames that contain the items to be analyzed. Normally, for each (hypothesized) scale, one data frame should be defined. If the data are multidimensional it may be convenient to create data frames for the subscales as well.
-#' 
+#'
 #' When one of the data frames is selected in the GUI, \code{iana} lists the numeric variables in that data frame. From this list, the items to include in the analyses performed by \code{iana} can then be selected. You can also specify ranges of variables in the input box below the list.
-#' 
+#'
 #' Because responses to ordered-category items are usually coded with integers ranging from 1 to the number of response categories (or from 0 to number of categories minus 1), and the number of categories is usually small (< 10), only variables with a limited range of non-negative integer values are shown. However, this may be changed by increasing the value in the numeric input box located above the variable list. Anyway, the items to be analyzed should be integers and, for some types of analysis (for example, partial credit models), these integers should fall within a small range. Otherwise you will probably get error messages.
-#' 
+#'
 #' Missing values should be handled before \code{iana} is launched. \code{iana} removes rows with incomplete values in a data frame via \code{\link{na.omit}}, which can result in a substantial reduction of the number of cases.
-#' 
+#'
 #' \code{iana} blocks the console while it is running. Simply press <Escape> in the console (or, in RStudio, click on the red STOP button in the upper right of the console window) to terminate \code{iana} and get the console responsive again. You can then do computations in R and later relaunch \code{iana}. Relaunching \code{iana} will open a new browser tab, so you might want to close the old tab in the browser before you return to R.
-#' 
+#'
 #' @author Michael Hock \email{michael.hock@@uni-bamberg.de}
-#' 
+#'
 #' @examples \dontrun{
 #' runiana()
 #' # Increase plot height to 900 pixels
 #' runiana(900)}
 #' @export
-#' 
+#'
 runiana <- function(plotheight = 750L, port = 8100L) {
     if(!is.numeric(plotheight) || plotheight < 300 || plotheight > 2000)
         stop("specified plotheight is invalid (height must be between 300 and 2000)")

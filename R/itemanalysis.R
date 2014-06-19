@@ -242,8 +242,6 @@ cor.prob <- function(X, Y=NULL, printprobs=FALSE, omitredundant = TRUE) {
   }
 }
 
-
-
 #' GUI for Item Analysis and Scale Construction
 #' 
 #' \code{iana} is a browser-based GUI for classical item and test analysis, factor analysis, and item response modeling with a focus on items with an ordered-category response format.
@@ -427,7 +425,7 @@ mapTest <- function(x, n = 20) {
 
 ### @rdname mapTest
 ### @method print mapTest
-#' @S3method print mapTest
+## @export print mapTest
 print.mapTest <- function(x, ...) {
     cat("Velicer's MAP test reaches its minimum with m =", which.min(x)-1, "components.\nMaximum number of components tested:", length(x) - 1, "\n\n")
     MAP <- data.frame(m = 0:(length(x) - 1), AP = round(x, 3))
@@ -436,7 +434,7 @@ print.mapTest <- function(x, ...) {
 
 ### @rdname mapTest
 ### @method plot mapTest
-#' @S3method plot mapTest
+## @export plot mapTest
 plot.mapTest <- function(x, ...) {
     Component <- 0:(length(x) - 1)
     MAP <- data.frame(Component, x)
