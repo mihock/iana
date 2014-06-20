@@ -438,8 +438,9 @@ mapTest <- function(x, n = 20) {
 }
 
 ### @rdname mapTest
-## @export print mapTest
-#' @method print mapTest
+## @method print mapTest
+##
+#' @export
 print.mapTest <- function(x, ...) {
     cat("Velicer's MAP test reaches its minimum with m =", which.min(x)-1, "components.\nMaximum number of components tested:", length(x) - 1, "\n\n")
     MAP <- data.frame(m = 0:(length(x) - 1), AP = round(x, 3))
@@ -447,8 +448,9 @@ print.mapTest <- function(x, ...) {
 }
 
 ### @rdname mapTest
+## @method plot mapTest
 ## @export plot mapTest
-#' @method plot mapTest
+#' @export
 plot.mapTest <- function(x, ...) {
     Component <- 0:(length(x) - 1)
     MAP <- data.frame(Component, x)
