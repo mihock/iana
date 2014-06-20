@@ -286,7 +286,21 @@ NULL
 #' @export
 getDataFrames <- function() {
     x <- ls(.GlobalEnv)
-    x[sapply(x, function(x) is.data.frame(get(x)))]
+    ret <- x[sapply(x, function(x) is.data.frame(get(x)))]
+    #### Todo
+    if (length(ret) == 0) ret <- "No data frames found!"
+#     if (length(ret) == 0) {
+#         # Construct a dummy data frame
+#         n = 200
+#         t = rnorm(n)
+#         x1 = as.integer(cut(rnorm(n) + t, 4))
+#         x2 = as.integer(cut(0.7*rnorm(n) + t, 4))
+#         x3 = as.integer(cut(0.8*rnorm(n) + t, 4))
+#         x4 = as.integer(cut(1.1*rnorm(n) + t, 4))
+#         zombieDf = data.frame(x1, x2, x3, x4)
+#         ret <- "zombieDf"
+#     }
+    ret
 }
 
 #' Degrees of freedom for a factor model
@@ -424,8 +438,8 @@ mapTest <- function(x, n = 20) {
 }
 
 ### @rdname mapTest
-### @method print mapTest
 ## @export print mapTest
+#' @method print mapTest
 print.mapTest <- function(x, ...) {
     cat("Velicer's MAP test reaches its minimum with m =", which.min(x)-1, "components.\nMaximum number of components tested:", length(x) - 1, "\n\n")
     MAP <- data.frame(m = 0:(length(x) - 1), AP = round(x, 3))
@@ -433,8 +447,8 @@ print.mapTest <- function(x, ...) {
 }
 
 ### @rdname mapTest
-### @method plot mapTest
 ## @export plot mapTest
+#' @method plot mapTest
 plot.mapTest <- function(x, ...) {
     Component <- 0:(length(x) - 1)
     MAP <- data.frame(Component, x)
