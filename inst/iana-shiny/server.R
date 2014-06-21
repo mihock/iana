@@ -11,7 +11,8 @@ require(stringr)
 # require(polycor)
 require(psych)
 
-load("ExampleData.RData", .GlobalEnv)
+#load("data/ExampleData.RData", .GlobalEnv)
+#load("data/ExampleData.RData")
 
 # logFile <- "log_reliab.txt"
 # cat("Log file for reliab\n", file = logFile)
@@ -33,7 +34,7 @@ cmdLog <- function(cmd.string = "") {
 }
 
 shinyServer(function(input, output) {
-    
+
     # Data ####
     
     getSelectedDf <- reactive({

@@ -24,7 +24,7 @@ shinyUI(fluidPage(
             actionButton(inputId = "stopIana", label = " Stop "),
             
             selectInput(inputId = "selectedDf", label = "Data frame to use:",
-                choices = getDataFrames()),
+                choices = getDataFramesIana()),
             numericInput(inputId = "kUniqueValues", 
                 label = "Exclude variables with values outside the range of 0 and k:",
                 min = 2, max = 20, value = 9, step = 1),
@@ -46,31 +46,20 @@ shinyUI(fluidPage(
         ),
         
         mainPanel = mainPanel(
-            #### tabsetPanel(
             navbarPage(
-                title = "Iana", #### Delete for tabsetPanel
+                title = "Iana",
                 id = "mainTabset",
                 
-                tabPanel("Items",
-                    h3("Item stems"),
-                    verbatimTextOutput(outputId = "itemtext"),
-                    h3("Frequency counts of item scores"),
-                    helpText("'NA' (not available) refers to missing values in the reponses."),
-                    verbatimTextOutput(outputId = "frequencies")
-                ),
-                
-                tabPanel("Histograms",
-                    h3("Histograms"),
-                    helpText("The plots show the histograms of the item scores and the total score."),
-                    h3("Item distributions"),
+                tabPanel("Distributions",
+                    h3("Item scores"),
                     selectInput(inputId = "histtypeitem",
                         label = "Type of plot:",
                         choices = c("Percentages" = "percent", 
                             "Counts" = "count")),
-                    plotOutput(outputId = "hist", height = getOption("iana.plotheight")),
-                    h3("Distribution of the total score"),
-                    helpText("The total score is may be computed either as sum or as average of the item scores."),
+                    plotOutput(outputId = "hist", 
+                        height = getOption("iana.plotheight")),
                     
+                    h3("Total score"),
                     tags$table(
                         border="0",
                         cellpadding="10",
@@ -84,7 +73,8 @@ shinyUI(fluidPage(
                             
                             tags$td(selectInput(inputId = "totalscoretype",
                                 label = "Total score represents:",
-                                choices = c("Sum of item scores" = "sum", "Average of item scores" = "ave"))),
+                                choices = c("Sum of item scores" = "sum", 
+                                    "Average of item scores" = "ave"))),
                             
                             
                             tags$td(sliderInput(inputId = "histbins", 
@@ -94,22 +84,15 @@ shinyUI(fluidPage(
                         )
                     ),
                     
-                    #                     tags$style(type='text/css', "#totalscoretype { width: 300px; }"),
-                    #                     tags$style(type='text/css', "#histtype { width: 300px; }"),
-                    
                     helpText(""),
                     
-                    plotOutput(outputId = "histTotal")
-                ),
-                
-                tabPanel("Reliability",
-                    h3("Reliability and Item Statistics"),
-                    helpText("The table shows item means, standard deviations, covariances between item scores and total score, item discriminations (i.e., item-total and item-remainder correlations), and the alpha obtained if the respective item is removed from the scale. At the bottom are statistics for the total score, i.e., the sum or the mean of the item scores for each person."),
-                    checkboxInput(inputId = "reliabDetailed", 
-                        label = "Show detailed output (package psych)",
-                        value = FALSE),
-                    helpText(""),
-                    verbatimTextOutput(outputId = "reliability")
+                    plotOutput(outputId = "histTotal"),
+                    
+                    h3("Item stems"),
+                    verbatimTextOutput(outputId = "itemtext"),
+                    h3("Frequency counts of item scores"),
+                    helpText("'NA' (not available) refers to missing values in the reponses."),
+                    verbatimTextOutput(outputId = "frequencies")
                 ),
                 
                 tabPanel("ICCs",
@@ -146,7 +129,7 @@ shinyUI(fluidPage(
                     helpText("The function 'loess' is used to produce locally weighted regression fits. The span (parameter alpha), which determines the degree of smoothing, is 0.75."),
                     helpText("Factor scores are regression scores based on maximum-likelihood factor analysis. See 'factanal' for details.")
                 ),
-                
+
                 tabPanel("Dimensionality",
                     h3("Parallel Analysis"),
                     helpText("Parallel analysis is based on the principal components of the data. The circles connected by the thick line show the empirical eigenvalues. The thin lines represent the eigenvalues of 20 simulations with normally distributed random data. A dimension/component is judged to be meaningful if its eigenvalue is larger than the eigenvalues obtained from random data."),
@@ -220,6 +203,17 @@ shinyUI(fluidPage(
                     h3("Results"),
                     verbatimTextOutput(outputId = "efa")
                 ),
+
+                tabPanel("Reliability",
+                    h3("Reliability and Item Statistics"),
+                    helpText("The table shows item means, standard deviations, covariances between item scores and total score, item discriminations (i.e., item-total and item-remainder correlations), and the alpha obtained if the respective item is removed from the scale. At the bottom are statistics for the total score, i.e., the sum or the mean of the item scores for each person."),
+                    checkboxInput(inputId = "reliabDetailed", 
+                        label = "Show detailed output (package psych)",
+                        value = FALSE),
+                    helpText(""),
+                    verbatimTextOutput(outputId = "reliability")
+                ),
+                
                 
                 tabPanel("CFA",
                     h3("Confirmatory Factor Analysis"),
