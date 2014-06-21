@@ -34,6 +34,8 @@ cmdLog <- function(cmd.string = "") {
 }
 
 shinyServer(function(input, output) {
+    
+    ###load("data/ExampleData.RData", .GlobalEnv)
 
     # Data ####
     
