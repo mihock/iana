@@ -286,17 +286,6 @@ getDataFrames <- function() {
     ret <- x[sapply(x, function(x) is.data.frame(get(x)))]
     #### Todo
     if (length(ret) == 0) ret <- "No data frames found!"
-#     if (length(ret) == 0) {
-#         # Construct a dummy data frame
-#         n = 200
-#         t = rnorm(n)
-#         x1 = as.integer(cut(rnorm(n) + t, 4))
-#         x2 = as.integer(cut(0.7*rnorm(n) + t, 4))
-#         x3 = as.integer(cut(0.8*rnorm(n) + t, 4))
-#         x4 = as.integer(cut(1.1*rnorm(n) + t, 4))
-#         zombieDf = data.frame(x1, x2, x3, x4)
-#         ret <- "zombieDf"
-#     }
     ret
 }
 
@@ -313,13 +302,24 @@ getDataFrames <- function() {
 #' @export
 getDataFramesIana <- function() {
     x <- ls(.GlobalEnv)
-    ret <- x[sapply(x, function(x) is.data.frame(get(x)))]
+    if (length(x) > 0) ret <- x[sapply(x, function(x) is.data.frame(get(x)))]
+    else ret <- ""
     if (length(ret) == 0) {
         load("data/ExampleData.RData", .GlobalEnv)
+        
+#         # Construct a dummy data frame
+#         n = 200
+#         t = rnorm(n)
+#         x1 = as.integer(cut(rnorm(n) + t, 4))
+#         x2 = as.integer(cut(0.7*rnorm(n) + t, 4))
+#         x3 = as.integer(cut(0.8*rnorm(n) + t, 4))
+#         x4 = as.integer(cut(1.1*rnorm(n) + t, 4))
+#         zombieDf = data.frame(x1, x2, x3, x4)
+        
         x <- ls(.GlobalEnv)
         ret <- x[sapply(x, function(x) is.data.frame(get(x)))]
     }
-    if (length(ret) == 0) ret <- "no frames"
+    if (length(ret) == 0) ret <- "no data frames found"
     ret
 }
 
