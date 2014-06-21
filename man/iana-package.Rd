@@ -6,7 +6,6 @@
 \title{GUI for Item Analysis and Scale Construction}
 \description{
 \code{iana} is a browser-based GUI for classical item and test analysis, factor analysis, and item response modeling with a focus on items with an ordered-category response format.
-.
 }
 \details{
 \code{iana} is a browser-based graphical user interface to R functions for the psychometric analysis of questionnaires and tests with an ordinal response format. \code{iana} tries to integrate the essential statistical analysis steps into a convenient interface. \code{iana} covers classical item and test analysis (reliability, item discrimation), dimensionality tests (parallel analysis and MAP test), principal components and exploratory factor analysis (including factor analysis based on polychoric correlations), one-factor confirmatory analysis, and item response models (partial credit model). Graphical output includes histograms of item and test scores, empirical item characteric curves, and person-item maps, among others.
