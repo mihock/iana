@@ -3,10 +3,8 @@ count.true <- function(x) {
 }
 
 descriptives <- function(Df, width=8, digits=2) {
-  ##
   ## Prints descriptive statistics of the variables in a data frame.
   ## Non-numeric variables are ignored.
-  ##
   
   count.false <- function(x) length(x[!x])
   count.true <- function(x) length(x[x])
