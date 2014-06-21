@@ -438,8 +438,6 @@ mapTest <- function(x, n = 20) {
 }
 
 ### @rdname mapTest
-## @method print mapTest
-##
 #' @export
 print.mapTest <- function(x, ...) {
     cat("Velicer's MAP test reaches its minimum with m =", which.min(x)-1, "components.\nMaximum number of components tested:", length(x) - 1, "\n\n")
@@ -448,8 +446,6 @@ print.mapTest <- function(x, ...) {
 }
 
 ### @rdname mapTest
-## @method plot mapTest
-## @export plot mapTest
 #' @export
 plot.mapTest <- function(x, ...) {
     Component <- 0:(length(x) - 1)
@@ -904,8 +900,8 @@ plotICC.Rasch <- function(object, item.subset = "all",
         if (mplot) par(mfrow=c(nrows, ncols))
         #### 
         
-        if (ask) par("ask"=TRUE)                       # added rh 2007-12-01
-        for (j in 1:length(ivec)) {                                 #runs over items
+        if (ask) par("ask"=TRUE)                   # added rh 2007-12-01
+        for (j in 1:length(ivec)) {                # runs over items
             i <- ivec[j]
             
             yp <- as.matrix(p.list[[i]])
