@@ -301,6 +301,29 @@ getDataFrames <- function() {
     ret
 }
 
+#' Data frames in global workspace
+#' 
+#' Returns of a vector with the names of the data frames present in the 
+#' global environment. If no data frame is found, Iana's example data
+#' are loaded.
+#' 
+#' @return A character vector with the names of the data frames
+#' 
+#' @author Michael Hock \email{michael.hock@@uni-bamberg.de}
+#' 
+#' @export
+getDataFramesIana <- function() {
+    x <- ls(.GlobalEnv)
+    ret <- x[sapply(x, function(x) is.data.frame(get(x)))]
+    if (length(ret) == 0) {
+        load("data/ExampleData.RData")
+        x <- ls(.GlobalEnv)
+        ret <- x[sapply(x, function(x) is.data.frame(get(x)))]
+    }
+    ret
+}
+
+
 #' Degrees of freedom for a factor model
 #' 
 #' Returns the degrees of freedom for a exploratory factor model, fit by maximum
