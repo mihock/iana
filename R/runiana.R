@@ -25,9 +25,10 @@
 #' runiana(900)}
 #' @export
 #'
-runiana <- function(plotheight = 750L, port = 8100L) {
+runiana <- function(plotheight = 750L, port = NULL) {
     if(!is.numeric(plotheight) || plotheight < 300 || plotheight > 2000)
         stop("specified plotheight is invalid (height must be between 300 and 2000)")
     options(iana.plotheight = paste0(round(plotheight), "px"))
-    shiny::runApp(system.file('iana-shiny', package='iana'), port = port)
+    shiny::runApp(system.file('iana-shiny', package='iana'), 
+        display.mode = "normal", port = port)
 }

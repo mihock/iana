@@ -303,6 +303,10 @@ shinyServer(function(input, output) {
                       htype, " , as.table = TRUE",
                       ")\n")
         )
+        ### trellis.par.set(canonical.theme(color = FALSE))
+#         ltheme <- canonical.theme(color = FALSE) ## in-built B&W theme 
+#         ltheme$strip.background$col <- "transparent" ## change strip bg 
+#         lattice.options(default.theme = ltheme) ## set as default 
         print(histogram(as.formula(myformula),
                         xlab = "Response",
                         data = mydata,

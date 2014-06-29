@@ -667,9 +667,9 @@ ggscree.plot <- function (Df, title = NULL,
                       symmetric = TRUE)$values
     nev <- length(eigenval)
 
-    #   mik
-    eigenvaldata <- eigenval
-    eigenval
+#     #   mik
+#     eigenvaldata <- eigenval
+#     eigenval
     #
     #plot(eigenval, type = "b", pch = 16, bty = "l", main = title,
     #     xlab = xlab, ylab = ylab)

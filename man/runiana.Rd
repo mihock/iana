@@ -3,7 +3,7 @@
 \alias{runiana}
 \title{Run \code{iana}}
 \usage{
-runiana(plotheight = 750L, port = 8100L)
+runiana(plotheight = 750L, port = NULL)
 }
 \arguments{
 \item{plotheight}{An integer value giving the height of multipanel plots in pixels. The default height is 750 pixels, which may not be enough if many (more than 20) items are analyzed. Valid values range from 300 to 2000.}
