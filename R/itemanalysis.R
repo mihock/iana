@@ -747,7 +747,7 @@ ggscree.plot <- function (Df, title = NULL,
 #'
 #' @export
 empICC <- function(x,
-                   score = c("factor", "mean", "sum"),
+                   score = c("factor.thomson", "factor.bartlett", "mean", "sum"),
                    method = loess,
                    alpha = 0,
                    jitter = TRUE) {
@@ -760,16 +760,14 @@ empICC <- function(x,
     x <- na.omit(x) ####
 
     score <- match.arg(score)
-    if (score == "factor") {
+    if (score == "factor.thomson") {
         xlab <- ("Factor Score")
         fm <- factanal(x, 1, scores = "regression")
-        #fm <- factanal(x, 1, scores = "Bartlett")
         scores <- fm$scores[,1]
-        #         f <- fa(x)
-        #         scores <- factor.scores(x, f)$scores
-        ##        scores
-        ##        hist(scores)
-
+    } else if (score == "factor.bartlett") {
+        xlab <- ("Factor Score")
+        fm <- factanal(x, 1, scores = "Bartlett")
+        scores <- fm$scores[,1]
     } else if (score == "sum") {
         xlab <- ("Total (Sum) Score")
         scores <- rowSums(x, na.rm = TRUE) ####

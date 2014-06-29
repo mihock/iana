@@ -3,8 +3,8 @@
 \alias{empICC}
 \title{Empirical ICCs}
 \usage{
-empICC(x, score = c("factor", "mean", "sum"), method = loess, alpha = 0,
-  jitter = TRUE)
+empICC(x, score = c("factor.thomson", "factor.bartlett", "mean", "sum"),
+  method = loess, alpha = 0, jitter = TRUE)
 }
 \arguments{
 \item{x}{data frame in which rows are subjects and colums are test items}

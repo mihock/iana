@@ -5,7 +5,7 @@ shinyUI(fluidPage(
     # Use bootstrap 2.3.2 themes, http://bootswatch.com/2/#gallery
     theme = "bootstrap-cerulean.css",
     
-    titlePanel("Iana - Item Analysis"),
+    #titlePanel("Iana - Item Analysis"),
     
     sidebarLayout(
         
@@ -69,14 +69,14 @@ shinyUI(fluidPage(
                                 label = "Type of plot:",
                                 choices = c("Percentages" = "percent", 
                                     "Counts" = "count",
-                                    "Density with overlaid bell curve" = "density"))),
+                                    "Density" = "density"))),
                             
                             tags$td(selectInput(inputId = "totalscoretype",
                                 label = "Total score represents:",
                                 choices = c("Sum of item scores" = "sum", 
-                                    "Average of item scores" = "ave"))),
-                            
-                            
+                                    "Average of item scores" = "ave")))
+                            ),
+                        tags$tr(    
                             tags$td(sliderInput(inputId = "histbins", 
                                 label = "Number of bins (3 = automatic):",
                                 min = 3, max = 40, value = 3, step = 1,
@@ -90,7 +90,7 @@ shinyUI(fluidPage(
                     
                     h3("Item stems"),
                     verbatimTextOutput(outputId = "itemtext"),
-                    h3("Frequency counts of item scores"),
+                    h3("Frequency counts"),
                     helpText("'NA' (not available) refers to missing values in the reponses."),
                     verbatimTextOutput(outputId = "frequencies")
                 ),
@@ -107,7 +107,8 @@ shinyUI(fluidPage(
                             valign="bottom",
                             tags$td(selectInput(inputId = "ICCscore",
                                 label = "Score to use:",
-                                choices = c("Factor score" = "factor",
+                                choices = c("Factor score (Thomson)" = "factor.thomson",
+                                    "Factor score (Bartlett)" = "factor.bartlett",
                                     "Total (mean) score" = "mean",
                                     "Total (sum) score" = "sum"))),
                             tags$td(numericInput(inputId = "ICCalpha", 
@@ -127,12 +128,12 @@ shinyUI(fluidPage(
                     plotOutput(outputId = "ICCs", height = getOption("iana.plotheight")),
                     h3("Notes"),
                     helpText("The function 'loess' is used to produce locally weighted regression fits. The span (parameter alpha), which determines the degree of smoothing, is 0.75."),
-                    helpText("Factor scores are regression scores based on maximum-likelihood factor analysis. See 'factanal' for details.")
+                    helpText("Factor scores are based on based on maximum-likelihood factor analysis. See 'factanal' for details.")
                 ),
 
                 tabPanel("Dimensionality",
                     h3("Parallel Analysis"),
-                    helpText("Parallel analysis is based on the principal components of the data. The circles connected by the thick line show the empirical eigenvalues. The thin lines represent the eigenvalues of 20 simulations with normally distributed random data. A dimension/component is judged to be meaningful if its eigenvalue is larger than the eigenvalues obtained from random data."),
+                    helpText("The parallel analysis below is based on the principal components of the data. The circles connected by the thick line show the empirical eigenvalues. The thin lines represent the eigenvalues of 20 simulations with normally distributed random data. A dimension/component is judged to be meaningful if its eigenvalue is larger than the eigenvalues obtained from random data."),
                     #plotOutput(outputId = "hist", height = "400px", width = "400px")
                     plotOutput(outputId = "parallelanalysis"),
                     
@@ -294,7 +295,7 @@ shinyUI(fluidPage(
                     verbatimTextOutput(outputId = "pcm")
                 ),
                 
-                tabPanel("Help",
+                tabPanel("?",
                     h3("Help"),
                     includeMarkdown("help.md"),
                     h3("Some Infos"),
