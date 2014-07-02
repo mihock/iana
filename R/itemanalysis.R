@@ -335,6 +335,7 @@ getDataFramesIana <- function() {
     if (length(x) > 0) x <- x[sapply(x, function(x) is.data.frame(get(x)))]
     if (length(x) == 0) {
         load("data/ExampleData.RData", .GlobalEnv)
+        load("data/daten_sose14.rda", .GlobalEnv)
         x <- ls(.GlobalEnv)
         x <- x[sapply(x, function(x) is.data.frame(get(x)))]
     }
