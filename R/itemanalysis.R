@@ -28,36 +28,87 @@ meansub <- function(x, imp.value=NULL) {
     x
 }
 
-count.true <- function(x) {
-  length(x[x])
+#' Overview of a Data Frame
+#'
+#' \code{overview} lists the columns in a data frame in a concise manner by stripping off trailing numbers from the column names. This is useful for getting an overview of questionnaire data where names of items belonging to a scale share the same stem and differ by an appended number.
+#'
+#' @param x a data frame
+#'
+#' @return a data frame containing abbreviated name, class (first component), start column, end column, number of columns occupied for each variable, and variable range.
+#'
+#' @author Michael Hock \email{michael.hock@@uni-bamberg.de}
+#'
+#' @export
+overview <- function(x) {
+    if (!is.data.frame(x)) stop("expecting a data frame")
+    basename <- gsub("[0-9]+$", "", names(x))
+    basename0 <- ""
+    class0 <- "-999"
+    tf <- tempfile("overview")
+    for (i in 1:ncol(x)) {
+        if ( (basename[i] != basename0) || (class(x[,i])[1] != class0) ) {
+            # Complete info for item i-1: End, Cols, Name1
+            if (basename0 != "") {
+                name2 <- names(x)[i-1]
+                #                 if (name1 == name2) name1 <- "-"
+                #                 else name1 <- paste(name1, name2, sep = ":")
+                if (name1 != name2) name1 <- paste(name1, name2, sep = ":")
+                cat(i-1, count, name1, "\n", file = tf, append = TRUE)
+            }
+            basename0 <- basename[i]
+            class0 <- class(x[,i])[1]
+            # Init info for item i: Name, Class, Start
+            cat(basename0, class0, i, " ", file = tf, append = TRUE)
+            name1 <- names(x)[i]
+            count <- 1
+        } else {
+            count <- count + 1
+        }
+    }
+    # Complete info for last item: End, Cols, Name1
+    name2 <- names(x)[i]
+    #     if (name1 == name2) name1 <- "-"
+    #     else name1 <- paste(name1, name2, sep = ":")
+    if (name1 != name2) name1 <- paste(name1, name2, sep = ":")
+    cat(i, count, name1, "\n", file = tf, append = TRUE)
+    x <- read.table(file = tf)
+    unlink(tf)
+    names(x) <- c("Basename", "Class", "Start", "End", "Cols", "Names")
+    x
 }
 
-descriptives <- function(Df, width=8, digits=2) {
-  ## Prints descriptive statistics of the variables in a data frame.
-  ## Non-numeric variables are ignored.
 
+#' Descriptive Statistics of the Variables in a Data Frame
+#'
+#' \code{descriptives} lists means, standard deviations, minima, maxima, number of missing values, and number of non-missing (valid) values of the numeric variables in a data frame. It aims at giving a quick overview of a data frame containing test/questionnaire items.
+#'
+#' @param x a data frame
+#' @param width width of numbers
+#' @param digits preferred number of digits after the decimal point
+#'
+#' @author Michael Hock \email{michael.hock@@uni-bamberg.de}
+#'
+#' @export
+descriptives <- function(x, width=8, digits=2) {
   count.false <- function(x) length(x[!x])
   count.true <- function(x) length(x[x])
 
-  if (!is.data.frame(Df)) Df <- as.data.frame(Df)
-  ##
-  ## Numeric variables
-  isnum <- sapply(Df, is.numeric)
-  newDf <- subset(Df, select=isnum)
-  if (length(newDf) == 0) {
+  if (!is.data.frame(x)) x <- as.data.frame(x)
+  isnum <- sapply(x, is.numeric)
+  newx <- subset(x, select=isnum)
+  if (length(newx) == 0) {
     stop("No numeric variables encountered.")
   }
-  origCol <- 1:ncol(Df)
-  colwidth <- floor(log10(ncol(Df))) + 1
+  origCol <- 1:ncol(x)
+  colwidth <- floor(log10(ncol(x))) + 1
   Col <- formatC(origCol[isnum], format = "d", width=colwidth)
-  Mean <- apply(newDf, 2, mean, na.rm=TRUE)
-  SD <- apply(newDf, 2, sd, na.rm=TRUE)
-  Min <- apply(newDf, 2, min, na.rm=TRUE)
-  Max <- apply(newDf, 2, max, na.rm=TRUE)
-  Valid <- apply(newDf, 2, complete.cases)
+  Mean <- apply(newx, 2, mean, na.rm=TRUE)
+  SD <- apply(newx, 2, sd, na.rm=TRUE)
+  Min <- apply(newx, 2, min, na.rm=TRUE)
+  Max <- apply(newx, 2, max, na.rm=TRUE)
+  Valid <- apply(newx, 2, complete.cases)
   Missing <- apply(Valid, 2, count.false)
   Valid <- apply(Valid, 2, count.true)
-  ##
   ## Output
   M <- cbind(Mean, SD, Min, Max)
   M <- formatC(M, format= "f", width=width, digits=digits)
@@ -67,23 +118,22 @@ descriptives <- function(Df, width=8, digits=2) {
   print(M, quote=FALSE, right=TRUE)
   ##
   ## Print names of nonnumeric variables
-  newDf <- subset(Df, select=!isnum)
-  if (length(newDf) > 0) {
+  newx <- subset(x, select=!isnum)
+  if (length(newx) > 0) {
     cat("\nNonnumeric variables:\n")
     Col <- formatC(origCol[!isnum], format = "d", width=colwidth)
-    Class <- sapply(newDf, function(x) paste(class(x), collapse = ", "))
-    Valid <- apply(newDf, 2, complete.cases)
+    Class <- sapply(newx, function(x) paste(class(x), collapse = ", "))
+    Valid <- apply(newx, 2, complete.cases)
     Missing <- apply(Valid, 2, count.false)
     Valid <- apply(Valid, 2, count.true)
     Missing <- formatC(Missing, format = "d", width=width)
     Valid <- formatC(Valid, format = "d", width=width)
-    newDf <- cbind(Col, Class, Missing, Valid)
-    print(newDf, quote=FALSE, right = TRUE)
+    newx <- cbind(Col, Class, Missing, Valid)
+    print(newx, quote=FALSE, right = TRUE)
   }
-  ##
   ## Valid cases
   cat("\n")
-  Valid <- apply(Df, 2, complete.cases)
+  Valid <- apply(x, 2, complete.cases)
   Missing <- apply(Valid, 2, count.false)
   cat("Variables contain ")
   if (min(Missing) != max(Missing)) {
@@ -91,7 +141,7 @@ descriptives <- function(Df, width=8, digits=2) {
   } else {
     cat(min(Missing), "case(s) with missing values.\n")
   }
-  cat(nrow(Df), "cases in data frame.\n")
+  cat(nrow(x), "cases in data frame.\n")
 }
 
 descriptives.groups <- function(Df, groups, width=8, digits=2) {
