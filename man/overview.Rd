@@ -9,10 +9,10 @@ overview(x)
 \item{x}{a data frame}
 }
 \value{
-a data frame containing abbreviated name, class (first component), start column, end column, number of columns occupied for each variable, and variable range.
+a data frame containing abbreviated name (basename), class (first component), start column, end column, number of columns occupied by the variables with the same basename, and variable range.
 }
 \description{
-\code{overview} lists the columns in a data frame in a concise manner by stripping off trailing numbers from the column names. This is useful for getting an overview of questionnaire data where names of items belonging to a scale share the same stem and differ by an appended number.
+\code{overview} lists the variables in a data frame in a concise manner by stripping off trailing numbers from the variable names (creating a basename) and combining variables with the same basename into one output row.
 }
 \author{
 Michael Hock \email{michael.hock@uni-bamberg.de}
