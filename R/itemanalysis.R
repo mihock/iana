@@ -582,15 +582,15 @@ plot.mapTest <- function(x, ...) {
 #' @author Michael Hock \email{michael.hock@@uni-bamberg.de}
 #'
 #' @export
-reliability <- function(x, invert = TRUE, digits=3, dfname = NULL) {
-    if (is.null(dfname)) dfname <- deparse(substitute(x))
-    if (!is.data.frame(x)) stop("x must be a data frame.")
+reliability <- function (x, invert = TRUE, digits = 3, dfname = NULL) {
+    if (is.null(dfname))
+        dfname <- deparse(substitute(x))
+    if (!is.data.frame(x))
+        stop("x must be a data frame.")
     n <- ncol(x)
-    if (n < 2) stop("At least 2 items are needed.")
+    if (n < 2)
+        stop("At least 2 items are needed.")
     cases.orig <- nrow(x)
-    ##### x <- subset(x, complete.cases(x)) ### deparse won't work right
-    ###x <- x[complete.cases(x),] ### same problem
-    ###x <- as.data.frame(x)
     x <- na.omit(x)
     cases <- nrow(x)
     if (cases < cases.orig) {
@@ -598,82 +598,64 @@ reliability <- function(x, invert = TRUE, digits=3, dfname = NULL) {
         cat("\nMissing values encountered.\n")
         cat("Using ", cases, " out of ", cases.orig, " cases.\n")
     }
-    if (cases < 3) stop("At least 3 cases are needed.")
-
-    loadings <- principal(x)$loadings[,1]
-    if (any(loadings < 0)) {
-        # Should be warning, but warnings are not shown in shiny...
-        neg.items <- names(loadings[loadings < 0])
-        cat("WARNING:\nThe following items have loadings < 0 on the first principal component:\n")
-        cat(paste(neg.items, collapse = ", "))
-        cat("\nYou may want to omit or invert these items.\n\nCode:\n")
-        maxx <- max(x) + min(x)
-        cat("# Assign the sum of the mininum and the maximum response to maxx.             \nmaxx <-", maxx, "\n")
-        for (item in neg.items) {
-            item <- paste0(dfname, "$", item)
-            cat(paste(item, "<- maxx -", item, "\n"))
-        }
-        cat("# End of code\n")
-
-        ## Invert items with negative loadings
-        if (invert) {
-            cat("\nNote: For the following analyses, these items were inverted.\n")
-            ### Correct?
-            x[,names(loadings[loadings < 0])] <- maxx - x[,names(loadings[loadings < 0])]
+    if (cases < 3)
+        stop("At least 3 cases are needed.")
+    loadings <- try(principal(x)$loadings[, 1], silent = TRUE)
+    if (class(loadings) == "try-error") {
+        warning("principal component loadings cannot be computed")
+    } else {
+        if (any(loadings < 0)) {
+            neg.items <- names(loadings[loadings < 0])
+            cat("WARNING:\nThe following items have loadings < 0 on the first principal component:\n")
+            cat(paste(neg.items, collapse = ", "))
+            cat("\nYou may want to omit or invert these items.\n\nCode:\n")
+            maxx <- max(x) + min(x)
+            cat("# Assign the sum of the mininum and the maximum response to maxx.             \nmaxx <-",
+                maxx, "\n")
+            for (item in neg.items) {
+                item <- paste0(dfname, "$", item)
+                cat(paste(item, "<- maxx -", item, "\n"))
+            }
+            cat("# End of code\n")
+            if (invert) {
+                cat("\nNote: For the following analyses, these items were inverted.\n")
+                x[, names(loadings[loadings < 0])] <- maxx - x[,
+                    names(loadings[loadings < 0])]
+            }
         }
     }
-
-    # alpha using variance-covariance matrix
     M <- cov(x)
-    alpha <- (n/(n - 1)) *  (1 - sum(diag(M)) / sum(M))
-
-    # alpha using correlation matrix
+    alpha <- (n/(n - 1)) * (1 - sum(diag(M))/sum(M))
     M <- cor(x)
-    stand.alpha <- (n/(n - 1)) * (1 - sum(diag(M)) / sum(M))
-
-    # item-total statistics
+    stand.alpha <- (n/(n - 1)) * (1 - sum(diag(M))/sum(M))
     row.sum <- apply(x, 1, sum)
     cov.it <- cov(x, row.sum)
     r.it <- cor(x, row.sum)
-
-    # corrected item-total cov/cor and alpha if item removed
-    r.it.c <- matrix(nrow=n, ncol=1)
-    cov.it.c <- matrix(nrow=n, ncol=1)
-    alpha.rm <- matrix(nrow=n, ncol=1)
-
+    r.it.c <- matrix(nrow = n, ncol = 1)
+    cov.it.c <- matrix(nrow = n, ncol = 1)
+    alpha.rm <- matrix(nrow = n, ncol = 1)
     if (n > 2) {
         for (i in 1:n) {
-            # corrected item-total cov/cor
-            row.sum <- apply(x[,-i], 1, sum)
-            cov.it.c[i,1] <- cov(x[,i], row.sum)
-            r.it.c[i,1] <- cor(x[,i], row.sum)
-
-            # alpha if item deleted
-            M <- cov(x[,-i])
-            alpha.rm[i,1] <- ((n-1)/(n-2)) * (1 - sum(diag(M)) / sum(M))
+            row.sum <- apply(x[, -i], 1, sum)
+            cov.it.c[i, 1] <- cov(x[, i], row.sum)
+            r.it.c[i, 1] <- cor(x[, i], row.sum)
+            M <- cov(x[, -i])
+            alpha.rm[i, 1] <- ((n - 1)/(n - 2)) * (1 - sum(diag(M))/sum(M))
         }
-    } else {
-        warning('With only 2 items "corrected" statistics cannot be computed.')
     }
-
+    else {
+        warning("With only 2 items \"corrected\" statistics cannot be computed.")
+    }
     item.means <- colMeans(x)
     item.sds <- apply(x, 2, sd)
     bad <- ifelse(alpha.rm > alpha, "*", "")
     badest <- which.max(alpha.rm)
     bad[badest] <- paste(bad[badest], "<=")
     bad <- str_pad(bad, 4, "right")
-    itemstats <- data.frame(M = item.means,
-                            SD = item.sds,
-                            cov.it,
-                            cov.it.c,
-                            r.it,
-                            r.it.c,
-                            alpha.rm,
-                            bad)
-
-    old.ops <- options(digits=digits)
-    on.exit(options(old.ops), add=TRUE)
-
+    itemstats <- data.frame(M = item.means, SD = item.sds, cov.it,
+        cov.it.c, r.it, r.it.c, alpha.rm, bad)
+    old.ops <- options(digits = digits)
+    on.exit(options(old.ops), add = TRUE)
     cat("\nCronbach's alpha is        ", alpha, "\n")
     cat("Standardized item alpha is ", stand.alpha, "\n")
     cat("\nItem statistics:\n\n")
@@ -681,12 +663,9 @@ reliability <- function(x, invert = TRUE, digits=3, dfname = NULL) {
     cat("\nCOV/r_it: item-total covariance/correlation\nCOV/r_itc: 'corrected' item-total covariance/correlation\n    (with the respective item removed)\nalpha.rm: alpha if item removed\nbad: *item decreases alpha, <= item with mininum contribution to alpha\n")
     cat("\nCases: ", cases, "     Items: ", n, "\n")
     cat("\nStatistics for the total score (sums or means of item scores):\n\n")
-    Total <- data.frame(Sum_score = rowSums(x), "Mean_score" = rowMeans(x))
-    ###
-###    require(psych)
+    Total <- data.frame(Sum_score = rowSums(x), Mean_score = rowMeans(x))
     print(describe(Total))
     cat("\n")
-    #invisible(alpha)
 }
 
 #' Parallel Analysis
