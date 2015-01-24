@@ -1,10 +1,8 @@
 library(shiny)
+library(shinythemes)
 
 shinyUI(fluidPage(
-    
-    # Use bootstrap 2.3.2 themes, http://bootswatch.com/2/#gallery
-    theme = "bootstrap-cerulean.css",
-    
+    theme = shinytheme("cerulean"),
     #titlePanel("Iana - Item Analysis"),
     
     sidebarLayout(
