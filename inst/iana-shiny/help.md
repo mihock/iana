@@ -2,7 +2,7 @@ Iana is a browser-based graphical user interface to R functions for the psychome
 
 ### First Start
 
-I you read this, you probably know how to start Iana:
+If you read this, you probably know how to start Iana:
 
     library(iana)
     runiana()
