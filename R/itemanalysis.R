@@ -184,7 +184,6 @@ descriptives.tot.groups <- function(Df, groups, width=8, digits=2) {
   print(X, quote=FALSE, right=TRUE)
 }
 
-
 descriptivesbygroups <- function(Df, groups, width=8, digits=2) {
   if (!is.data.frame(Df)) Df <- as.data.frame(Df)
   isnum <- sapply(Df, is.numeric)
@@ -1354,7 +1353,7 @@ getItemText <- function(x) {
 #'
 #' Automatically classify the items in a data frame.
 #'
-#' @param factormodel a factor model fitted by factanal of fa
+#' @param factormodel a factor model fitted by factanal or fa
 #' @param Df a data frame containing the items
 #' @param minloading minimum loading of an item to be considered a marker of a factor
 #' @param maxloading maximum loading of an item on a secondary factor (i,e., the factor on which the items has its second highest loading) to be considered a marker for the primary factor (i,e., the factor on which the items has its highest loading)
