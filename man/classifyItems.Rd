@@ -8,7 +8,7 @@ classifyItems(factormodel, Df, minloading = 0.4, maxloading = 0.4,
   minpurity = 0.25, itemlength = 0, Df.name = deparse(substitute(Df)))
 }
 \arguments{
-\item{factormodel}{a factor model fitted by factanal of fa}
+\item{factormodel}{a factor model fitted by factanal or fa}
 
 \item{Df}{a data frame containing the items}
 
