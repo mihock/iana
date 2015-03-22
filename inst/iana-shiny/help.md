@@ -2,7 +2,12 @@ Iana is a browser-based graphical user interface to R functions for the psychome
 
 ### First Start
 
-I you read this, you probably know how to start Iana. You may have noticed that the first start takes some time. This is because Iana first pulls the R packages it needs for its computations from one of the CRAN mirrors and installs them on your machine. This happens only once. Subsequent starts of Iana are much faster and should not take more than a few seconds.
+I you read this, you probably know how to start Iana:
+
+    library(iana)
+    runiana()
+
+You may have noticed that the first start takes some time. This is because Iana first pulls the R packages it needs for its computations from one of the CRAN mirrors and installs them on your machine. This happens only once. Subsequent starts of Iana are much faster and should not take more than a few seconds.
 
 ### Analyzing Data
 
@@ -10,7 +15,7 @@ On startup, Iana checks which data frames are present in your R environment and 
 
 Possibly, not all variables in the data frame are shown as labels. For each variable in the selected data frame, Iana checks whether it looks like a Likert item. Such items normally have a low number of discrete values (3--9), which are usually coded as integers with an origin of 0 or 1. Iana considers variables that meet these criteria as items and hides the other variables in the data frame. You can change these criteria by specifying a different range of values in the numeric input box located above the item list. Setting this value to the maximum (20) shows all numeric variables in the data frame, including variables with non-integer or negative values. Notice, however, that not all functions are able to handle non-integer variables, so that you will get error messages if you try to analyze such variables.
 
-The check boxes allow you to compile a set of items for analysis. For example, if you check four specific variables, the reliability of the scale composed of these four items will be reported. Instead to checking the items one after another you can also define a range of successive items to be combined using the input field below the check boxes. A variable range is specified by typing the names of two items (separated by a colon) into the input box, for example `e1:e4`. This is often faster than checking and unchecking single items. Typing only one variable name into the box unselects all variables except the specified variable. A quick way of unchecking all variables is to type any character into the field that is not the name of a variable.
+The check boxes allow you to compile a set of items for analysis. For example, if you check four specific variables, the reliability of the scale composed of these four items will be reported. Instead to checking the items one after another you can also define a range of successive items to be combined using the input field below the check boxes. A variable range is specified by typing the names of two items (separated by a colon) into the input box, for example `e1:e4`. This is often faster than checking and unchecking single items. Typing only one variable name into the box deselects all variables except the specified variable. A quick way of unchecking all variables is to type any character into the field that is not the name of a variable.
 
 
 ### Used Packages

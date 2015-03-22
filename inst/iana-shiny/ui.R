@@ -24,7 +24,7 @@ shinyUI(fluidPage(
             selectInput(inputId = "selectedDf", label = "Data frame to use:",
                 choices = getDataFramesIana()),
             numericInput(inputId = "kUniqueValues", 
-                label = "Exclude variables with values outside the range of 0 and k:",
+                label = "Exclude variables with values outside the range of 0 and ...:",
                 min = 2, max = 20, value = 9, step = 1),
             helpText("To include all numeric (including non-integer) variables, set this to 20."),
             
@@ -58,29 +58,23 @@ shinyUI(fluidPage(
                         height = getOption("iana.plotheight")),
                     
                     h3("Total score"),
-                    tags$table(
-                        border="0",
-                        cellpadding="10",
-                        cellspacing="6",
-                        tags$tr(
-                            tags$td(selectInput(inputId = "histtype",
+                    fluidRow(
+                        column(6, 
+                            selectInput(inputId = "histtype",
                                 label = "Type of plot:",
                                 choices = c("Percentages" = "percent", 
                                     "Counts" = "count",
                                     "Density" = "density"))),
-                            
-                            tags$td(selectInput(inputId = "totalscoretype",
-                                label = "Total score represents:",
-                                choices = c("Sum of item scores" = "sum", 
-                                    "Average of item scores" = "ave")))
-                            ),
-                        tags$tr(    
-                            tags$td(sliderInput(inputId = "histbins", 
-                                label = "Number of bins (3 = automatic):",
-                                min = 3, max = 40, value = 3, step = 1,
-                                animate = TRUE))
-                        )
+                        column(6, 
+                            selectInput(inputId = "totalscoretype",
+                            label = "Total score represents:",
+                            choices = c("Sum of item scores" = "sum", 
+                                "Average of item scores" = "ave")))
                     ),
+                    sliderInput(inputId = "histbins", 
+                        label = "Number of bins (3 = automatic):",
+                        min = 3, max = 45, value = 3, step = 1,
+                        animate = TRUE),
                     
                     helpText(""),
                     
@@ -97,31 +91,24 @@ shinyUI(fluidPage(
                     h3("Empirical Item Characteristic Curves"),
                     helpText("To examine item characteristics, item scores are plotted against total scores or factor scores. To avoid overplotting, a small amount of jitter is added to overlapping points. (These are the light points in the plot.) In the upper left corner, the correlation of the total/factor score and the item score is given. The lines are locally weighted regression lines, the shaded regions represent 95% confidence intervals around the expected item scores. If you have many data points you might want to decrease the opaqueness of the points and/or to deactivate jitter."),
                     
-                    tags$table(
-                        border="0",
-                        cellpadding="10",
-                        cellspacing="6",
-                        tags$tr(
-                            valign="bottom",
-                            tags$td(selectInput(inputId = "ICCscore",
+                    fluidRow(
+                        column(6,
+                            selectInput(inputId = "ICCscore",
                                 label = "Score to use:",
                                 choices = c("Factor score (Thomson)" = "factor.thomson",
                                     "Factor score (Bartlett)" = "factor.bartlett",
                                     "Total (mean) score" = "mean",
-                                    "Total (sum) score" = "sum"))),
-                            tags$td(numericInput(inputId = "ICCalpha", 
+                                    "Total (sum) score" = "sum")),
+                            checkboxInput(inputId = "ICClinear", 
+                                label = "Fit linear regression")),
+                        column(6, 
+                            numericInput(inputId = "ICCalpha", 
                                 label = "Opaqueness of points:",
-                                min = 0, max = 1, value = 0.5, step = 0.1))
-                        ),
-                        tags$tr(
-                            valign="bottom",
-                            tags$td(checkboxInput(inputId = "ICCjitter", 
+                                min = 0, max = 1, value = 0.5, step = 0.1),
+                            checkboxInput(inputId = "ICCjitter", 
                                 label = "Jitter",
-                                value = TRUE)),
-                            tags$td(checkboxInput(inputId = "ICClinear", 
-                                label = "Fit linear (instead of locally weighted) regression"))
-                        )
-                    ),
+                                value = TRUE))
+                        ),
                     
                     plotOutput(outputId = "ICCs", height = getOption("iana.plotheight")),
                     h3("Notes"),
@@ -146,57 +133,49 @@ shinyUI(fluidPage(
                     h3("Principal Components and Exploratory Factor Analysis"),
                     helpText("By default, results of exploratory factor analysis (EFA) are shown. To obtain results of principal components analysis (PCA) choose 'Principal components' in the Method dropdown list. (For PCA, not all rotations are implemented.) The method options include 'Item Response Theory.' In this case polychoric correlations are computed by a fast (also somewhat inaccurate) two-step procedure. These correlations are then fitted by maximum likelihood factor analysis. For obtaining accurate estimates check the 'Accurate' Box. Notice that this computation is very slow."),
                     
-                    h3("Options"),
+                    h3("Factoring"),
+                    fluidRow(
+                        column(4, numericInput(inputId = "nFactors", 
+                            label = "Number of factors:",
+                            min = 1, max = 20, value = 1, step = 1)),
+                        column(4, selectInput(inputId = "faMethod",
+                            label = "Factoring method:",
+                            choices = c("Maximum likelihood", "Minimum residuals", "Principal axes", "Principal components", "Item Response Theory"))),
+                        column(4, selectInput(inputId = "faRotation",
+                            label = "Rotation:",
+                            choices = c("varimax", "promax", "oblimin", "none", "quartimax", "bentlerT", "geominT", "bifactor", "simplimax", "bentlerQ", "geominQ","biquartimin", "cluster")))
+                    ),                    
+                    fluidRow(
+                        column(4, checkboxInput(inputId = "faIRTaccurate", 
+                            label = "Accurate polychorics",
+                            value = FALSE))
+                    ),
                     
-                    tags$table(
-                        border="0",
-                        cellpadding="10",
-                        cellspacing="6",
-                        
-                        tags$tr(
-                            valign="bottom",
-                            tags$td(numericInput(inputId = "nFactors", 
-                                label = "Number of factors to extract:",
-                                min = 1, max = 20, value = 1, step = 1)),
-                            tags$td(selectInput(inputId = "faMethod",
-                                label = "Method:",
-                                choices = c("Maximum likelihood", "Minimum residuals", "Principal axes", "Principal components", "Item Response Theory"))),
-                            tags$td(checkboxInput(inputId = "faIRTaccurate", 
-                                label = "Accurate polychorics for IRT (SLOW)",
-                                value = FALSE))
-                        ),
-                        
-                        tags$tr(
-                            valign="bottom",
-                            tags$td(selectInput(inputId = "faRotation",
-                                label = "Rotation:",
-                                choices = c("varimax", "promax", "oblimin", "none", "quartimax", "bentlerT", "geominT", "bifactor", "simplimax", "bentlerQ", "geominQ","biquartimin", "cluster"))),
-                            tags$td(numericInput(inputId = "faCut", 
-                                label = "Suppress (absolute) loadings less than:",
-                                min = 0, max = 0.6, value = 0, step = 0.05)),
-                            tags$td(numericInput(inputId = "faDigits", 
-                                label = "Number of digits used in the results:",
-                                min = 2, max = 8, value = 2, step = 1))
-                        ),
-                        tags$tr(
-                            valign="bottom",
-                            tags$td(numericInput(inputId = "faMinloading", 
-                                label = "Minimum loading for marker:",
-                                min = 0.1, max = 0.9, value = 0.4, step = 0.05)),
-                            tags$td(numericInput(inputId = "faMaxloading", 
-                                label = "Minor loadings for marker are less than:",
-                                min = 0.1, max = 0.9, value = 0.35, step = 0.05)),
-                            tags$td(numericInput(inputId = "faPurity", 
-                                label = "Mininum purity of marker:",
-                                min = 0.1, max = 0.9, value = 0.25, step = 0.05))
-                        ),
-                        
-                        tags$tr(
-                            valign="bottom",
-                            tags$td(numericInput(inputId = "faItemlength", 
-                                label = "Trim item text to ... characters (0 = auto):",
-                                min = 0, max = 250, value = 50, step = 5))
-                        )
+                    
+                    h3("Markers"),
+                    fluidRow(
+                        column(4, numericInput(inputId = "faMinloading", 
+                            label = "Minimum loading:",
+                            min = 0.1, max = 0.9, value = 0.4, step = 0.05)),
+                        column(4, numericInput(inputId = "faMaxloading", 
+                            label = "Minor loadings are less than:",
+                            min = 0.1, max = 0.9, value = 0.35, step = 0.05)),
+                        column(4, numericInput(inputId = "faPurity", 
+                            label = "Mininum purity:",
+                            min = 0.1, max = 0.9, value = 0.25, step = 0.05))
+                    ),
+                    
+                    h3("Output"),
+                    fluidRow(
+                        column(4, numericInput(inputId = "faCut", 
+                            label = "Suppress loadings less than:",
+                            min = 0, max = 0.6, value = 0, step = 0.05)),
+                        column(4, numericInput(inputId = "faDigits", 
+                            label = "Digits to show:",
+                            min = 2, max = 8, value = 2, step = 1)),
+                        column(4, numericInput(inputId = "faItemlength", 
+                            label = "Trim item text (characters, 0 = auto):",
+                            min = 0, max = 250, value = 50, step = 5))
                     ),
                     
                     h3("Results"),
@@ -219,21 +198,19 @@ shinyUI(fluidPage(
                     helpText("Below is the fit of a confirmatory one-factor model for all of the selected variables (items). This is useful for checking fit indexes such as the SRMR or RMSEA or for obtaining unstandardized factor loadings and their standard errors, which are not given by EFAs. The omegas above the summary are reliability estimates based on the factor loadings. McDonalds (1999) version is omega3. Because CFAs for a large number of variables are slow, the computation is suppressed if the number of variables exceeds the specified threshold."),
                     helpText(""),
                     
-                    tags$table(
-                        border="0",
-                        cellpadding="10",
-                        cellspacing="6",
-                        tags$tr(
-                            valign="top",
-                            tags$td(sliderInput(inputId = "cfamaxvars", 
+                    fluidRow(
+                        column(6, 
+                            sliderInput(inputId = "cfamaxvars", 
                                 label = "Threshold for computation:",
                                 min = 0, max = 100, value = 20,
                                 animate = TRUE)),
-                            tags$td(selectInput(inputId = "cfaEstimator",
+                        column(6,
+                            selectInput(inputId = "cfaEstimator",
                                 label = "Estimator:",
-                                choices = c("ML", "MLM", "WLSMV")))
-                        )
+                                # choices = c("ML", "MLM", "WLSMV")))
+                                choices = c("ML", "MLM")))
                     ),
+                    
                     helpText(""),
                     verbatimTextOutput(outputId = "cfa"),
                     helpText(""),
@@ -243,26 +220,14 @@ shinyUI(fluidPage(
                 
                 tabPanel("Rasch",
                     h3("Rasch Models"),
+                    actionButton(inputId = "fitrasch", label = " Run "),
                     helpText('Press the "Run" button to fit or refit the model. (Fitting Rasch models is computationally intensive, therefore computations are not performed automatically.)'),
                     
-                    #                helpText(""),
-                    
-                    tags$table(
-                        border="0",
-                        cellpadding="10",
-                        cellspacing="6",
-                        tags$tr(
-                            #valign="top",
-                            tags$td(actionButton(inputId = "fitrasch", label = " Run ")),
-                            tags$td(selectInput(inputId = "raschmodel", 
-                                label = "Model to fit:", 
-                                choices = c("Partial Credit Model" = "pcm", 
-                                    "Rating Scale Model" = "rsm", 
-                                    "Rasch Model for binary items" = "rasch")))
-                        )
-                    ),
-                    
-                    #                helpText(""),
+                    selectInput(inputId = "raschmodel", 
+                        label = "Model to fit:", 
+                        choices = c("Partial Credit Model" = "pcm", 
+                            "Rating Scale Model" = "rsm", 
+                            "Rasch Model for binary items" = "rasch")),
                     
                     conditionalPanel(
                         condition = "input.raschmodel == 'rasch'",
@@ -277,7 +242,8 @@ shinyUI(fluidPage(
                         #                     numericInput(inputId = "colsRaschICC", 
                         #                         label = "Number of columns to use:",
                         #                         value = 4, min = 1, max = 10, step = 1),
-                        plotOutput(outputId = "rasch.icc", height = getOption("iana.plotheight"))
+                        plotOutput(outputId = "rasch.icc", 
+                            height = getOption("iana.plotheight"))
                     ),
                     
                     h3("Person-item map"),

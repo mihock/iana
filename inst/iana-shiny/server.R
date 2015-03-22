@@ -570,9 +570,11 @@ shinyServer(function(input, output) {
             fitm <- fitm["rmsea"]
         else
             fitm <- fitm[c("rmsea", "rmsea.scaled")]
-        cat("RMSEA and reliability estimates:\n")
-        header <- round(c(fitm, semTools::reliability(fit)), 3)
-        print(header)
+        cat("RMSEA:\n")
+        # header <- round(c(fitm, semTools::reliability(fit)), 3)
+        print(round(fitm, 3))
+        cat("\nReliability estimates:\n")
+        print(semTools::reliability(fit))
         cat("\n")
 
         cmdLog("# Confirmatory Factor Analysis")
