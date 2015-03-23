@@ -160,16 +160,13 @@ shinyUI(fluidPage(
                         column(4, numericInput(inputId = "faMaxloading", 
                             label = "Minor loadings are less than:",
                             min = 0.1, max = 0.9, value = 0.35, step = 0.05)),
-                        column(4, numericInput(inputId = "faPurity", 
-                            label = "Mininum purity:",
-                            min = 0.1, max = 0.9, value = 0.25, step = 0.05))
+                        column(4, numericInput(inputId = "faComplexity", 
+                            label = "Maximum complexity:",
+                            min = 0, max = 10, value = 2, step = 0.25))
                     ),
                     
                     h3("Output"),
                     fluidRow(
-                        column(4, numericInput(inputId = "faCut", 
-                            label = "Suppress loadings less than:",
-                            min = 0, max = 0.6, value = 0, step = 0.05)),
                         column(4, numericInput(inputId = "faDigits", 
                             label = "Digits to show:",
                             min = 2, max = 8, value = 2, step = 1)),

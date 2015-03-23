@@ -90,13 +90,12 @@ dfEFA <- function(p, m) {
     # Degrees of freeddom for exploratory factor model (ML)
     # p: number of variables, m = number of factors
     # Brown 2009
-
-    #     Dof <- function (p, m) {
+    #
+    #     Dof <- function(p, m) {
     #         a <- (p*m) + ((m*(m+1)) / 2) + p -m^2 # Parameters in FA
     #         b <- (p*(p+1)) / 2 # Elements of cov matrix to use
     #         dif <- b - a
     #         list(a, b, dif)
-    #
     #     }
 
     if (p < m) return(-1)
@@ -117,7 +116,7 @@ dfEFA <- function(p, m) {
 #'
 #' @export
 #'
-frequencies <- function (x, max.unique = 10) {
+frequencies <- function(x, max.unique = 10) {
     if (!is.data.frame(x))
         stop("x must be a data frame.")
     cat("\nFrequencies\n")
@@ -260,7 +259,7 @@ plot.mapTest <- function(x, ...) {
 #' @author Michael Hock \email{michael.hock@@uni-bamberg.de}
 #'
 #' @export
-reliability <- function (x, invert = TRUE, digits = 3, dfname = NULL) {
+reliability <- function(x, invert = TRUE, digits = 3, dfname = NULL) {
     if (is.null(dfname))
         dfname <- deparse(substitute(x))
     if (!is.data.frame(x))
@@ -362,7 +361,7 @@ reliability <- function (x, invert = TRUE, digits = 3, dfname = NULL) {
 #' @author Michael Hock \email{michael.hock@@uni-bamberg.de}
 #'
 #' @export
-ggscree.plot <- function (Df, title = NULL,
+ggscree.plot <- function(Df, title = NULL,
                           use = "complete.obs", simu = 20,
                           xlab = "Component", ylab = "Eigenvalue") {
 #     if (require(ggplot2) == FALSE) {
@@ -1028,123 +1027,188 @@ getItemText <- function(x) {
     return(itemtext)
 }
 
-#' Classify items
+#' Exploratory Factor Analysis
 #'
-#' Automatically classify the items in a data frame.
-#'
-#' @param factormodel a factor model fitted by factanal or fa
-#' @param Df a data frame containing the items
-#' @param minloading minimum loading of an item to be considered a marker of a factor
-#' @param maxloading maximum loading of an item on a secondary factor (i,e., the factor on which the items has its second highest loading) to be considered a marker for the primary factor (i,e., the factor on which the items has its highest loading)
-#' @param minpurity mininum purity for a marker
-#' @param itemlength trim item text to given number characters
-#' @param Df.name name of data frame
-#'
-#' @details The purity is computed as
-#' \deqn{(a_1^2 - a_2^2) / h^2,}
-#' where \eqn{a_1} and \eqn{a_2} are the highest and second highest loadings of the item, respectively, and \eqn{h 2} is the communality of the item.
+#' Perform exploratory factor analysis of a set of variables. This is a wrapper around psych::fa.
+#' 
+#' @param x a data frame
+#' @param nfactors number of factors to be extracted
+#' @param rotate rotation
+#' @param fm factoring method 
 #'
 #' @author Michael Hock \email{michael.hock@@uni-bamberg.de}
 #'
 #' @export
-classifyItems <- function(factormodel, Df, minloading = 0.4, maxloading = .40, minpurity = 0.25, itemlength = 0, Df.name = deparse(substitute(Df))) {
+#'
+factoranalysis <- function(x, nfactors, rotate = "promax", fm = "ml") {
+    #require(psych)
+    q <- psych::fa(x, nfactors, fm = fm, rotate = rotate)
+    #q <- fa(x, nfactors, fm = fm, rotate = rotate)
+    
+    cat("FACTOR ANALYSIS\n")
+    cat("\nMethod:  ", q$fm)
+    cat("\nRotation:", q$rotation)
+    cat("\nN:       ", q$n.obs, "\n")
+    
+    cat("\nFIT STATISTICS\n\n")
+    # BIC = χ2 + ln(N)[k(k + 1)/2 - df]
+    Statistic = c("Chi-Square", "Degrees of Freedom", "p",
+        "Tucker-Lewis-Index (NNFI)",
+        "RMSR",
+        "SRMR",
+        "RMSEA", "RMSEA Lower Bound", "RMSEA Upper Bound",
+        "BIC", "SABIC",
+        "Kaiser-Meyer-Olkin (KMO) Factor Adequacy")
+    
+    p = nrow(q$residual)
+    ### p-1 -> RMSR
+    srmr = sqrt( sum( (q$residual[upper.tri(q$residual)])^2 ) / (p * (p+1) / 2) )
+    Value <- c(q$STATISTIC, q$dof, q$PVAL,
+        q$TLI,
+        q$rms, srmr,
+        q$RMSEA[1], q$RMSEA[2], q$RMSEA[3],
+        q$BIC, q$SABIC,
+        KMO(x)$MSA
+    )
+    Value <- as.character(round(Value, 3))
+    if(Value[3] < .001) Value[3] <- "< .001"
+    statsDf <- data.frame(Statistic, Value)
+    print(statsDf, row.names = FALSE)
+    cat("\nRMSEA bounds are for a 90% confidence interval\nKMO is based on Pearson correlations\n")
+    ####classifyItems(q, x, Df.name = deparse(substitute(x)))
+    #class(q) <- "fa"
+    return(q)
+}
 
+#' Classify items
+#'
+#' Automatically classify the items in a data frame.
+#'
+#' @param fm a factor model fitted by psych::fa or principal components computed with psych::principal
+#' @param Df a data frame containing the items
+#' @param min.loading minimum loading of an item to be considered a marker of a factor
+#' @param max.loading maximum loading of an item on a secondary factor (i.e., the factor on which the items has its second highest loading) to be considered a marker for the primary factor (i.e., the factor on which the items has its highest loading)
+#' @param max.complexity maximum complexity of an item to be considered a marker item. This is only used for factor models (not for principal components)
+#' @param itemlength trim item text to given number characters
+#' @param digits number of digits used in the output
+#' @param Df.name name of data frame
+#'
+#' @author Michael Hock \email{michael.hock@@uni-bamberg.de}
+#'
+#' @export
+## Needs: getItemText from iana, str_trim from stringr
+
+classifyItems <- function(fm, Df, min.loading = 0.4, max.loading = 0.3, max.complexity = 10, itemlength = 0, digits = 2, Df.name = deparse(substitute(Df))) {
+    
+    if(!inherits(fm, "fa") && !inherits(fm, "principal") ) 
+        stop("fm was not computed with psych::fa oder psych::principal")
+    
     ### Todo: is Df needed? We now have the names of the items in attr
     ### itemText
+    
     max2 <- function(x) {
         y <- sort(x, decreasing=TRUE)
         y[2]
     }
-
-    lmat <- factormodel$loadings # for factanal()
-    if (is.null(lmat)) {
-        lmat <- factormodel$fa$loadings # for psych, fa.poly
-        communality <- factormodel$fa$communality
-        cat("\nUsing loadings from fa.poly in package psych.\n")
-    } else {
-        communality <- 1 - factormodel$uniquenesses
-    }
-    if (ncol(lmat) < 2) {
-        cat("\nOnly 1 factor was extracted, so no classification table is needed.\n")
-        return()
-    }
-
-    cat("\nClassification Table\n")
-    cat("====================\n")
-    cat("F = Factor number, M = Marker, a1/a2 = Highest loadings\n")
-    cat("Pur = Purity measure\n")
-
-    ilength = getOption("width") - 25 - max(nchar(names(Df)))
+    
+    # for fa.poly and irt.fa
+    if (exists("fa", fm)) fm <- fm$fa
+    
+    # These will be rounded below...
+    lmat <- fm$loadings
+    communality <- fm$communality
+    # principal does not compute complexity
+    if(inherits(fm, "fa")) complexity <- fm$complexity
+    else complexity <- (rep(-1, length(communality)))
+    
+    F <- apply(abs(lmat), 1, which.max)
+    max.absload <- apply(abs(lmat), 1, max)
+    max.absload2 <- apply(abs(lmat), 1, max2)
+    max.absload2[is.na(max.absload2)] <- 0
+    marker <- ifelse(
+        (max.absload > min.loading) &
+            (max.absload2 < max.loading) &
+            (complexity < max.complexity),
+        "*", " ")
+    varnames <- rownames(lmat)
+    lmat <- round(unclass(lmat), digits)
+    communality <- round(communality, digits)
+    if(inherits(fm, "fa")) complexity <- round(complexity, digits)
+    
+    cat("\nLOADINGS\n\n")
+    #cat("====================\n")
+    cat("M = Marker, a_j = Factor loadings\n")
+    cat("h2 = Communality, Cmpl = Factorial complexity\n")
+    
+    ilength <- getOption("width") -  max(nchar(varnames)) - 3 - (ncol(lmat) + 2) * (digits + 4)
     items <- getItemText(Df)
     if (is.null(items)) {
         shortitems <- rep("-", length(communality))
         cat("\nHint: You can associate the text of the items with the columns \nof the data frame with 'setItemText()'. \nThis would allow to produce an item table.\n")
     } else {
         items <- stringr::str_trim(items)
-        shortitems <- str_pad(strtrim(items, ilength), width = ilength,
-                              side = "right")
+        if (itemlength == 0) {
+            shortitems <- substr(items, 1, ilength)
+        }
+        else {
+            maxilen <- max(nchar(items))
+            if (itemlength > maxilen) itemlength <- maxilen
+            shortitems <- substr(items, 1, itemlength)
+        }
     }
-
-    fac <- apply(abs(lmat), 1, which.max)
-    maxabsload <- apply(abs(lmat), 1, max)
-    maxabsload2 <- apply(abs(lmat), 1, max2)
-    diffsqload <- maxabsload^2 - maxabsload2^2
-    purity <- diffsqload / communality
-    marker <- ifelse( (maxabsload > minloading) & (maxabsload2 < maxloading) & (purity > minpurity), "*", "-")
-    x <- data.frame(fac, marker, maxabsload, maxabsload2, purity, shortitems)
-    names(x) <- c("F", "M", "a1", "a2", "Pur", "Item")
-    cat("\n")
-    print(x[order(x$F, -x$a1), ], digits = 2)
-    cat("\nNote:\nThe following code may be used to create data frames of items\nassigned to the factors. Some items may need to be inverted.\n\n")
-
+    
+    if(inherits(fm, "principal")) complexity <- (rep("-", length(complexity)))
+        
+    x <- data.frame(F, marker, lmat, communality, complexity, shortitems)
+    x <- x[order(x$F, -max.absload), ]
+    colnames(x) <- c(
+        "F",
+        "M",
+        paste0("a_", 1:ncol(lmat)),
+        "h2",
+        "Cmpl",
+        "Item"
+    )
+    xl <- split(x, x$F)
+    for (i in 1:length(xl)) {
+        cat("\nFactor", i, "\n")
+        print(xl[[i]][,-1], right = FALSE)
+    }
+    
+    # Markers
+    mcount <- sum(ifelse(marker == "*", 1, 0))
+    cat("\n", mcount, "of", ncol(Df), "Items were classified as markers.\n")
+    
+    
+    # Factor Correlations
+    
+    if (exists("Phi", fm)) {
+        corrs <- round(fm$Phi, digits)
+        rownames(corrs) <- colnames(corrs) <- paste0("F", 1:ncol(lmat))
+        cat("\nFACTOR CORRELATIONS\n\n")
+        print(corrs)
+    }
+    
+    # Factors
+    
+    cat("\nFACTORS\n\n")
+    # use fm$loadings, not lmat because lmat now contains the rounded values
+    colnames(fm$loadings) <- paste0("F", 1:ncol(fm$loadings))
+    ssload <- colSums(fm$loadings^2)
+    expl.var <- ssload / nrow(fm$loadings)
+    cumsum.expl.var <- cumsum(expl.var)
+    tab <- rbind(ssload, expl.var, cumsum.expl.var)
+    row.names(tab) <- c("Sum of squared loadings", "Proportion Variance", "Cumulative Variance")
+    print(round(tab, digits))
+    
+    # Code snippet
+    
+    cat("\nNOTE\n\nThe following code may be used to create data frames of items\nassigned to the factors. Some items may need to be inverted.\n\n")
+    
+    
     for (i in (1:ncol(lmat))) {
         selected <- row.names(x[(x$F == i) & (x$M == "*"), ])
         selected <- paste(selected, collapse = ", ")
         cat("F", i, " <- subset(", Df.name, ", select = c(", selected, "))\n", sep = "")
     }
-
-    # Item Table
-    if (!is.null(items)) {
-        if (itemlength != 0) {
-            shortitems <- str_pad(strtrim(items, itemlength),
-                                  width = itemlength, side = "right")
-        }
-    }
-    cat("\nItem Table and Loadings\n")
-    cat("=======================\n")
-    M <- matrix(nrow=nrow(lmat), ncol = 1+ncol(lmat))
-    classified <- numeric(nrow(lmat))
-
-    for (i in 1:ncol(lmat)) {
-        cat("\nFactor", i, "\n")
-        k <- 0
-        for (j in 1:nrow(lmat)) {
-            if (fac[j] == i && marker[j] == "*") {
-                k <- k+1
-                #cat(k, "-", shortitems[j], round(lmat[j,],2), "\n")
-                M[k,] <- c(shortitems[j], round(lmat[j,],2))
-                classified[j] <- 1
-            }
-        }
-        if (k > 0) {
-            Df <- as.data.frame(M)[1:k,]
-            names(Df) <- c("Item", paste0("a", 1:ncol(lmat)))
-            print(Df)
-        }
-    }
-    k <- 0
-    for (j in 1:nrow(lmat)) {
-        if (classified[j] == 0) {
-            k <- k+1
-            #cat(k, "-", shortitems[j], round(lmat[j,],2), "\n")
-            M[k,] <- c(shortitems[j], round(lmat[j,],2))
-        }
-    }
-    if (k > 0) {
-        cat("\nNot classified\n")
-        Df <- as.data.frame(M)[1:k,]
-        names(Df) <- c("Item", paste0("a", 1:ncol(lmat)))
-        print(Df)
-        cat("") # Without this, we get an error!
-    } else cat("\nAll items were classified\n")
 }

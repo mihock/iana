@@ -433,7 +433,7 @@ shinyServer(function(input, output) {
 
     output$efa <- renderPrint({
         log.output("EFA")
-        if (input$mainTabset != "EFA" && faMethod() == "irt.ml") return()
+        if (input$mainTabset != "EFA" && faMethod() == "irt.ml") return() #####?
         vnames <- checkedVars()
         if (is.null(vnames)) return()
 
@@ -471,6 +471,7 @@ shinyServer(function(input, output) {
                 ))
 
                 fa.res <- principal(Df, nFactors(), rotate = faRotation())
+                cat("PRINCIPAL COMPONENTS\n")
             } else {
                 cat("With principal components, only the following rotations are possible: ", possible.rots)
             }
@@ -507,18 +508,20 @@ shinyServer(function(input, output) {
         } else {
             cmdLog("# Exploratory Factor Analysis")
             cmdLog(paste0(
-                "fa(myData",
+                "factoranalysis(myData",
                 ", ", nFactors(),
                 ",\n    fm = '", faMethod(), "'",
                 ",\n    rotate = '", faRotation(), "'",
                 ")\n"
             ))
-            fa.res <- fa(Df, nFactors(), fm = faMethod(), rotate = faRotation())
+            fa.res <- factoranalysis(Df, nFactors(), fm = faMethod(), 
+                rotate = faRotation())
         }
-        print(fa.res, cut = input$faCut, digits = faDigits())
+        log.output(class(fa.res))
 
         classifyItems(fa.res, Df, input$faMinloading, input$faMaxloading,
-                      input$faPurity, input$faItemlength, input$selectedDf)
+            input$faComplexity, input$faItemlength, input$faDigits, 
+            Df.name = input$selectedDf)
     })
 
     # CFA ####

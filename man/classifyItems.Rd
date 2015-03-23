@@ -4,31 +4,29 @@
 \alias{classifyItems}
 \title{Classify items}
 \usage{
-classifyItems(factormodel, Df, minloading = 0.4, maxloading = 0.4,
-  minpurity = 0.25, itemlength = 0, Df.name = deparse(substitute(Df)))
+classifyItems(fm, Df, min.loading = 0.4, max.loading = 0.3,
+  max.complexity = 10, itemlength = 0, digits = 2,
+  Df.name = deparse(substitute(Df)))
 }
 \arguments{
-\item{factormodel}{a factor model fitted by factanal or fa}
+\item{fm}{a factor model fitted by psych::fa or principal components computed with psych::principal}
 
 \item{Df}{a data frame containing the items}
 
-\item{minloading}{minimum loading of an item to be considered a marker of a factor}
+\item{min.loading}{minimum loading of an item to be considered a marker of a factor}
 
-\item{maxloading}{maximum loading of an item on a secondary factor (i,e., the factor on which the items has its second highest loading) to be considered a marker for the primary factor (i,e., the factor on which the items has its highest loading)}
+\item{max.loading}{maximum loading of an item on a secondary factor (i.e., the factor on which the items has its second highest loading) to be considered a marker for the primary factor (i.e., the factor on which the items has its highest loading)}
 
-\item{minpurity}{mininum purity for a marker}
+\item{max.complexity}{maximum complexity of an item to be considered a marker item. This is only used for factor models (not for principal components)}
 
 \item{itemlength}{trim item text to given number characters}
+
+\item{digits}{number of digits used in the output}
 
 \item{Df.name}{name of data frame}
 }
 \description{
 Automatically classify the items in a data frame.
-}
-\details{
-The purity is computed as
-\deqn{(a_1^2 - a_2^2) / h^2,}
-where \eqn{a_1} and \eqn{a_2} are the highest and second highest loadings of the item, respectively, and \eqn{h 2} is the communality of the item.
 }
 \author{
 Michael Hock \email{michael.hock@uni-bamberg.de}
