@@ -119,7 +119,7 @@ dfEFA <- function(p, m) {
 frequencies <- function(x, max.unique = 10) {
     if (!is.data.frame(x))
         stop("x must be a data frame.")
-    cat("\nFrequencies\n")
+    cat("Frequencies\n")
     n.categories <- sapply(x, function(x) length(unique(x)))
     cols <- names(x)
     for (i in 1:ncol(x)) {
@@ -505,8 +505,13 @@ empICC <- function(x,
                xlab = xlab, ylab = "Item Score")  +
         geom_text(data=corrs,
                   aes(x=x.corrs, y=y.corrs, label=corrs),
-                  parse=TRUE, hjust = 0) +
-        geom_smooth(method = method)
+                  parse=TRUE, hjust = 0, size = 5) +
+        geom_smooth(method = method) +
+        theme(text = element_text(size = 14))
+#               colour = "black"),
+#               axis.title.x = element_text(vjust = 0.2),
+#               axis.title.y = element_text(vjust = 0.3),
+#               plot.title = element_text(vjust = 1.5))
     if (jitter) p <- p + geom_jitter(alpha = alpha.jitter)
     #if (TRUE) p <- p + geom_point(alpha = 0.05)
     print(p)
@@ -1029,23 +1034,30 @@ getItemText <- function(x) {
 
 #' Exploratory Factor Analysis
 #'
-#' Perform exploratory factor analysis of a set of variables. This is a wrapper around psych::fa.
+#' Perform exploratory factor analysis of a set of variables. This is a wrapper around psych::fa and psych::fa.poly.
 #' 
 #' @param x a data frame
-#' @param nfactors number of factors to be extracted
-#' @param rotate rotation
-#' @param fm factoring method 
+#' @param nfactors (integer) number of factors to be extracted
+#' @param rotate (char) rotation
+#' @param fm factoring (char) method
+#' @param polychor (logical) use polychoric correlatons (via psych::irt.fa)?
 #'
 #' @author Michael Hock \email{michael.hock@@uni-bamberg.de}
 #'
 #' @export
-#'
-factoranalysis <- function(x, nfactors, rotate = "promax", fm = "ml") {
-    #require(psych)
-    q <- psych::fa(x, nfactors, fm = fm, rotate = rotate)
-    #q <- fa(x, nfactors, fm = fm, rotate = rotate)
-    
-    cat("FACTOR ANALYSIS\n")
+#
+factoranalysis <- function(x, nfactors, rotate = "promax", fm = "ml",
+                           polychor = FALSE) {
+    if (polychor) {
+        ### fm frei lassen oder ml erzwingen?
+        q <- psych::irt.fa(x, nfactors, fm = fm,
+                      rotate = rotate, plot = FALSE)$fa
+        cat("FACTOR ANALYSIS OF POLYCHORIC CORRELATIONS\n")
+    } else {
+        q <- psych::fa(x, nfactors, fm = fm, rotate = rotate)
+        cat("FACTOR ANALYSIS\n")
+    }
+
     cat("\nMethod:  ", q$fm)
     cat("\nRotation:", q$rotation)
     cat("\nN:       ", q$n.obs, "\n")
@@ -1058,18 +1070,21 @@ factoranalysis <- function(x, nfactors, rotate = "promax", fm = "ml") {
         "SRMR",
         "RMSEA", "RMSEA Lower Bound", "RMSEA Upper Bound",
         "BIC", "SABIC",
+        "Maximum Absolute Residual",
         "Kaiser-Meyer-Olkin (KMO) Factor Adequacy")
     
     p = nrow(q$residual)
     ### p-1 -> RMSR
     srmr = sqrt( sum( (q$residual[upper.tri(q$residual)])^2 ) / (p * (p+1) / 2) )
     Value <- c(q$STATISTIC, q$dof, q$PVAL,
-        q$TLI,
-        q$rms, srmr,
-        q$RMSEA[1], q$RMSEA[2], q$RMSEA[3],
-        q$BIC, q$SABIC,
-        KMO(x)$MSA
-    )
+               q$TLI,
+               q$rms,
+               srmr,
+               q$RMSEA[1], q$RMSEA[2], q$RMSEA[3],
+               q$BIC, q$SABIC,
+               max(abs(q$residual[upper.tri(q$residual)])),
+               KMO(x)$MSA
+               )
     Value <- as.character(round(Value, 3))
     if(Value[3] < .001) Value[3] <- "< .001"
     statsDf <- data.frame(Statistic, Value)
@@ -1178,8 +1193,7 @@ classifyItems <- function(fm, Df, min.loading = 0.4, max.loading = 0.3, max.comp
     # Markers
     mcount <- sum(ifelse(marker == "*", 1, 0))
     cat("\n", mcount, "of", ncol(Df), "Items were classified as markers.\n")
-    
-    
+        
     # Factor Correlations
     
     if (exists("Phi", fm)) {

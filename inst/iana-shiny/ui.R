@@ -1,3 +1,4 @@
+# TODO: import?
 library(shiny)
 library(shinythemes)
 
@@ -140,17 +141,16 @@ shinyUI(fluidPage(
                             min = 1, max = 20, value = 1, step = 1)),
                         column(4, selectInput(inputId = "faMethod",
                             label = "Factoring method:",
-                            choices = c("Maximum likelihood", "Minimum residuals", "Principal axes", "Principal components", "Item Response Theory"))),
+                            choices = c("Maximum likelihood", "Minimum residuals", "Principal axes", "Principal components"))),
                         column(4, selectInput(inputId = "faRotation",
                             label = "Rotation:",
                             choices = c("varimax", "promax", "oblimin", "none", "quartimax", "bentlerT", "geominT", "bifactor", "simplimax", "bentlerQ", "geominQ","biquartimin", "cluster")))
                     ),                    
                     fluidRow(
-                        column(4, checkboxInput(inputId = "faIRTaccurate", 
-                            label = "Accurate polychorics",
+                        column(8, checkboxInput(inputId = "faIRT", 
+                            label = "Use polychoric correlations",
                             value = FALSE))
                     ),
-                    
                     
                     h3("Markers"),
                     fluidRow(
@@ -158,7 +158,7 @@ shinyUI(fluidPage(
                             label = "Minimum loading:",
                             min = 0.1, max = 0.9, value = 0.4, step = 0.05)),
                         column(4, numericInput(inputId = "faMaxloading", 
-                            label = "Minor loadings are less than:",
+                            label = "Maximum minor loading:",
                             min = 0.1, max = 0.9, value = 0.35, step = 0.05)),
                         column(4, numericInput(inputId = "faComplexity", 
                             label = "Maximum complexity:",

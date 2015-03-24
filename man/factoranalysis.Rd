@@ -4,19 +4,22 @@
 \alias{factoranalysis}
 \title{Exploratory Factor Analysis}
 \usage{
-factoranalysis(x, nfactors, rotate = "promax", fm = "ml")
+factoranalysis(x, nfactors, rotate = "promax", fm = "ml",
+  polychor = FALSE)
 }
 \arguments{
 \item{x}{a data frame}
 
-\item{nfactors}{number of factors to be extracted}
+\item{nfactors}{(integer) number of factors to be extracted}
 
-\item{rotate}{rotation}
+\item{rotate}{(char) rotation}
 
-\item{fm}{factoring method}
+\item{fm}{factoring (char) method}
+
+\item{polychor}{(logical) use polychoric correlatons (via psych::irt.fa)?}
 }
 \description{
-Perform exploratory factor analysis of a set of variables. This is a wrapper around psych::fa.
+Perform exploratory factor analysis of a set of variables. This is a wrapper around psych::fa and psych::fa.poly.
 }
 \author{
 Michael Hock \email{michael.hock@uni-bamberg.de}

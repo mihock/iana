@@ -365,7 +365,7 @@ shinyServer(function(input, output) {
             empICC(x, input$ICCscore, alpha = input$ICCalpha,
                    jitter = input$ICCjitter)
         }
-    })
+    }, res = 96) ### check res
 
 
     # Parallel analysis ####
@@ -423,20 +423,24 @@ shinyServer(function(input, output) {
                "Minimum residuals" = "minres",
                "Principal axes" = "pa",
                "Maximum likelihood" = "ml",
-               "Principal components" = "princomp",
-               "Item Response Theory" = "irt.ml")
+               "Principal components" = "princomp")
     })
 
     faRotation <- reactive({
         input$faRotation
     })
 
+    ## Why needed?
+    faIRT <- reactive({
+        input$faIRT
+    })
+    
     output$efa <- renderPrint({
         log.output("EFA")
-        if (input$mainTabset != "EFA" && faMethod() == "irt.ml") return() #####?
+        if (input$mainTabset != "EFA" && faIRT()) return() #####?
         vnames <- checkedVars()
         if (is.null(vnames)) return()
-
+        
         # Check if we have enough variables for the specified number of factors
         p <- length(vnames)
         if (faMethod() == "princomp") {
@@ -445,7 +449,7 @@ shinyServer(function(input, output) {
                 return()
             }
         } else {
-            if (faMethod() == "ml" || faMethod() == "irt.ml")
+            if (faMethod() == "ml")
                 dof <- dfEFA(p, nFactors())
             else
                 dof <- p - nFactors() -1
@@ -454,10 +458,10 @@ shinyServer(function(input, output) {
                 return()
             }
         }
-
+        
         Df <- getSubset(checkedVars(), input$selectedDf)
         if (is.null(Df)) return()
-
+        
         if (faMethod() == "princomp") {
             ### Error in psych: quartimax is quatimax in doc
             possible.rots = c("none", "varimax", "quartimax", "promax", "oblimin", "simplimax", "cluster")
@@ -469,42 +473,12 @@ shinyServer(function(input, output) {
                     ",\n    rotate = '", faRotation(), "'",
                     ")\n"
                 ))
-
+                
                 fa.res <- principal(Df, nFactors(), rotate = faRotation())
                 cat("PRINCIPAL COMPONENTS\n")
             } else {
                 cat("With principal components, only the following rotations are possible: ", possible.rots)
             }
-        } else if (faMethod() == "irt.ml") {
-            cmdLog("# Exploratory Factor Analysis (IRT)")
-            if (input$faIRTaccurate == TRUE) {
-                cmdLog("# Using exact polychorics")
-                ### polychoric does not seem to react to ML
-                ### if polycor is not choosen...
-                xx <- polychoric(Df, polycor = TRUE, ML = TRUE)
-                cmdLog(paste0(
-                    "irt.fa(polychoric(myData, ML = TRUE)",
-                    ", ", nFactors(),
-                    ",\n    fm = 'ml'",
-                    ",\n    rotate = '", faRotation(), "'",
-                    ")$fa\n"
-                ))
-            } else {
-                cmdLog("# Using approximate polychorics")
-                xx <- Df
-                cmdLog(paste0(
-                    "irt.fa(myData",
-                    ", ", nFactors(),
-                    ",\n    fm = 'ml'",
-                    ",\n    rotate = '", faRotation(), "'",
-                    ")$fa\n"
-                ))
-            }
-            fa.res <- irt.fa(xx, nFactors(),
-                             fm = "ml",
-                             rotate = faRotation(),
-                             plot = FALSE)$fa
-            cat("Factor analysis of polychoric correlations\n")
         } else {
             cmdLog("# Exploratory Factor Analysis")
             cmdLog(paste0(
@@ -512,18 +486,19 @@ shinyServer(function(input, output) {
                 ", ", nFactors(),
                 ",\n    fm = '", faMethod(), "'",
                 ",\n    rotate = '", faRotation(), "'",
+                ",\n    polychor = '", faIRT(), "'",
                 ")\n"
             ))
             fa.res <- factoranalysis(Df, nFactors(), fm = faMethod(), 
-                rotate = faRotation())
+                rotate = faRotation(), polychor = faIRT())
         }
         log.output(class(fa.res))
-
+        
         classifyItems(fa.res, Df, input$faMinloading, input$faMaxloading,
             input$faComplexity, input$faItemlength, input$faDigits, 
             Df.name = input$selectedDf)
     })
-
+    
     # CFA ####
 
     output$cfa <- renderPrint({
@@ -676,14 +651,12 @@ shinyServer(function(input, output) {
     output$pcm.pimap <- renderPlot({
         log.output("RASCH, PI Map")
 ###        if (input$fitrasch == FALSE) return()
-
         x <- computePCM()
         if (is.null(x)) return()
-
         plotPImap(x$res, sorted=input$pcm.sortitems,
                   warn.ord.colour = "red", cex.gen = 0.8)
-
-    })
+    }, res = 96)
+    ### Check "res"
 
     output$rasch.icc <- renderPlot({
         log.output("RASCH, ICC")
