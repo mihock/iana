@@ -567,9 +567,9 @@ shinyServer(function(input, output) {
     computePCM <- reactive({
         log.output("RASCH")
         #### if (input$mainTabset != "Rasch") return() # not needed anymore
-        if (input$fitrasch == 0) return()
+        #### if (input$fitrasch == 0) return()
 
-        isolate({
+####        isolate({
             x <- getSubset(checkedVars(), input$selectedDf, 3)
             if (is.null(x)) return()
             x <- na.omit(x) ####
@@ -583,7 +583,7 @@ shinyServer(function(input, output) {
 
             x <- list(res = res, pp = pp, cases = cases)
             x
-        })
+####        })
     })
 
     output$pcm <- renderPrint({
@@ -665,13 +665,9 @@ shinyServer(function(input, output) {
 
         x <- computePCM()
         if (is.null(x)) return()
+        ggplotICC.RM(x$res, empICC = list(input$rasch.icctype))
 
-        #plotICC.Rasch(x$res, empICC = list("loess"), ask = FALSE,
-        #    ncols = input$colsRaschICC)
-### Does not work anymore
-        ##########plotICC(x$res, empICC = list(input$rasch.icctype))
-
-    })
+    }, res = 96) ### res
 
     output$pcm.info <- renderPlot({
         log.output("PCM, Info")

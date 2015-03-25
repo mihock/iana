@@ -517,260 +517,59 @@ empICC <- function(x,
     print(p)
 }
 
-plotICC.Rasch <- function(object, item.subset = "all",
-    empICC = NULL, empCI = NULL, mplot = NULL,
-    xlim = c(-4,4), ylim = c(0,1),
-    xlab = "Dimension", ylab = "Probability",
-    main=NULL,
-    col = NULL, lty = 1, legpos = "left", ask = TRUE,
-    ncols = 4, #### Mik, columns in mplot
-    ...) {
-
-    #### Mik
-    plist.internal <- function(object,theta)
-            # computes a list of expected probabilities for objects of class Rm
-            # with 0th category included!
-        {
-
-            X <- object$X
-            mt_vek <- apply(X,2,max,na.rm=TRUE)             #number of categories - 1 for each item
-            mt_ind <- rep(1:length(mt_vek),mt_vek)
-
-
-            #--------compute list matrix of probabilites for fixed theta)
-            p.list <- tapply(object$betapar,mt_ind,function(beta.i) {
-                beta.i <- c(0,beta.i)
-                ind.h <- 0:(length(beta.i)-1)
-                theta.h <- ind.h %*% t(theta)          #multiply category with
-                #tb <- exp(theta.h-beta.i)
-                tb <- exp(theta.h+beta.i)
-                denom <- colSums(tb)
-                pi.mat <- apply(tb,1,function(y) {y/denom})
-                return(pi.mat)
-            })
-            return(p.list)
-        }
-
-
-    # plotICC.Rm from eRm 0.15-1
-
-    X <- object$X
-    if (is.null(col)) col <- 1:(max(apply(X,2,max,na.rm=TRUE))+1)
-    main.arg <- main # rh added 2010-11-23 otherwise always same item in title if NULL
-
-    # some sanity checks
-
-    if (is.null(empICC)) {
-        emp.plot <- FALSE
-
-    } else if (!is.element(empICC[[1]], c("raw","loess","tukey","kernel"))) {
-        ##empirical[[1]] <- "none"
-        emp.plot <- FALSE
-        warning('empICC must be one of "raw","loess","tukey","kernel"!\n')
-
-    } else  if (object$model != "RM") {
-        warning("Empirical ICCs can only be plotted for a dichotomous Rasch model!\n")
-        emp.plot <- FALSE
-
-    } else {
-
-        th.est <- person.parameter(object)
-        thetapar <- th.est$thetapar
-        if (length(thetapar)!=1) {      #Too complicated with NA'groups (for each NAgroup separate plots...)
-            warning("Empirical ICCs are not produced for different NA groups!\n")
-            emp.plot <- FALSE
-        } else {
-            thetapar.u <- unique(round(unlist(thetapar),5))
-            if (length(thetapar.u)<4) {
-                warning("No empirical ICCs for less the 4 different person parameters!\n")
-                emp.plot <- FALSE
-            } else
-                emp.plot <- TRUE
-
-        }
-    }
-
-    theta <- seq(xlim[1],xlim[2],by=0.1)    #x-axis
-    p.list <- plist.internal(object,theta)  #matrix of probabilities
-    th.ord <- order(theta)
-
-    if (any(item.subset=="all")) {
-        textlab <- colnames(object$X)
-        ivec <- 1:length(p.list)
-    } else {
-        if (is.character(item.subset)) {     #item names specified
-            ivectemp <- t(as.matrix(1:length(p.list)))
-            colnames(ivectemp) <- colnames(object$X)
-            ivec <- ivectemp[,item.subset]
-            textlab <- item.subset
-            textlab[ivec] <- textlab
-            it.legend <- item.subset
-        } else {                        #numeric vector specified
-            textlab <- colnames(object$X)[item.subset]
-            textlab[item.subset] <- textlab
-            ivec <- item.subset
-        }
-    }
-
-    if (object$model=="RM") {                          #Rasch model
-        p.list <- lapply(p.list,function(x) {x[,-1]})  #Delete 0-probabilites
-        p.mat <- matrix(unlist(p.list),ncol=length(p.list))  #matrix with solving probabilities
-        text.ylab <- p.mat[(1:length(theta))[theta==median(theta)],]
-    }
-
-    ## plot for non RMs #################
-    if (object$model != "RM"){
-        if (ask) par("ask"=TRUE)                                 # added rh 2007-12-01
-        if (is.null(mplot)) mplot<-FALSE
-        if (mplot) par(mfrow=c(2,2))
-        for (j in 1:length(ivec)) {                                 # loop for items
-            i <- ivec[j]
-
-            yp <- as.matrix(p.list[[i]])
-            yy <- yp[th.ord,]
-
-            if(is.null(main.arg)) main<-paste("Item ",
-                textlab[i])    # rh 2010-03-06
-            matplot(sort(theta),yy,type="l",lty=lty,col=col,
-                main=main, xlim=xlim,
-                ylim=ylim,xlab=xlab,ylab=ylab,
-                ...)
-            if (is.character(legpos))
-                legend(legpos,legend=paste(c("Category"),0:(dim(yp)[2]-1)), col=col,lty=lty, ...)  # added rh 2007-12-01
-        }
-
-        ## plot for  RMs #####################
-    } else {
-        if (is.null(mplot)) mplot <- TRUE       ### FIX MM 2012-03-18
-        if (length(ivec) == 1) mplot <- FALSE   ### FIX MM 2012-03-18
-
-        #### Mik:
-        #### if (mplot) par(mfrow=c(2,2))
-        nrows <- ceiling(length(ivec) / ncols)
-        if (mplot) par(mfrow=c(nrows, ncols))
-        ####
-
-        if (ask) par("ask"=TRUE)                   # added rh 2007-12-01
-        for (j in 1:length(ivec)) {                # runs over items
-            i <- ivec[j]
-
-            yp <- as.matrix(p.list[[i]])
-            yy <- yp[th.ord,]
-            if(is.null(main.arg)) main<-paste("Item ",textlab[i])    # rh 2010-03-06
-
-            par(cex = 1.05) #### Mik
-            matplot(sort(theta),yy,type="l",lty=lty,col=col,
-                main=main, xlim=xlim,
-                ylim=ylim,xlab=xlab,ylab=ylab,
-                ...)
-            ##ylim=ylim,xlab=xlab,ylab=ylab,"ask"=TRUE,...)
-
-            ## empirical ICC
-            if (emp.plot) {
-                freq.table <- as.matrix(table(rowSums(X),X[,i]))
-                rel.freq <- freq.table[,2]/rowSums(freq.table)
-                idx <- as.numeric(rownames(freq.table))
-                xy<-cbind(th.est$pred.list[[1]]$y[idx+1],rel.freq)
-
-
-                if(empICC[[1]]=="loess")
-                    if(!is.null(empICC$smooth)) smooth<-empICC$smooth else smooth<-0.75
-                if(empICC[[1]]=="kernel")
-                    if(!is.null(empICC$smooth)) smooth<-empICC$smooth else smooth<-0.5
-
-                nn <- rowSums(freq.table)
-                switch(empICC[[1]],
-                    "raw"={},
-                    "loess"={xy[,2]<-loess(xy[,2]~xy[,1],span=smooth)$fitted},#+;cyf<-cbind(xy[,2] * nn, nn)},
-                    "tukey"={xy[,2]<-smooth(xy[,2])},#;cyf<-cbind(xy[,2] * nn, nn)}
-                    "kernel"={xy[,2]<-ksmooth(xy[,1],xy[,2],bandwidth=smooth,x.points=xy[,1])[[2]]}
-                )
-                xy[,2] <- ifelse(xy[,2]>1,1,ifelse(xy[,2]<0,0,xy[,2])) # bounding p in [0,1]
-
-                if(is.null(empICC$type)) empICC$type <- "p"
-                if(is.null(empICC$pch)) empICC$pch <- 1
-                if(is.null(empICC$col)) empICC$col <- "black"
-                if(is.null(empICC$lty)) empICC$lty <- "solid"
-
-
-                # confidence intervals for empirical ICC
-                if(!is.null(empCI)) {
-                    # functions from prop.test()
-                    p.L <- function(x, n, alpha) {
-                        if (x <= 0) 0 else qbeta(alpha, x, n - x + 1)}
-                    p.U <- function(x, n, alpha) {
-                        if (x >= n) 1 else qbeta(1 - alpha, x + 1, n - x)}
-                    CINT <- function(x, n, conf.level){
-                        alpha <- (1 - conf.level)/2
-                        c(p.L(x,n, alpha), p.U(x,n, alpha))
-                    }
-
-                    if(is.null(empCI$clevel)) empCI$clevel <- 0.95
-                    if(is.null(empCI$col)) empCI$col <- "red"
-                    if(is.null(empCI$lty)) empCI$lty <- "dotted"
-
-
-                    cyf<-cbind(xy[,2] * nn, nn)
-                    cy<-apply(cyf,1,function(x) CINT(x[1],x[2],empCI$clevel))
-
-
-                    apply(cbind(xy[,1],t(cy)),1,function(x)segments(x[1],x[2],x[1],x[3],lty=empCI$lty,col=empCI$col))
-                }
-
-                # plots the point estimates of the empirical ICC
-                lines(xy[,1],xy[,2],type=empICC$type, pch=empICC$pch, col=empICC$col, lty=empICC$lty, ...)
-
-
-            } # end if(emp.plot)
-        }
-    }
-    ## reset graphics parameters
-    par("ask"=FALSE) # added rh 2007-12-01
-    par(mfrow=c(1,1))
-    par(cex = 1)
-}
-
-############################################################################
-plotICC.RM <- function(object, item.subset = "all",
-    empICC = NULL, empCI = NULL,
-    xlim = c(-4,4), ylim = c(0,1),
-    xlab = "Dimension", ylab = "Probability") {
-
+#' ICCs for Rasch Model
+#'
+#' Plot item characteristic curves for a Rasch model.
+#'
+#' @param object of class RM
+#' @param empICC see eRm::plotICC
+#' @param empCI not used yet
+#' @param xlim see eRm::plotICC
+#' @param xlab see eRm::plotICC
+#' @param ylab see eRm::plotICC
+#'
+#' @details This a slightly modified version of plotICC.Rm from package eRm (version 0.15-1). The main  difference is the usage of ggplot2 for plotting.
+#'
+#' @author Michael Hock \email{michael.hock@@uni-bamberg.de}
+#'
+#' @export
+ggplotICC.RM <- function(object, empICC = NULL, empCI = NULL,
+    xlim = c(-4,4), xlab = "Dimension", ylab = "Probability") {
+   
+    ### require(ggplot2)  #### ???
     #### Mik
     plist.internal <- function(object,theta)
         # computes a list of expected probabilities for objects of class Rm
         # with 0th category included!
     {
-
+        
         X <- object$X
-        mt_vek <- apply(X,2,max,na.rm=TRUE) # number of categories - 1 for each item
-        mt_ind <- rep(1:length(mt_vek),mt_vek)
-
-
+        mt_vek <- apply(X, 2, max, na.rm=TRUE) # number of categories - 1 for each item
+        mt_ind <- rep(1:length(mt_vek), mt_vek)
+        
         #--------compute list matrix of probabilites for fixed theta)
-        p.list <- tapply(object$betapar,mt_ind,function(beta.i) {
-            beta.i <- c(0,beta.i)
+        p.list <- tapply(object$betapar, mt_ind, function(beta.i) {
+            beta.i <- c(0, beta.i)
             ind.h <- 0:(length(beta.i)-1)
             theta.h <- ind.h %*% t(theta)
             tb <- exp(theta.h+beta.i)
             denom <- colSums(tb)
-            pi.mat <- apply(tb,1,function(y) {y/denom})
+            pi.mat <- apply(tb, 1, function(y) {y/denom})
             return(pi.mat)
         })
         return(p.list)
     }
-
-
+    
     # plotICC.Rm from eRm 0.15-1
-############################################################################
+    ############################################################################
     if (object$model != "RM") stop("object must be Rasch model (RM)")
-
+    
     X <- object$X
-#    if (is.null(col)) col <- 1:(max(apply(X,2,max,na.rm=TRUE))+1)
-#    main.arg <- main
-
+    #    if (is.null(col)) col <- 1:(max(apply(X,2,max,na.rm=TRUE))+1)
+    #    main.arg <- main
+    
     # some sanity checks
-
+    
     if (is.null(empICC)) {
         emp.plot <- FALSE
     } else if (!is.element(empICC[[1]], c("raw","loess","tukey","kernel"))) {
@@ -791,39 +590,24 @@ plotICC.RM <- function(object, item.subset = "all",
                 emp.plot <- TRUE
         }
     }
-
+    
     theta <- seq(xlim[1],xlim[2], by = 0.1) # x-axis
     p.list <- plist.internal(object,theta)  # matrix of probabilities
-    th.ord <- order(theta) #### Warum das?
-
-    if (any(item.subset=="all")) {
-        textlab <- colnames(object$X)
-        ivec <- 1:length(p.list)
-    } else {
-        if (is.character(item.subset)) {     # item names specified
-            ivectemp <- t(as.matrix(1:length(p.list)))
-            colnames(ivectemp) <- colnames(object$X)
-            ivec <- ivectemp[,item.subset]
-            textlab <- item.subset
-            textlab[ivec] <- textlab
-            it.legend <- item.subset
-        } else {                        # numeric vector specified
-            textlab <- colnames(object$X)[item.subset]
-            textlab[item.subset] <- textlab
-            ivec <- item.subset
-        }
-    }
-
+    th.ord <- order(theta) #### Why this?
+    
+    textlab <- colnames(object$X)
+    ivec <- 1:length(p.list)
+    
     p.list <- lapply(p.list,function(x) {x[,-1]})  # Delete 0-probabilites
     p.mat <- matrix(unlist(p.list),ncol=length(p.list))  # matrix with solving probabilities
     text.ylab <- p.mat[(1:length(theta))[theta==median(theta)],]
-
+    
     ## plot for RMs #################
     for (j in 1:length(ivec)) { # runs over items
         i <- ivec[j]
         yp <- as.matrix(p.list[[i]])
         yy <- yp[th.ord,]
-
+        
         ####################################################################
         #### ICC: 'model', 'empirical'
         if (j == 1)
@@ -840,79 +624,79 @@ plotICC.RM <- function(object, item.subset = "all",
                     Item = rep(textlab[i], length(theta)),
                     Theta = sort(theta), Probability = yy))
         ####
-
+        
         ## empirical ICC
         if (emp.plot) {
             freq.table <- as.matrix(table(rowSums(X),X[,i]))
             rel.freq <- freq.table[,2]/rowSums(freq.table)
             idx <- as.numeric(rownames(freq.table))
             xy<-cbind(th.est$pred.list[[1]]$y[idx+1],rel.freq)
-
-
+            
+            
             if(empICC[[1]]=="loess")
                 if(!is.null(empICC$smooth)) smooth <- empICC$smooth else smooth <- 0.75
-            if(empICC[[1]]=="kernel")
-                if(!is.null(empICC$smooth)) smooth<-empICC$smooth else smooth<-0.5
-
-            nn <- rowSums(freq.table)
-            switch(empICC[[1]],
-                "raw"={},
-                "loess"={xy[,2]<-loess(xy[,2]~xy[,1],span=smooth)$fitted},
-                "tukey"={xy[,2]<-smooth(xy[,2])},
-                "kernel"={xy[,2]<-ksmooth(xy[,1],xy[,2],bandwidth=smooth,x.points=xy[,1])[[2]]}
-            )
-            xy[,2] <- ifelse(xy[,2]>1,1,ifelse(xy[,2]<0,0,xy[,2])) # bounding p in [0,1]
-
-#            if(is.null(empICC$type)) empICC$type <- "p"
-#            if(is.null(empICC$pch)) empICC$pch <- 1
-#            if(is.null(empICC$col)) empICC$col <- "black"
-#            if(is.null(empICC$lty)) empICC$lty <- "solid"
-
-
-            # confidence intervals for empirical ICC
-            if(!is.null(empCI)) {
-                # functions from prop.test()
-                p.L <- function(x, n, alpha) {
-                    if (x <= 0) 0 else qbeta(alpha, x, n - x + 1)}
-                p.U <- function(x, n, alpha) {
-                    if (x >= n) 1 else qbeta(1 - alpha, x + 1, n - x)}
-                CINT <- function(x, n, conf.level){
-                    alpha <- (1 - conf.level)/2
-                    c(p.L(x,n, alpha), p.U(x,n, alpha))
-                }
-
-                if(is.null(empCI$clevel)) empCI$clevel <- 0.95
- #               if(is.null(empCI$col)) empCI$col <- "red"
- #               if(is.null(empCI$lty)) empCI$lty <- "dotted"
-
-
-                cyf<-cbind(xy[,2] * nn, nn)
-                cy<-apply(cyf,1,function(x) CINT(x[1],x[2],empCI$clevel))
-
-
-###                apply(cbind(xy[,1],t(cy)),1,function(x)segments(x[1],x[2],x[1],x[3],lty=empCI$lty,col=empCI$col))
-            }
-
-            #################################################################
-#             # plots the point estimates of the empirical ICC
-#             lines(xy[,1],xy[,2],type=empICC$type, pch=empICC$pch, col=empICC$col, lty=empICC$lty, ...)
-#             ####
-
-            len <- length(xy[,1])
-            mikPlotData <- rbind(mikPlotData,
-                data.frame(
-                    ICC = factor(rep("Empirical", len,
-                        levels = c("Empirical", "Model"))),
-                    Item = rep(textlab[i], len),
-                    Theta = xy[,1], Probability = xy[,2]))
-
-#             geom_line(alpha = c(rep(1, p), rep(0.2, p*simu))) +
-#                 geom_point(size = c(rep(5, p), rep(0, p*simu)),
-#                     shape = c(rep(21, p), rep(21, p*simu)),
-#                     fill = "white") +
-
-            ####
-
+                if(empICC[[1]]=="kernel")
+                    if(!is.null(empICC$smooth)) smooth<-empICC$smooth else smooth<-0.5
+                    
+                    nn <- rowSums(freq.table)
+                    switch(empICC[[1]],
+                        "raw"={},
+                        "loess"={xy[,2]<-loess(xy[,2]~xy[,1],span=smooth)$fitted},
+                        "tukey"={xy[,2]<-smooth(xy[,2])},
+                        "kernel"={xy[,2]<-ksmooth(xy[,1],xy[,2],bandwidth=smooth,x.points=xy[,1])[[2]]}
+                    )
+                    xy[,2] <- ifelse(xy[,2]>1,1,ifelse(xy[,2]<0,0,xy[,2])) # bounding p in [0,1]
+                    
+                    #            if(is.null(empICC$type)) empICC$type <- "p"
+                    #            if(is.null(empICC$pch)) empICC$pch <- 1
+                    #            if(is.null(empICC$col)) empICC$col <- "black"
+                    #            if(is.null(empICC$lty)) empICC$lty <- "solid"
+                    
+                    
+                    # confidence intervals for empirical ICC
+                    if(!is.null(empCI)) {
+                        # functions from prop.test()
+                        p.L <- function(x, n, alpha) {
+                            if (x <= 0) 0 else qbeta(alpha, x, n - x + 1)}
+                        p.U <- function(x, n, alpha) {
+                            if (x >= n) 1 else qbeta(1 - alpha, x + 1, n - x)}
+                        CINT <- function(x, n, conf.level){
+                            alpha <- (1 - conf.level)/2
+                            c(p.L(x,n, alpha), p.U(x,n, alpha))
+                        }
+                        
+                        if(is.null(empCI$clevel)) empCI$clevel <- 0.95
+                        #               if(is.null(empCI$col)) empCI$col <- "red"
+                        #               if(is.null(empCI$lty)) empCI$lty <- "dotted"
+                        
+                        
+                        cyf<-cbind(xy[,2] * nn, nn)
+                        cy<-apply(cyf,1,function(x) CINT(x[1],x[2],empCI$clevel))
+                        
+                        
+                        ###                apply(cbind(xy[,1],t(cy)),1,function(x)segments(x[1],x[2],x[1],x[3],lty=empCI$lty,col=empCI$col))
+                    }
+                    
+                    #################################################################
+                    #             # plots the point estimates of the empirical ICC
+                    #             lines(xy[,1],xy[,2],type=empICC$type, pch=empICC$pch, col=empICC$col, lty=empICC$lty, ...)
+                    #             ####
+                    
+                    len <- length(xy[,1])
+                    mikPlotData <- rbind(mikPlotData,
+                        data.frame(
+                            ICC = factor(rep("Empirical", len,
+                                levels = c("Empirical", "Model"))),
+                            Item = rep(textlab[i], len),
+                            Theta = xy[,1], Probability = xy[,2]))
+                    
+                    #             geom_line(alpha = c(rep(1, p), rep(0.2, p*simu))) +
+                    #                 geom_point(size = c(rep(5, p), rep(0, p*simu)),
+                    #                     shape = c(rep(21, p), rep(21, p*simu)),
+                    #                     fill = "white") +
+                    
+                    ####
+                    
         }
     }
     onlyEmp <- mikPlotData[as.character(mikPlotData$ICC) == "Empirical",]
@@ -924,10 +708,8 @@ plotICC.RM <- function(object, item.subset = "all",
         geom_point(data = onlyEmp, size = 4,
             shape = 21,
             fill = "white")
-
     print(myplot)
 }
-
 
 # Item Classification -----------------------------------------------------
 

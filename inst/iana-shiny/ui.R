@@ -217,13 +217,13 @@ shinyUI(fluidPage(
                 
                 tabPanel("Rasch",
                     h3("Rasch Models"),
-                    actionButton(inputId = "fitrasch", label = " Run "),
-                    helpText('Press the "Run" button to fit or refit the model. (Fitting Rasch models is computationally intensive, therefore computations are not performed automatically.)'),
+##                    actionButton(inputId = "fitrasch", label = " Run "),
+##                    helpText('Press the "Run" button to fit or refit the model. (Fitting Rasch models is computationally intensive, therefore computations are not performed automatically.)'),
                     
                     selectInput(inputId = "raschmodel", 
                         label = "Model to fit:", 
                         choices = c("Partial Credit Model" = "pcm", 
-                            "Rating Scale Model" = "rsm", 
+                            #### "Rating Scale Model" = "rsm", 
                             "Rasch Model for binary items" = "rasch")),
                     
                     conditionalPanel(
@@ -232,13 +232,10 @@ shinyUI(fluidPage(
                         selectInput(inputId = "rasch.icctype",
                             label = "Type of empirical ICC:",
                             choices = c(
-                                "Local polynomial regression" = "loess", 
+                                # "Local polynomial regression" = "loess", 
                                 "Tukey's (running median) smoothing" = "tukey",
-                                "Kernel regression" = "kernel", 
+                                # "Kernel regression" = "kernel", 
                                 "Relative frequency" = "raw")),
-                        #                     numericInput(inputId = "colsRaschICC", 
-                        #                         label = "Number of columns to use:",
-                        #                         value = 4, min = 1, max = 10, step = 1),
                         plotOutput(outputId = "rasch.icc", 
                             height = getOption("iana.plotheight"))
                     ),
