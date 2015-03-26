@@ -229,32 +229,11 @@ shinyServer(function(input, output) {
 
     # Item text and frequencies ####
 
-    output$itemtext <- renderPrint({
-        log.output("ITEMTEXT")
-        x <- getSubset(checkedVars(), input$selectedDf)
-        if (is.null(x)) return()
-        #cmdLog("# Reliability")
-        #cmdLog("reliability(myData)\n")
-        res <- getItemText(x)
-        if (is.null(res)) cat("Items have no associated text. Use 'setItemText()' to attach text to items.\n")
-        else {
-            for (i in 1:length(res)) {
-                cat("Item: ", names(x)[i])
-                Text <- strwrap(str_trim(res[i]), width = 75, 3, 3)
-                cat("\n", paste0(Text, "\n"), "\n")
-            }
-        }
-        cat("")
-    })
-
     output$frequencies <- renderPrint({
         log.output("FREQUENCIES")
         x <- getSubset(checkedVars(), input$selectedDf)
         if (is.null(x)) return()
-        #cmdLog("# Reliability")
-        #cmdLog("reliability(myData)\n")
         frequencies(x)
-        #cat("==============\n")
     })
 
     # Reliability ####

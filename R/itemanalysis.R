@@ -119,16 +119,24 @@ dfEFA <- function(p, m) {
 frequencies <- function(x, max.unique = 10) {
     if (!is.data.frame(x))
         stop("x must be a data frame.")
-    cat("Frequencies\n")
+    # cat("Frequencies\n")
     n.categories <- sapply(x, function(x) length(unique(x)))
     cols <- names(x)
+    it <- getItemText(x)
+    
     for (i in 1:ncol(x)) {
-        cat("\n", cols[i])
-        if (n.categories[i] <= max.unique)
+        cat("\nItem:", cols[i])
+        if (n.categories[i] <= max.unique) {
             print(table(x[,i], useNA = "ifany"))
+            if (!is.null(it)) {
+                itext <- strwrap(str_trim(it[i]), width = 75, 3, 3)
+                cat(paste0(itext, "\n"))
+            }
+        }
         else
             cat("\n    Variable was omitted because it has more than", max.unique, "unique values.")
     }
+    if (is.null(it)) cat("\nItems have no associated text. Use 'setItemText()' to attach text to items.\n")
 }
 
 #' Velicer's MAP Test

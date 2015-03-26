@@ -55,42 +55,49 @@ shinyUI(fluidPage(
                 id = "mainTabset",
                 
                 tabPanel("Distributions",
-                    h3("Item scores"),
-                    selectInput(inputId = "histtypeitem",
-                        label = "Type of plot:",
-                        choices = c("Percentages" = "percent", 
-                            "Counts" = "count")),
-                    plotOutput(outputId = "hist", 
-                        height = getOption("iana.plotheight")),
+                    h3("Distributions of items and total score"),
                     
-                    h3("Total score"),
-                    fluidRow(
-                        column(6, 
-                            selectInput(inputId = "histtype",
-                                label = "Type of plot:",
-                                choices = c("Percentages" = "percent", 
-                                    "Counts" = "count",
-                                    "Density" = "density"))),
-                        column(6, 
-                            selectInput(inputId = "totalscoretype",
-                            label = "Total score represents:",
-                            choices = c("Sum of item scores" = "sum", 
-                                "Average of item scores" = "ave")))
-                    ),
-                    sliderInput(inputId = "histbins", 
-                        label = "Number of bins (3 = automatic):",
-                        min = 3, max = 45, value = 3, step = 1,
-                        animate = TRUE),
+                    selectInput(inputId = "distrType", label = "Distribution",
+                        choices = c("Item scores (histogram)" = "items", "Total score (histogram)" = "total", "Frequency counts and item stems" = "freq")),
                     
-                    br(),
+                    conditionalPanel(
+                        condition = "input.distrType == 'items'",
+                        h3("Item scores"),
+                        selectInput(inputId = "histtypeitem",
+                            label = "Type of plot:",
+                            choices = c("Percentages" = "percent", 
+                                "Counts" = "count")),
+                        plotOutput(outputId = "hist", 
+                        height = getOption("iana.plotheight"))),
                     
-                    plotOutput(outputId = "histTotal"),
+                    conditionalPanel(
+                        condition = "input.distrType == 'total'",
+                        h3("Total score"),
+                        fluidRow(
+                            column(6, 
+                                selectInput(inputId = "histtype",
+                                    label = "Type of plot:",
+                                    choices = c("Percentages" = "percent", 
+                                        "Counts" = "count",
+                                        "Density" = "density"))),
+                            column(6, 
+                                selectInput(inputId = "totalscoretype",
+                                    label = "Total score represents:",
+                                    choices = c("Sum of item scores" = "sum", 
+                                        "Average of item scores" = "ave")))
+                        ),
+                        sliderInput(inputId = "histbins", 
+                            label = "Number of bins (3 = automatic):",
+                            min = 3, max = 45, value = 3, step = 1,
+                            animate = TRUE),
+                        br(),
+                        plotOutput(outputId = "histTotal")),
                     
-                    h3("Item stems"),
-                    verbatimTextOutput(outputId = "itemtext"),
-                    h3("Frequency counts"),
-                    helpText("'NA' (not available) refers to missing values in the reponses."),
-                    verbatimTextOutput(outputId = "frequencies")
+                    conditionalPanel(
+                        condition = "input.distrType == 'freq'",
+                        h3("Frequency counts and item stems"),
+                        helpText("'NA' (not available) refers to missing values in the reponses."),
+                        verbatimTextOutput(outputId = "frequencies"))
                 ),
                 
                 tabPanel("ICCs",
@@ -258,11 +265,13 @@ shinyUI(fluidPage(
                     verbatimTextOutput(outputId = "pcm")
                 ),
                 
-                tabPanel("?",
-                    h3("Help"),
-                    includeMarkdown("help.md"),
-                    h3("Some Infos"),
-                    textOutput(outputId = "info")
+                navbarMenu("Info",
+                    tabPanel("Help",
+                        h3("Help"),
+                        includeMarkdown("help.md")),
+                    tabPanel("Some Infos",
+                        h3("Some Infos"),
+                        textOutput(outputId = "info"))
                 )
             )
         )
