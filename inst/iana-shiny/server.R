@@ -83,7 +83,7 @@ shinyServer(function(input, output) {
     }
 
     getVarsInDf <- reactive({
-        log.output("getvarsindf")
+        log.output("getVarsInDf")
         varnames <- getLikertLikeVars(getSelectedDf(), input$kUniqueValues)
         if (is.null(varnames)) {
             log.output("getVarsInDf: varnames is NULL")
@@ -93,7 +93,7 @@ shinyServer(function(input, output) {
     })
 
     getVarRange <- reactive({
-        log.output("getvarrange")
+        log.output("getVarRange")
         if (input$varrange == "") {
             varrange <- getVarsInDf()
             if (length(varrange) > 80) varrange <- varrange[1:80]
@@ -139,7 +139,10 @@ shinyServer(function(input, output) {
                           return.cases.only = FALSE) {
         #### hidden .data.frame.name to avoid error when Df already exists ####
         #### Look at getVarrange for an alternative. Also: reactive function? ####
-        log.output("getsubset")
+        log.output("getSubset (1)")
+####        input$applyButton
+        ##################################
+####isolate({
         if (is.null(vnames) || length(vnames) < minNoVars) return()
         vnames <- sub(" .*", "", vnames)
         vnames <- shQuote(vnames)
@@ -166,7 +169,7 @@ shinyServer(function(input, output) {
             return()
         }
         nrow1 <- nrow(Df)
-        log.output(paste("getSubset: cases:", nrow0, "complete cases:", nrow1))
+        log.output(paste("getSubset (2): cases:", nrow0, "complete cases:", nrow1))
         if (return.cases.only) return(list(nrow0 = nrow0, nrow1 = nrow1))
         #####
         #### Called to often!
@@ -181,6 +184,7 @@ shinyServer(function(input, output) {
         ###.currentSubsetCmd <<- mycmd
         #####
         Df
+####})                
     }
 
 

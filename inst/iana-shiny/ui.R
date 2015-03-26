@@ -1,3 +1,4 @@
+
 # TODO: import?
 library(shiny)
 library(shinythemes)
@@ -18,10 +19,14 @@ shinyUI(fluidPage(
             h3("Item selection"),
             
             helpText("The dropdown list below contains the data frames present in your R environment. Please select a data frame containing the variables (items) to analyze. You can then select or deselect variables. Notice that only variables coded with integer values are shown."),
-            helpText(""),
+            br(),
             
             ###actionButton(inputId = "stopIana", label = " Stop "),
-            
+            ###submitButton("Apply"),
+            ###br(),
+            ####actionButton(inputId = "applyButton", label = "Apply"),
+            ####br(),
+               
             selectInput(inputId = "selectedDf", label = "Data frame to use:",
                 choices = getDataFramesIana()),
             numericInput(inputId = "kUniqueValues", 
@@ -77,7 +82,7 @@ shinyUI(fluidPage(
                         min = 3, max = 45, value = 3, step = 1,
                         animate = TRUE),
                     
-                    helpText(""),
+                    br(),
                     
                     plotOutput(outputId = "histTotal"),
                     
@@ -185,7 +190,7 @@ shinyUI(fluidPage(
                     checkboxInput(inputId = "reliabDetailed", 
                         label = "Show detailed output (package psych)",
                         value = FALSE),
-                    helpText(""),
+                    br(),
                     verbatimTextOutput(outputId = "reliability")
                 ),
                 
@@ -193,7 +198,7 @@ shinyUI(fluidPage(
                 tabPanel("CFA",
                     h3("Confirmatory Factor Analysis"),
                     helpText("Below is the fit of a confirmatory one-factor model for all of the selected variables (items). This is useful for checking fit indexes such as the SRMR or RMSEA or for obtaining unstandardized factor loadings and their standard errors, which are not given by EFAs. The omegas above the summary are reliability estimates based on the factor loadings. McDonalds (1999) version is omega3. Because CFAs for a large number of variables are slow, the computation is suppressed if the number of variables exceeds the specified threshold."),
-                    helpText(""),
+                    br(),
                     
                     fluidRow(
                         column(6, 
@@ -208,9 +213,9 @@ shinyUI(fluidPage(
                                 choices = c("ML", "MLM")))
                     ),
                     
-                    helpText(""),
+                    br(),
                     verbatimTextOutput(outputId = "cfa"),
-                    helpText(""),
+                    br(),
                     strong("Reference"),
                     helpText("McDonald, R. P. (1999). Test theory: A unified treatment. Mahwah, NJ: Erlbaum.")
                 ),
