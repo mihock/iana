@@ -10,6 +10,7 @@ require(stringr)
 # require(semTools)
 # require(polycor)
 require(psych)
+#require(tidyr)
 
 #load("data/ExampleData.RData", .GlobalEnv)
 #load("data/ExampleData.RData")
@@ -229,12 +230,15 @@ shinyServer(function(input, output) {
 
     # Item text and frequencies ####
 
-    output$frequencies <- renderPrint({
+    output$frequencies <-  renderTable({
+        ###renderPrint({
         log.output("FREQUENCIES")
         x <- getSubset(checkedVars(), input$selectedDf)
         if (is.null(x)) return()
         frequencies(x)
-    })
+    }, digits = 0)
+    
+    
 
     # Reliability ####
 

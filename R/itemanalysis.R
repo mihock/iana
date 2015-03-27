@@ -20,7 +20,7 @@
 #' @name iana-package
 #' @aliases iana
 #' @importFrom psych alpha describe principal fa irt.fa
-#' @import lattice ggplot2 GPArotation lavaan eRm markdown reshape2 stringr semTools polycor
+#' @import lattice ggplot2 GPArotation lavaan eRm markdown reshape2 stringr semTools polycor tidyr
 #' @docType package
 #' @author Michael Hock (\email{michael.hock@@uni-bamberg.de})
 #' @references Shiny web framework for R: \url{http://www.rstudio.com/shiny/}
@@ -105,38 +105,27 @@ dfEFA <- function(p, m) {
 
 #' Frequencies
 #'
-#' Print tables with frequency counts of the unique values of the variables in a
-#' data frame.
+#' Returns a data frame representing a table with frequency counts of the 
+#' unique values of the variables in x. If present, item stems are appended 
+#' as the last row of the table.
 #'
 #' @param x a data frame
-#' @param max.unique print only variables with at most this number of unique
-#'   values
 #'
 #' @author Michael Hock \email{michael.hock@@uni-bamberg.de}
 #'
 #' @export
 #'
-frequencies <- function(x, max.unique = 10) {
+frequencies <- function(x) {
+    # needs tidyr::gather_
+    ####require(tidyr)
     if (!is.data.frame(x))
         stop("x must be a data frame.")
-    # cat("Frequencies\n")
-    n.categories <- sapply(x, function(x) length(unique(x)))
-    cols <- names(x)
     it <- getItemText(x)
-    
-    for (i in 1:ncol(x)) {
-        cat("\nItem:", cols[i])
-        if (n.categories[i] <= max.unique) {
-            print(table(x[,i], useNA = "ifany"))
-            if (!is.null(it)) {
-                itext <- strwrap(str_trim(it[i]), width = 75, 3, 3)
-                cat(paste0(itext, "\n"))
-            }
-        }
-        else
-            cat("\n    Variable was omitted because it has more than", max.unique, "unique values.")
-    }
-    if (is.null(it)) cat("\nItems have no associated text. Use 'setItemText()' to attach text to items.\n")
+    x <- tidyr::gather_(x, "item", "score")
+    x <- xtabs(~ item + score, data = x)
+    x <- as.data.frame(unclass(x))
+    if (!is.null(it)) x$Text <- it
+    x
 }
 
 #' Velicer's MAP Test

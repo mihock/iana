@@ -4,17 +4,15 @@
 \alias{frequencies}
 \title{Frequencies}
 \usage{
-frequencies(x, max.unique = 10)
+frequencies(x)
 }
 \arguments{
 \item{x}{a data frame}
-
-\item{max.unique}{print only variables with at most this number of unique
-  values}
 }
 \description{
-Print tables with frequency counts of the unique values of the variables in a
-data frame.
+Returns a data frame representing a table with frequency counts of the
+unique values of the variables in x. If present, item stems are appended
+as the last row of the table.
 }
 \author{
 Michael Hock \email{michael.hock@uni-bamberg.de}

@@ -22,5 +22,6 @@ Imports:
     reshape2,
     stringr,
     semTools,
+    tidyr,
     polycor
 License: GPL (>= 2)
