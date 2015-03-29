@@ -2,24 +2,29 @@
 % Please edit documentation in R/itemanalysis.R
 \name{factoranalysis}
 \alias{factoranalysis}
-\title{Exploratory Factor Analysis}
+\title{Principal Components and Exploratory Factor Analysis}
 \usage{
 factoranalysis(x, nfactors, rotate = "promax", fm = "ml",
-  polychor = FALSE)
+  polychor = FALSE, return.res = FALSE)
 }
 \arguments{
-\item{x}{a data frame}
+\item{x}{a data frame of variables to be analyzed}
 
 \item{nfactors}{(integer) number of factors to be extracted}
 
 \item{rotate}{(char) rotation}
 
-\item{fm}{factoring (char) method}
+\item{fm}{factoring (char) method. May be any method allowed for psych::fa or "principal" for principal components analysis.}
 
 \item{polychor}{(logical) use polychoric correlatons (via psych::irt.fa)?}
+
+\item{return.res}{(logical) if TRUE, return output as a list instead of simply printing the output. This is used by Iana to render the output via renderTable().}
+}
+\value{
+if \code{return.res} is TRUE, a list with components \code{res} (the results of factor analysis) and \code{stats} (the fit statistics)
 }
 \description{
-Perform exploratory factor analysis of a set of variables. This is a wrapper around psych::fa and psych::fa.poly.
+Perform principal components or exploratory factor analysis of a set of variables. This is a wrapper around psych::principal, psych::fa, and psych::fa.poly.
 }
 \author{
 Michael Hock \email{michael.hock@uni-bamberg.de}

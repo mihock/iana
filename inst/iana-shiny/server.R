@@ -1,16 +1,18 @@
 library(shiny)
-require(lattice)
+#require(lattice)
 require(ggplot2)
 # require(GPArotation)
 require(lavaan)
 require(eRm)
 # require(markdown)
 # require(reshape2)
-require(stringr)
+# require(stringr)
 # require(semTools)
-# require(polycor)
+#
+# Bei Paketen, die in server.R angesprochen werden, brauchen wir das zusätzlich (neben Import)
 require(psych)
-#require(tidyr)
+require(tidyr)
+require(stringr)
 
 #load("data/ExampleData.RData", .GlobalEnv)
 #load("data/ExampleData.RData")
@@ -249,7 +251,7 @@ shinyServer(function(input, output) {
         cmdLog("# Reliability")
         if (input$reliabDetailed){
             cmdLog("alpha(myData)\n")
-            print(alpha(x)) #### dfname?
+            print(psych::alpha(x)) #### dfname? ganz importieren???
             cat("") # needed for shiny
         } else {
             cmdLog("reliability(myData)\n")
@@ -260,81 +262,119 @@ shinyServer(function(input, output) {
     # Histogram ####
 
     output$hist <- renderPlot({
-        log.output("Hist")
-
+        log.output("hist")
         x <- getSubset(checkedVars(), input$selectedDf, 1)
         if (is.null(x)) return()
-
-        vnames <- names(x)
-        myvars <- paste(vnames, collapse = " + ")
-        myformula <- paste0("~ " , myvars)
-
-        ###mydata <- getSelectedDf()
-        mydata <- x ### Do we really need this copy?
-        for (vn in vnames) mydata[,vn] <- as.factor(mydata[,vn])
-        htype <- input$histtypeitem
-
-#         print(do.call("histogram",
-#                       args = list(x = as.formula(myformula),
-#                                   xlab = "Response",
-#                                   data = mydata,
-#                                   as.table = TRUE #,
-#                                   #layout = c(4, NA)
-#                       )
-#         )
-#         )
-
-        cmdLog("# Histogram")
-        cmdLog(paste0("histogram(", myformula,
-                      ",\n    xlab = 'Response', data = myData, type = ",
-                      htype, " , as.table = TRUE",
-                      ")\n")
-        )
-        ### trellis.par.set(canonical.theme(color = FALSE))
-#         ltheme <- canonical.theme(color = FALSE) ## in-built B&W theme 
-#         ltheme$strip.background$col <- "transparent" ## change strip bg 
-#         lattice.options(default.theme = ltheme) ## set as default 
-        print(histogram(as.formula(myformula),
-                        xlab = "Response",
-                        data = mydata,
-                        type = htype,
-                        as.table = TRUE)
-              )
+        d <- gather_(x, "Item", "Score")
+        if (input$histtypeitem == "count") {
+            ggplot(d, aes(x = as.factor(Score))) +
+                facet_wrap(~ ~Item) +
+                geom_bar(colour = "black", fill = "white") +
+                xlab("Response") + ylab("Count")
+        } else {
+            ggplot(d, aes(x = as.factor(Score))) + 
+                facet_wrap(~ ~Item) +
+                geom_bar(aes(y = 100*(..count..) /
+                        tapply(..count..,..PANEL..,sum)[..PANEL..]),
+                    colour = "black", fill = "white") +
+                #scale_y_continuous(formatter = "percent") +
+                xlab("Response") + ylab("Percent of total")
+        }
     })
-
+    
     output$histTotal <- renderPlot({
-        log.output("Hist Total")
+        log.output("histTotal")
 
         x <- getSubset(checkedVars(), input$selectedDf)
-        log.output(names(x))
         if (is.null(x)) return()
 
         sumScore <- rowSums(x, na.rm = TRUE) ####
+        binw <- input$histbinwidth
+        
         if (input$totalscoretype == "sum") Total <- sumScore
-        else Total <- rowMeans(x, na.rm = TRUE) ####
-        htype <- input$histtype
-        bins <- input$histbins
-        if (bins < 4) bins <- round(log2(length(Total)) + 1) # Default
-        # This first max is only valid for integer scores, the second
-        # is not always okay.
-        maxbins <- max(1 + max(sumScore) - min(sumScore),
-                       length(unique(Total)))
-        # take the larger of both???
-        if (bins > maxbins) bins <- maxbins
-        if (htype == "density") {
-            print(histogram(~ Total, xlab = "Total Score",
-                            type = "density",
-                            nint = bins,
-                            panel = function(x, ...) {
-                                panel.histogram(x, ...)
-                                panel.mathdensity(dmath = dnorm,
-                                                  col = "red", lwd = 2,
-                                                  args = list(mean=mean(x),sd=sd(x)))
-                            }))
-        } else {
-            print(histogram(~ Total, type = htype, nint = bins,
-                            xlab = "Total Score"))
+        else {
+            Total <- rowMeans(x, na.rm = TRUE) ####
+            binw <- binw/ncol(x)
         }
+        
+        d <- data.frame(Total)
+        rm(Total)
+        
+        # Setup colors for histogram
+        mycolor = "black"
+        myfill = "white" #### better NA?
+        
+        # Plot
+        p <- ggplot(d, aes(x = Total)) +
+            xlab("Total score")
+        
+#        , xlab = "Total score", ylab = "Count", binwidth = binw)
+        if (input$histtype == "percent")  {
+            p <- p + geom_histogram(aes(y = 100*(..count..) / sum(..count..)),
+                color = mycolor, fill = myfill, 
+                binwidth = binw) +
+                ylab("Percent of total")
+        } else if (input$histtype == "count") {
+            p <- p + geom_histogram(binwidth = binw,
+                color = mycolor, fill = myfill) +
+                ylab("Count")
+        } else { # density
+            p <- p + 
+                ylab("Density") +
+                geom_histogram(aes(y = ..density..), 
+                    color = mycolor, fill = myfill,
+                    binwidth=binw) +
+                stat_function(fun=dnorm, 
+                    args=list(mean=mean(d$Total), sd=sd(d$Total)),
+                    colour = "darkgreen", size = 2, alpha = 0.5
+                ) +
+                geom_density(color="blue")
+        }
+        p
+        
+        #stat_function(fun=dnorm, args=list(mean=mean(df$PF), sd=sd(df$PF)))
+        
+        #histogram with density line overlaid
+#         p2<-ggplot(xy, aes(x=xvar)) + 
+#             geom_histogram(aes(y = ..density..), color="black", fill=NA) +
+#             geom_density(color="blue")
+        
+        
+#         if (input$histtype == "density") {
+#             
+#         } else {
+#             
+#         }
+#         if (bins < 4) bins <- round(log2(length(Total)) + 1) # Default
+#         # This first max is only valid for integer scores, the second
+#         # is not always okay.
+#         maxbins <- max(1 + max(sumScore) - min(sumScore),
+#                        length(unique(Total)))
+#         # take the larger of both???
+#         if (bins > maxbins) bins <- maxbins
+#         if (htype == "density") {
+#             print(histogram(~ Total, xlab = "Total Score",
+#                             type = "density",
+#                             nint = bins,
+#                             panel = function(x, ...) {
+#                                 panel.histogram(x, ...)
+#                                 panel.mathdensity(dmath = dnorm,
+#                                                   col = "red", lwd = 2,
+#                                                   args = list(mean=mean(x),sd=sd(x)))
+#                             }))
+#         } else {
+#             print(histogram(~ Total, type = htype, nint = bins,
+#                             xlab = "Total Score"))
+#         }
+    })
+    
+    output$descrStatsTotal <- renderTable({
+        x <- getSubset(checkedVars(), input$selectedDf)
+        if (is.null(x)) return()
+        
+        sumScore <- rowSums(x, na.rm = TRUE) ####
+        meanScore <- rowMeans(x, na.rm = TRUE) ####
+        rbind("Sum score" = basicDescr(sumScore), "Mean score" = basicDescr(meanScore))
     })
 
     # ICCs ####
@@ -421,10 +461,11 @@ shinyServer(function(input, output) {
     faIRT <- reactive({
         input$faIRT
     })
-    
-    output$efa <- renderPrint({
-        log.output("EFA")
-        if (input$mainTabset != "EFA" && faIRT()) return() #####?
+
+    ############################################################################
+    computeEFA <- reactive({
+        log.output("computeEFA")
+        ###if (input$mainTabset != "EFA" && faIRT()) return() #####?
         vnames <- checkedVars()
         if (is.null(vnames)) return()
         
@@ -461,10 +502,15 @@ shinyServer(function(input, output) {
                     ")\n"
                 ))
                 
-                fa.res <- principal(Df, nFactors(), rotate = faRotation())
-                cat("PRINCIPAL COMPONENTS\n")
+                #fa.res <- principal(Df, nFactors(), rotate = faRotation())
+                fa.res <- factoranalysis(Df, nFactors(), 
+                    rotate = faRotation(), 
+                    fm = "principal", 
+                    return.res = TRUE)
+                ####cat("PRINCIPAL COMPONENTS\n")
             } else {
                 cat("With principal components, only the following rotations are possible: ", possible.rots)
+                #### stop?
             }
         } else {
             cmdLog("# Exploratory Factor Analysis")
@@ -476,16 +522,64 @@ shinyServer(function(input, output) {
                 ",\n    polychor = '", faIRT(), "'",
                 ")\n"
             ))
-            fa.res <- factoranalysis(Df, nFactors(), fm = faMethod(), 
-                rotate = faRotation(), polychor = faIRT())
+            fa.res <- factoranalysis(Df, nFactors(),
+                rotate = faRotation(), 
+                fm = faMethod(), 
+                polychor = faIRT(), return.res = TRUE)
         }
-        log.output(class(fa.res))
-        
-        classifyItems(fa.res, Df, input$faMinloading, input$faMaxloading,
+
+        classif <- classifyItems(fa.res$res, Df, input$faMinloading, input$faMaxloading,
             input$faComplexity, input$faItemlength, input$faDigits, 
-            Df.name = input$selectedDf)
+            Df.name = input$selectedDf, return.res = TRUE)
+        list(fa.res = fa.res$res, 
+            fit = fa.res$stats,
+            factorloadings = classif$factorloadings, 
+            factorvariances = classif$factorvariance, 
+            factorcorrelations = classif$factorcorrelations,
+            factorcode = classif$factorcode)
     })
     
+    ############################################################################
+    output$factorfit <- renderTable({
+        log.output("factorfit")
+        res <- computeEFA()
+        if (is.null(res)) return() #### needed?
+        #res$classif$loadings
+        res$fit
+    }, include.rownames = FALSE)
+
+    output$loadings <- renderTable({
+        log.output("loadings")
+        res <- computeEFA()
+        if (is.null(res)) return() #### needed?
+        #res$classif$loadings
+        res$factorloadings
+    })
+    
+    output$factorvariances <- renderTable({
+        log.output("factorvariances")
+        res <- computeEFA() # $classif
+        if (is.null(res)) return() #### needed?
+        res$factorvariances
+    })
+
+    output$factorcorrelations <- renderTable({
+        log.output("factorcorrelations")
+        res <- computeEFA() # $classif
+        #if (is.null(res)) return() #### needed?
+        if (is.null(res$factorcorrelations)) log.output("factorcorrs are NULL")
+        res$factorcorrelations
+    })
+
+    output$factorcode <- renderPrint({
+        log.output("factorcode")
+        res <- computeEFA() # $classif
+        #if (is.null(res)) return() #### needed?
+        cat(res$factorcode)
+    })
+    
+    ############################################################################
+        
     # CFA ####
 
     output$cfa <- renderPrint({
@@ -548,53 +642,88 @@ shinyServer(function(input, output) {
         cmdLog("summary(fit, fit.measures = TRUE, standardized = TRUE)\n")
         summary(fit, fit.measures = TRUE, standardized = TRUE)
     })
+    
+    ############################################################################
 
     # PCM ####
 
     computePCM <- reactive({
         log.output("RASCH")
-        #### if (input$mainTabset != "Rasch") return() # not needed anymore
-        #### if (input$fitrasch == 0) return()
-
-####        isolate({
-            x <- getSubset(checkedVars(), input$selectedDf, 3)
-            if (is.null(x)) return()
-            x <- na.omit(x) ####
-
-            if (input$raschmodel == "pcm") res <- PCM(x)
-            else if (input$raschmodel == "rsm") res <- RSM(x)
-            else res <- RM(x)
-            pp <- person.parameter(res)
-            log.output("RASCH done")
-            cases <- nrow(x)
-
-            x <- list(res = res, pp = pp, cases = cases)
-            x
-####        })
+        x <- getSubset(checkedVars(), input$selectedDf, 3)
+        if (is.null(x)) return()
+        x <- na.omit(x) ####
+        
+        # Fit a Rasch Model if data have 2 unique values,
+        # otherwise fit a Partial credit model
+        if ( length(unique(as.vector(as.matrix(x)))) == 2 ) {
+            model <- "Rasch"
+            res <- RM(x)
+        } else {
+            model <- "PCM"
+            res <- PCM(x)
+        }
+        pp <- person.parameter(res)
+        log.output("RASCH done")
+        cases <- nrow(x)
+        x <- list(res = res, pp = pp, cases = cases, model = model)
+        x
     })
 
-    output$pcm <- renderPrint({
-        log.output("RASCH, Parameters")
+    output$pcm.tests <- renderPrint({
+        log.output("pcm.tests")
         x <- computePCM()
         if (is.null(x)) return()
+        
+        if (x$model == "Rasch") 
+            cat("Fitting a Rasch Model for binary items because data\nhave 2 unique values.\n")
+        else 
+            cat("Fitting a Partial Credit Model because data\n have more than 2 unique values.\n")
 
-        #summary(res)
-#         cat("Andersen's LR-Test:")
-#         print(LRtest(x$res))
-        if (input$raschmodel == "rasch") {
+        cat("\nANDERSEN'S LR TEST")
+        cat("\n==================\n")
+        tryPrintExpr(LRtest(x$res))
+        cat("\nWALD TEST")
+        cat("\n=========\n")
+        tryPrintExpr(Waldtest(x$res))
+        cat("\nMARTIN LÖF TEST")
+        cat("\n===============\n")
+        tryPrintExpr(MLoef(x$res))
+    })
+
+    output$pcm.itemfit <- renderPrint({
+        log.output("pcm.itemfit")
+        x <- computePCM()
+        if (is.null(x)) return()
+        print(itemfit(x$pp))
+    })
+        
+        
+    output$pcm.itemstats <- renderPrint({
+        log.output("pcm.itemstats")
+        x <- computePCM()
+        if (is.null(x)) return()
+        
+        if (x$model == "Rasch") {
             ###
+            summary(x$res)
         } else {
             cat("Thresholds:")
             print(thresholds(x$res))
-            cat("")
+            cat("\n")
+            cat("Summary:")
+            summary(x$res)
         }
+    })
+    
+    output$pcm.personstats <- renderPrint({
+        log.output("pcm.itemstats")
+        x <- computePCM()
+        if (is.null(x)) return()
+
         print(x$pp)
-        cat("")
-        print(itemfit(x$pp))
-        cat("")
 
         # Summary of person fit
-        cat("Unique Response Patterns and Personfit Statistics:\n")
+        cat("\n\nUnique Response Patterns and Personfit Statistics:\n")
 
         # Data frame for response pattern
         pers.fit <- personfit(x$pp)
@@ -637,7 +766,6 @@ shinyServer(function(input, output) {
 
     output$pcm.pimap <- renderPlot({
         log.output("RASCH, PI Map")
-###        if (input$fitrasch == FALSE) return()
         x <- computePCM()
         if (is.null(x)) return()
         plotPImap(x$res, sorted=input$pcm.sortitems,
@@ -648,11 +776,17 @@ shinyServer(function(input, output) {
     output$rasch.icc <- renderPlot({
         log.output("RASCH, ICC")
 ###        if (input$fitrasch == FALSE) return()
-        if (input$raschmodel != "rasch") return()
+###        if (input$raschmodel != "rasch") return()
 
         x <- computePCM()
         if (is.null(x)) return()
-        ggplotICC.RM(x$res, empICC = list(input$rasch.icctype))
+        if (x$model == "Rasch") {
+            ggplotICC.RM(x$res, empICC = list(input$rasch.icctype))
+        } else {
+            # Empirical ICCs can only be plotted for a dichotomous Rasch model
+            ggplotICC.RM(x$res)
+            ###plotICC(x$res, item.subset = "all", ask = FALSE)    
+        }
 
     }, res = 96) ### res
 

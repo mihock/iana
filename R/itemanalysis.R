@@ -19,8 +19,9 @@
 #'
 #' @name iana-package
 #' @aliases iana
-#' @importFrom psych alpha describe principal fa irt.fa
-#' @import lattice ggplot2 GPArotation lavaan eRm markdown reshape2 stringr semTools polycor tidyr
+#' @importFrom psych alpha describe principal fa irt.fa KMO skew kurtosi
+#' @importFrom semTools reliability
+#' @import ggplot2 GPArotation lavaan eRm markdown reshape2 stringr tidyr shiny shinythemes
 #' @docType package
 #' @author Michael Hock (\email{michael.hock@@uni-bamberg.de})
 #' @references Shiny web framework for R: \url{http://www.rstudio.com/shiny/}
@@ -71,6 +72,63 @@ getDataFramesIana <- function() {
     x
 }
 
+##================================================================##
+###  In longer simulations, aka computer experiments,		 ###
+###  you may want to						 ###
+###  1) catch all errors and warnings (and continue)		 ###
+###  2) store the error or warning messages			 ###
+###								 ###
+###  Here's a solution	(see R-help mailing list, Dec 9, 2010):	 ###
+###  See: demo(error.catching)                                   ###
+##================================================================##
+
+##' Catch and save both errors and warnings, and in the case of
+##' a warning, also keep the computed result.
+##'
+##' @title tryCatch both warnings (with value) and errors
+##' @param expr an \R expression to evaluate
+##' @return a list with 'value' and 'warning', where
+##'   'value' may be an error caught.
+##' @author Martin Maechler;
+##' Copyright (C) 2010-2012  The R Core Team
+tryCatch.W.E <- function(expr) {
+    W <- NULL
+    w.handler <- function(w){ # warning handler
+        W <<- w
+        invokeRestart("muffleWarning")
+    }
+    list(value = withCallingHandlers(tryCatch(expr, error = function(e) e),
+             warning = w.handler),
+         warning = W)
+}
+
+#' Try to print results of a command
+#'
+#' Try to print the results of a command, catching errors and warnings
+#' with \code{\link{tryCatch.W.E}}. Warnings are appended to the
+#' results.
+#'
+#' @param x an expression
+#'
+#' @author Michael Hock \email{michael.hock@@uni-bamberg.de}
+#'
+#' @export
+tryPrintExpr <- function(x) {
+    out <- tryCatch.W.E(x)
+    if (inherits(out$value, c("simpleError", "error"))) {
+        cat("\n*** ERROR ************************************************************\n")
+        cat(str_wrap(str_trim(out$value$message), 70))
+        cat("\n**********************************************************************\n\n")
+    } else {
+        print(out$value)
+    }
+    if (!is.null(out$warning)) {
+        cat("\n*** WARNING **********************************************************\n")
+        cat(str_wrap(str_trim(out$warning$message), 70))
+        cat("\n**********************************************************************\n\n")
+    }
+    
+}
 
 #' Degrees of freedom for a factor model
 #'
@@ -101,6 +159,27 @@ dfEFA <- function(p, m) {
     if (p < m) return(-1)
     dof <- 0.5 * ((p - m)^2 - p - m)
     dof
+}
+
+#' Basic descriptive statistics
+#'
+#' Return mean, standard deviation, skewness, and kurtosis of a variable.
+#'
+#' @param x a numeric variable
+#'
+#' @return a data.frame
+#'
+#' @export
+#'
+basicDescr <- function(x) {
+    # require(psych)
+    if (! is.numeric(x)) stop("x must be numeric")
+    data.frame(Mean = mean(x, na.rm = TRUE),
+               SD = sd(x, na.rm = TRUE),
+               Skew = psych::skew(x),
+               Kurtosis = psych::kurtosi(x),
+               Min = min(x, na.rm = TRUE),
+               Max = max(x, na.rm = TRUE))
 }
 
 #' Frequencies
@@ -487,7 +566,7 @@ empICC <- function(x,
     corrs <- data.frame(variable, corrs)
 
     x <- melt(x, id.vars = "scores")
-    head(x)
+    # head(x)
     x.corrs <- min(x$scores)
     y.corrs <- max(x$value) + 0.25 ###
     #     require(lattice)
@@ -696,15 +775,24 @@ ggplotICC.RM <- function(object, empICC = NULL, empCI = NULL,
                     
         }
     }
-    onlyEmp <- mikPlotData[as.character(mikPlotData$ICC) == "Empirical",]
-    myplot <- qplot(Theta, Probability, colour = ICC,
-        facets = ~ Item,
-        data = mikPlotData,
-        geom = "line",
-        xlab = xlab, ylab = ylab) +
-        geom_point(data = onlyEmp, size = 4,
-            shape = 21,
-            fill = "white")
+
+    if (emp.plot) {
+        onlyEmp <- mikPlotData[as.character(mikPlotData$ICC) == "Empirical",]
+        myplot <- qplot(Theta, Probability, colour = ICC,
+                        facets = ~ Item,
+                        data = mikPlotData,
+                        geom = "line",
+                        xlab = xlab, ylab = ylab) +
+          geom_point(data = onlyEmp, size = 4,
+                     shape = 21,
+                     fill = "white")
+    } else {
+        myplot <- qplot(Theta, Probability, colour = ICC,
+                        facets = ~ Item,
+                        data = mikPlotData,
+                        geom = "line",
+                        xlab = xlab, ylab = ylab)
+    }
     print(myplot)
 }
 
@@ -794,84 +882,95 @@ print.itemText <- function(x, ...) {
 #'
 #' @export
 getItemText <- function(x) {
-    ### to do: also allow a single item
     if (!is.data.frame(x)) stop("x must be a data frame")
     itemtext <- sapply(X = x, FUN = attr, which = "item.text")
-    ### For data frame:
-#     itemtext <- attr(x, "item.text")
-#     if (is.null(itemtext)) {
-#         message("x has no 'item.txt' attribute")
-#         return()
-#     }
-    if (is.list(itemtext)) return(NULL) ### ?
-    #itemtext <- ifelse(is.null(itemtext), "No item text given", itemtext)
-    #cat(itemtext, "---", colnames(x))
+    if (is.list(itemtext)) return(NULL)
     names(itemtext) <- colnames(x)
     class(itemtext) <- c("itemText", "character")
     return(itemtext)
 }
 
-#' Exploratory Factor Analysis
+#' Principal Components and Exploratory Factor Analysis
 #'
-#' Perform exploratory factor analysis of a set of variables. This is a wrapper around psych::fa and psych::fa.poly.
+#' Perform principal components or exploratory factor analysis of a set of variables. This is a wrapper around psych::principal, psych::fa, and psych::fa.poly.
 #' 
-#' @param x a data frame
+#' @param x a data frame of variables to be analyzed
 #' @param nfactors (integer) number of factors to be extracted
 #' @param rotate (char) rotation
-#' @param fm factoring (char) method
+#' @param fm factoring (char) method. May be any method allowed for psych::fa or "principal" for principal components analysis.
 #' @param polychor (logical) use polychoric correlatons (via psych::irt.fa)?
+#' @param return.res (logical) if TRUE, return output as a list instead of simply printing the output. This is used by Iana to render the output via renderTable().
 #'
+#' @return if \code{return.res} is TRUE, a list with components \code{res} (the results of factor analysis) and \code{stats} (the fit statistics)
 #' @author Michael Hock \email{michael.hock@@uni-bamberg.de}
 #'
 #' @export
 #
 factoranalysis <- function(x, nfactors, rotate = "promax", fm = "ml",
-                           polychor = FALSE) {
-    if (polychor) {
-        ### fm frei lassen oder ml erzwingen?
+                           polychor = FALSE, return.res = FALSE) {
+    if (fm == "principal") {
+        q <- psych::principal(x, nfactors, rotate = rotate)
+        if (!return.res) cat("PRINCIPAL COMPONENTS ANALYSIS\n")
+    } else if (polychor) {
         q <- psych::irt.fa(x, nfactors, fm = fm,
-                      rotate = rotate, plot = FALSE)$fa
-        cat("FACTOR ANALYSIS OF POLYCHORIC CORRELATIONS\n")
+                           rotate = rotate, plot = FALSE)$fa
+        if (!return.res) cat("FACTOR ANALYSIS OF POLYCHORIC CORRELATIONS\n")
     } else {
         q <- psych::fa(x, nfactors, fm = fm, rotate = rotate)
-        cat("FACTOR ANALYSIS\n")
+        if (!return.res) cat("FACTOR ANALYSIS\n")
     }
 
-    cat("\nMethod:  ", q$fm)
-    cat("\nRotation:", q$rotation)
-    cat("\nN:       ", q$n.obs, "\n")
+    if (!return.res) {
+        cat("\nMethod:  ", fm)
+        cat("\nRotation:", q$rotation)
+        cat("\nN:       ", q$n.obs, "\n")
+        cat("\nFIT STATISTICS\n\n")
+    }
     
-    cat("\nFIT STATISTICS\n\n")
     # BIC = χ2 + ln(N)[k(k + 1)/2 - df]
-    Statistic = c("Chi-Square", "Degrees of Freedom", "p",
-        "Tucker-Lewis-Index (NNFI)",
-        "RMSR",
-        "SRMR",
-        "RMSEA", "RMSEA Lower Bound", "RMSEA Upper Bound",
-        "BIC", "SABIC",
-        "Maximum Absolute Residual",
-        "Kaiser-Meyer-Olkin (KMO) Factor Adequacy")
-    
-    p = nrow(q$residual)
-    ### p-1 -> RMSR
-    srmr = sqrt( sum( (q$residual[upper.tri(q$residual)])^2 ) / (p * (p+1) / 2) )
-    Value <- c(q$STATISTIC, q$dof, q$PVAL,
-               q$TLI,
-               q$rms,
-               srmr,
-               q$RMSEA[1], q$RMSEA[2], q$RMSEA[3],
-               q$BIC, q$SABIC,
-               max(abs(q$residual[upper.tri(q$residual)])),
-               KMO(x)$MSA
-               )
+    if (fm == "principal") {
+        Statistic = c("Chi-Square", "Degrees of Freedom", "p")
+        Value <- c(q$STATISTIC, q$dof, q$PVAL)
+    } else {
+        Statistic = c("Chi-Square", "Degrees of Freedom", "p",
+            "Tucker-Lewis-Index (NNFI)",
+            "RMSR",
+            "SRMR",
+            "RMSEA", "RMSEA Lower Bound (90% CI)", "RMSEA Upper Bound (90% CI)",
+            "BIC", "SABIC",
+            "Maximum Absolute Residual",
+            "Kaiser-Meyer-Olkin (KMO) Factor Adequacy")
+        p = nrow(q$residual)
+        ### p-1 -> RMSR
+        srmr = sqrt( sum( (q$residual[upper.tri(q$residual)])^2 ) / (p * (p+1) / 2) )
+        Value <- c(q$STATISTIC, q$dof, q$PVAL,
+                   q$TLI,
+                   q$rms,
+                   srmr,
+                   q$RMSEA[1], q$RMSEA[2], q$RMSEA[3],
+                   q$BIC, q$SABIC,
+                   max(abs(q$residual[upper.tri(q$residual)])),
+                   KMO(x)$MSA
+                   )
+    }
     Value <- as.character(round(Value, 3))
-    if(Value[3] < .001) Value[3] <- "< .001"
-    statsDf <- data.frame(Statistic, Value)
-    print(statsDf, row.names = FALSE)
-    cat("\nRMSEA bounds are for a 90% confidence interval\nKMO is based on Pearson correlations\n")
-    ####classifyItems(q, x, Df.name = deparse(substitute(x)))
-    #class(q) <- "fa"
-    return(q)
+    if (!is.na(q$PVAL)) {
+        if(q$PVAL < .001) Value[3] <- "< .001"
+    }
+    if (length(Statistic) != length(Value)) {
+        stats <- data.frame(Message = "Fit statistics could not be computed.")
+    } else {
+        stats <- data.frame(Statistic, Value)
+    }        
+    if (!return.res) {
+        print(stats, row.names = FALSE)
+        if (fm != "principal") {
+            cat("\nRMSEA bounds are for a 90% confidence interval\nKMO is based on Pearson correlations\n")
+        }
+        return(q)
+    } else {
+        list(res = q, stats = stats)
+    }
 }
 
 #' Classify items
@@ -883,17 +982,18 @@ factoranalysis <- function(x, nfactors, rotate = "promax", fm = "ml",
 #' @param min.loading minimum loading of an item to be considered a marker of a factor
 #' @param max.loading maximum loading of an item on a secondary factor (i.e., the factor on which the items has its second highest loading) to be considered a marker for the primary factor (i.e., the factor on which the items has its highest loading)
 #' @param max.complexity maximum complexity of an item to be considered a marker item. This is only used for factor models (not for principal components)
-#' @param itemlength trim item text to given number characters
+#' @param itemlength trim item text to given number characters (0 = automatic trimming)
 #' @param digits number of digits used in the output
 #' @param Df.name name of data frame
+#' @param return.res (logical) if TRUE, return output as a list of data frames instead of simply printing the output. This is used by Iana to render the output via renderTable().
 #'
 #' @author Michael Hock \email{michael.hock@@uni-bamberg.de}
 #'
 #' @export
 ## Needs: getItemText from iana, str_trim from stringr
 
-classifyItems <- function(fm, Df, min.loading = 0.4, max.loading = 0.3, max.complexity = 10, itemlength = 0, digits = 2, Df.name = deparse(substitute(Df))) {
-    
+classifyItems <- function(fm, Df, min.loading = 0.4, max.loading = 0.3, max.complexity = 10, itemlength = 0, digits = 2, Df.name = deparse(substitute(Df)), return.res = FALSE) {
+
     if(!inherits(fm, "fa") && !inherits(fm, "principal") ) 
         stop("fm was not computed with psych::fa oder psych::principal")
     
@@ -928,23 +1028,27 @@ classifyItems <- function(fm, Df, min.loading = 0.4, max.loading = 0.3, max.comp
     lmat <- round(unclass(lmat), digits)
     communality <- round(communality, digits)
     if(inherits(fm, "fa")) complexity <- round(complexity, digits)
-    
-    cat("\nLOADINGS\n\n")
-    #cat("====================\n")
-    cat("M = Marker, a_j = Factor loadings\n")
-    cat("h2 = Communality, Cmpl = Factorial complexity\n")
-    
-    ilength <- getOption("width") -  max(nchar(varnames)) - 3 - (ncol(lmat) + 2) * (digits + 4)
+
+    # Loadings 
+
+    if (!return.res) {
+        cat("\nLOADINGS\n\n")
+        cat("M = Marker, a_j = Factor loadings\n")
+        cat("h2 = Communality, Cmpl = Factorial complexity\n")
+    }
+    ilength <- getOption("width") -  max(nchar(varnames)) - 3 -
+      (ncol(lmat) + 2) * (digits + 4)
     items <- getItemText(Df)
     if (is.null(items)) {
         shortitems <- rep("-", length(communality))
-        cat("\nHint: You can associate the text of the items with the columns \nof the data frame with 'setItemText()'. \nThis would allow to produce an item table.\n")
+        if (!return.res) {
+            cat("\nHint: You can associate the text of the items with the columns \nof the data frame with 'setItemText()'. \nThis would allow to produce an item table.\n")
+        }
     } else {
         items <- stringr::str_trim(items)
         if (itemlength == 0) {
             shortitems <- substr(items, 1, ilength)
-        }
-        else {
+        } else {
             maxilen <- max(nchar(items))
             if (itemlength > maxilen) itemlength <- maxilen
             shortitems <- substr(items, 1, itemlength)
@@ -962,29 +1066,27 @@ classifyItems <- function(fm, Df, min.loading = 0.4, max.loading = 0.3, max.comp
         "h2",
         "Cmpl",
         "Item"
-    )
-    xl <- split(x, x$F)
-    for (i in 1:length(xl)) {
-        cat("\nFactor", i, "\n")
-        print(xl[[i]][,-1], right = FALSE)
+      )
+    if (return.res) {
+        loadingsDf <- x
+    } else {
+        xl <- split(x, x$F)
+        for (i in 1:length(xl)) {
+            cat("\nFactor", i, "\n")
+            print(xl[[i]][,-1], right = FALSE)
+        }
     }
     
     # Markers
+    
     mcount <- sum(ifelse(marker == "*", 1, 0))
-    cat("\n", mcount, "of", ncol(Df), "Items were classified as markers.\n")
-        
-    # Factor Correlations
-    
-    if (exists("Phi", fm)) {
-        corrs <- round(fm$Phi, digits)
-        rownames(corrs) <- colnames(corrs) <- paste0("F", 1:ncol(lmat))
-        cat("\nFACTOR CORRELATIONS\n\n")
-        print(corrs)
+    if (!return.res) {
+        cat("\n", mcount, "of", ncol(Df), "Items were classified as markers.\n")
     }
+
+    # Factor variances
     
-    # Factors
-    
-    cat("\nFACTORS\n\n")
+    if (!return.res) cat("\nFACTOR VARIANCES\n\n")
     # use fm$loadings, not lmat because lmat now contains the rounded values
     colnames(fm$loadings) <- paste0("F", 1:ncol(fm$loadings))
     ssload <- colSums(fm$loadings^2)
@@ -992,16 +1094,34 @@ classifyItems <- function(fm, Df, min.loading = 0.4, max.loading = 0.3, max.comp
     cumsum.expl.var <- cumsum(expl.var)
     tab <- rbind(ssload, expl.var, cumsum.expl.var)
     row.names(tab) <- c("Sum of squared loadings", "Proportion Variance", "Cumulative Variance")
-    print(round(tab, digits))
+    if (!return.res) print(round(tab, digits))
+    
+    # Factor Correlations
+    
+    if (exists("Phi", fm)) {
+        corrs <- round(fm$Phi, digits)
+        rownames(corrs) <- colnames(corrs) <- paste0("F", 1:ncol(lmat))
+        if (!return.res) {
+            cat("\nFACTOR CORRELATIONS\n\n")
+            print(corrs)
+        }
+    } else {
+        corrs <- diag(ncol(lmat))
+        rownames(corrs) <- colnames(corrs) <- paste0("F", 1:ncol(lmat))
+    }
     
     # Code snippet
-    
-    cat("\nNOTE\n\nThe following code may be used to create data frames of items\nassigned to the factors. Some items may need to be inverted.\n\n")
-    
-    
+
+    code <- "\n"
     for (i in (1:ncol(lmat))) {
         selected <- row.names(x[(x$F == i) & (x$M == "*"), ])
         selected <- paste(selected, collapse = ", ")
-        cat("F", i, " <- subset(", Df.name, ", select = c(", selected, "))\n", sep = "")
+        code <- paste0(code, "F", i, " <- subset(", Df.name,
+                           ", select = c(", selected, "))\n")
+    }
+    if (!return.res) {
+        cat("\nNOTE\n\nThe following code may be used to create data frames of items\nassigned to the factors. Some items may need to be inverted.\n", code)
+    } else {
+        list(factorloadings = loadingsDf, factorcorrelations = corrs, factorvariances = tab, factorcode = str_trim(code))
     }
 }

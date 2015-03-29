@@ -4,7 +4,8 @@ library(shiny)
 library(shinythemes)
 
 shinyUI(fluidPage(
-    theme = shinytheme("cerulean"),
+    #theme = shinytheme("cerulean"),
+    theme = shinytheme("cosmo"),
     #titlePanel("Iana - Item Analysis"),
     
     sidebarLayout(
@@ -58,13 +59,16 @@ shinyUI(fluidPage(
                     h3("Distributions of items and total score"),
                     
                     selectInput(inputId = "distrType", label = "Distribution",
-                        choices = c("Item scores (histogram)" = "items", "Total score (histogram)" = "total", "Frequency counts and item stems" = "freq")),
+                        choices = c(
+                            "Item scores (histogram)" = "items",
+                            "Total score (histogram)" = "total", 
+                            "Frequency counts and item stems" = "freq")),
                     
                     conditionalPanel(
                         condition = "input.distrType == 'items'",
                         h3("Item scores"),
                         selectInput(inputId = "histtypeitem",
-                            label = "Type of plot:",
+                            label = "Y axis represents:",
                             choices = c("Percentages" = "percent", 
                                 "Counts" = "count")),
                         plotOutput(outputId = "hist", 
@@ -76,22 +80,29 @@ shinyUI(fluidPage(
                         fluidRow(
                             column(6, 
                                 selectInput(inputId = "histtype",
-                                    label = "Type of plot:",
-                                    choices = c("Percentages" = "percent", 
-                                        "Counts" = "count",
-                                        "Density" = "density"))),
+                                    label = "Y axis represents:",
+                                    choices = c("Density" = "density",
+                                        "Percentages" = "percent", 
+                                        "Counts" = "count"
+                                        ))),
                             column(6, 
                                 selectInput(inputId = "totalscoretype",
                                     label = "Total score represents:",
                                     choices = c("Sum of item scores" = "sum", 
                                         "Average of item scores" = "ave")))
                         ),
-                        sliderInput(inputId = "histbins", 
-                            label = "Number of bins (3 = automatic):",
-                            min = 3, max = 45, value = 3, step = 1,
+                        sliderInput(inputId = "histbinwidth", 
+                            label = "Binwidth:",
+                            min = 1, max = 20, value = 1, step = 1,
                             animate = TRUE),
                         br(),
-                        plotOutput(outputId = "histTotal")),
+                        plotOutput(outputId = "histTotal"),
+                        strong("Notes"),
+                        helpText("In density plots the blue line represents the empirical density, the green line represents the normal density. For item average scores, the specified binwidth is divided by the number of items."),
+                        strong("Statistics"),
+                        p(""),
+                        tableOutput(outputId = "descrStatsTotal")
+                    ),
                     
                     #                     conditionalPanel(
                     #                         condition = "input.distrType == 'freq'",
@@ -150,10 +161,9 @@ shinyUI(fluidPage(
                 ),
                 
                 tabPanel("EFA",
-                    h3("Principal Components and Exploratory Factor Analysis"),
-                    helpText("By default, results of exploratory factor analysis (EFA) are shown. To obtain results of principal components analysis (PCA) choose 'Principal components' in the Method dropdown list. (For PCA, not all rotations are implemented.) The method options include 'Item Response Theory.' In this case polychoric correlations are computed by a fast (also somewhat inaccurate) two-step procedure. These correlations are then fitted by maximum likelihood factor analysis. For obtaining accurate estimates check the 'Accurate' Box. Notice that this computation is very slow."),
-                    
-                    h3("Factoring"),
+                    h3("Exploratory Factor Analysis and Principal Components Analysis"),
+
+                    h4("Factoring"),
                     fluidRow(
                         column(4, numericInput(inputId = "nFactors", 
                             label = "Number of factors:",
@@ -163,7 +173,12 @@ shinyUI(fluidPage(
                             choices = c("Maximum likelihood", "Minimum residuals", "Principal axes", "Principal components"))),
                         column(4, selectInput(inputId = "faRotation",
                             label = "Rotation:",
-                            choices = c("varimax", "promax", "oblimin", "none", "quartimax", "bentlerT", "geominT", "bifactor", "simplimax", "bentlerQ", "geominQ","biquartimin", "cluster")))
+                            choices = c("varimax", "promax", "oblimin", "none", 
+                                "quartimax", "bentlerT", "geominT", "bifactor", 
+                                "simplimax", "bentlerQ", "geominQ",
+                                "biquartimin", "cluster"), 
+                            selected = "promax")
+                        )
                     ),                    
                     fluidRow(
                         column(8, checkboxInput(inputId = "faIRT", 
@@ -171,7 +186,7 @@ shinyUI(fluidPage(
                             value = FALSE))
                     ),
                     
-                    h3("Markers"),
+                    h4("Markers"),
                     fluidRow(
                         column(4, numericInput(inputId = "faMinloading", 
                             label = "Minimum loading:",
@@ -184,18 +199,38 @@ shinyUI(fluidPage(
                             min = 0, max = 10, value = 2, step = 0.25))
                     ),
                     
-                    h3("Output"),
+                    h4("Output options"),
                     fluidRow(
                         column(4, numericInput(inputId = "faDigits", 
                             label = "Digits to show:",
                             min = 2, max = 8, value = 2, step = 1)),
                         column(4, numericInput(inputId = "faItemlength", 
-                            label = "Trim item text (characters, 0 = auto):",
-                            min = 0, max = 250, value = 50, step = 5))
+                            label = "Trim item text (characters):",
+                            min = 20, max = 500, value = 250, step = 5))
                     ),
                     
-                    h3("Results"),
-                    verbatimTextOutput(outputId = "efa")
+                    #h3("Results"),
+                    ###verbatimTextOutput(outputId = "efa"),
+                    
+                    hr(),
+                    
+                    h3("Model fit"),
+                    fluidRow(column(12, tableOutput(outputId = "factorfit"))),
+                    
+                    h3("Factor loadings"),
+                    fluidRow(column(12, tableOutput(outputId = "loadings"))),
+                    p("F = Factor, M = Marker, a_j = Factor loadings, h2 = Communality, Cmpl = Factorial complexity"),
+
+                    h3("Factor variances"),
+                    fluidRow(column(12, tableOutput(outputId = "factorvariances"))),
+                    
+                    conditionalPanel(condition = "input.nFactors > 1",
+                    h3("Factor correlations"),
+                    fluidRow(column(12, tableOutput(outputId = "factorcorrelations")))),
+                    
+                    h3("Code"),
+                    p("The following code may be used to create data frames of items assigned to the factors. (Some items may need to be inverted.)"),
+                    verbatimTextOutput(outputId = "factorcode")
                 ),
 
                 tabPanel("Reliability",
@@ -235,18 +270,31 @@ shinyUI(fluidPage(
                 ),
                 
                 tabPanel("Rasch",
-                    h3("Rasch Models"),
+                    h3("Rasch Model and Partial Credit Model"),
 ##                    actionButton(inputId = "fitrasch", label = " Run "),
 ##                    helpText('Press the "Run" button to fit or refit the model. (Fitting Rasch models is computationally intensive, therefore computations are not performed automatically.)'),
+                    helpText("The appropriate model is automatically chosen based on the values of the items. For binary items, a Rasch Model is fitted. For items with more than two reponse categories, a Partial Credit Model is fitted. (The former model is actually a special case of the latter, however, the output is somewhat different.)"),
                     
-                    selectInput(inputId = "raschmodel", 
-                        label = "Model to fit:", 
-                        choices = c("Partial Credit Model" = "pcm", 
-                            #### "Rating Scale Model" = "rsm", 
-                            "Rasch Model for binary items" = "rasch")),
+                    selectInput(inputId = "raschOutputOptions",
+                        label = "Output:",
+                        choices = c("Model tests", 
+                            "ICCs (only Rasch models)" = "iccs",
+                            "Person-item map",
+                            "Test and item information" = "testinfo",
+                            "Item fit statistics" = "itemfit",
+                            "Item parameters" = "itemstats",
+                            "Person parameters and person fit" = "personstats"
+                        )
+                    ),
                     
                     conditionalPanel(
-                        condition = "input.raschmodel == 'rasch'",
+                        condition = "input.raschOutputOptions == 'Model tests'",
+                        h3("Model tests"),
+                        verbatimTextOutput(outputId = "pcm.tests")
+                    ),
+
+                    conditionalPanel(
+                        condition = "input.raschOutputOptions == 'iccs'",
                         h3("ICCs"),
                         selectInput(inputId = "rasch.icctype",
                             label = "Type of empirical ICC:",
@@ -258,18 +306,41 @@ shinyUI(fluidPage(
                         plotOutput(outputId = "rasch.icc", 
                             height = getOption("iana.plotheight"))
                     ),
+
+                    conditionalPanel(
+                        condition = "input.raschOutputOptions == 'Person-item map'",
+                        h3("Person-item map"),
+                        helpText("Items with nonordinal (disordered) threshold locations are shown in red."),
+                        checkboxInput(inputId = "pcm.sortitems", label = "Sort items by location"),
+                        plotOutput(outputId = "pcm.pimap", height = getOption("iana.plotheight"))
+                    ),
+
+                    conditionalPanel(
+                        condition = "input.raschOutputOptions == 'testinfo'",
+                        h3("Test and item information"),
+                        plotOutput(outputId = "pcm.info", height = getOption("iana.plotheight"))
+                    ),
                     
-                    h3("Person-item map"),
-                    helpText("Items with nonordinal (disordered) threshold locations are shown in red."),
-                    checkboxInput(inputId = "pcm.sortitems", label = "Sort items by location"),
-                    plotOutput(outputId = "pcm.pimap", height = getOption("iana.plotheight")),
+                    conditionalPanel(
+                        condition = "input.raschOutputOptions == 'itemfit'",
+                        h3("Item fit statistics"),
+                        verbatimTextOutput(outputId = "pcm.itemfit")
+                    ),
                     
-                    h3("Test and item information"),
-                    plotOutput(outputId = "pcm.info", height = getOption("iana.plotheight")),
+
+                    conditionalPanel(
+                        condition = "input.raschOutputOptions == 'itemstats'",
+                        h3("Item parameters and fit statistics"),
+                        helpText("For the PCM, items coded with an origin of 1 are recoded to have an origin of 0. Therefore, the raw (sum) score to person parameter mapping also starts also with 0."),
+                        verbatimTextOutput(outputId = "pcm.itemstats")
+                    ),
                     
-                    h3("Item and person parameters, fit statistics"),
-                    helpText("For the PCM, items coded with an origin of 1 are recoded to have an origin of 0. Therefore, the raw (sum) score to person parameter mapping also starts also with 0."),
-                    verbatimTextOutput(outputId = "pcm")
+                    conditionalPanel(
+                        condition = "input.raschOutputOptions == 'personstats'",
+                        h3("Person parameters and fit statistics"),
+                        helpText("For the PCM, items coded with an origin of 1 are recoded to have an origin of 0. Therefore, the raw (sum) score to person parameter mapping also starts also with 0."),
+                        verbatimTextOutput(outputId = "pcm.personstats")
+                    )
                 ),
                 
                 navbarMenu("Info",

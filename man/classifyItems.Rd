@@ -6,7 +6,7 @@
 \usage{
 classifyItems(fm, Df, min.loading = 0.4, max.loading = 0.3,
   max.complexity = 10, itemlength = 0, digits = 2,
-  Df.name = deparse(substitute(Df)))
+  Df.name = deparse(substitute(Df)), return.res = FALSE)
 }
 \arguments{
 \item{fm}{a factor model fitted by psych::fa or principal components computed with psych::principal}
@@ -19,11 +19,13 @@ classifyItems(fm, Df, min.loading = 0.4, max.loading = 0.3,
 
 \item{max.complexity}{maximum complexity of an item to be considered a marker item. This is only used for factor models (not for principal components)}
 
-\item{itemlength}{trim item text to given number characters}
+\item{itemlength}{trim item text to given number characters (0 = automatic trimming)}
 
 \item{digits}{number of digits used in the output}
 
 \item{Df.name}{name of data frame}
+
+\item{return.res}{(logical) if TRUE, return output as a list of data frames instead of simply printing the output. This is used by Iana to render the output via renderTable().}
 }
 \description{
 Automatically classify the items in a data frame.

@@ -28,8 +28,6 @@ Yves Rosseel (2012). lavaan: An R Package for Structural Equation Modeling. Jour
 
 Sunthud Pornprasertmanit, Patrick Miller, Alexander Schoemann and Yves Rosseel (2012). semTools: Useful tools for structural equation modeling. R package version 0.2-11. http://CRAN.R-project.org/package=semTools
 
-Sarkar, Deepayan (2008) Lattice: Multivariate Data Visualization with R. Springer, New York. ISBN 978-0-387-75968-5
-
 H. Wickham. ggplot2: elegant graphics for data analysis. Springer New York, 2009.
 
 Patrick Mair, Reinhold Hatzinger and Marco J. Maier (2012). eRm: Extended Rasch Modeling. R package version 0.15-1. http://CRAN.R-project.org/package=eRm
@@ -40,5 +38,3 @@ Hadley Wickham (2007). Reshaping Data with the reshape Package. Journal of Stati
 
 Hadley Wickham (2012). stringr: Make it easier to work with strings.. R
 package version 0.6.2. http://CRAN.R-project.org/package=stringr
-
-John Fox (2010). polycor: Polychoric and Polyserial Correlations. R package version 0.7-8. http://CRAN.R-project.org/package=polycor
