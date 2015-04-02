@@ -2,14 +2,21 @@
 % Please edit documentation in R/itemanalysis.R
 \name{mapTest}
 \alias{mapTest}
+\alias{print.mapTest}
 \title{Velicer's MAP Test}
 \usage{
-mapTest(x, n = 20)
+mapTest(data, n = 20, ...)
+
+\method{print}{mapTest}(x, ...)
 }
 \arguments{
-\item{x}{a data frame containing the variables (items) to be analyzed}
+\item{data}{a data frame containing the variables (items) to be analyzed}
 
 \item{n}{the maximum number of factors to consider (default: 20)}
+
+\item{...}{ignored}
+
+\item{x}{a mapTest object}
 }
 \value{
 A vector of class 'mapTest' containing the average squared (partial)

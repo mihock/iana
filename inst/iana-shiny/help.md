@@ -18,23 +18,15 @@ Possibly, not all variables in the data frame are shown as labels. For each vari
 The check boxes allow you to compile a set of items for analysis. For example, if you check four specific variables, the reliability of the scale composed of these four items will be reported. Instead to checking the items one after another you can also define a range of successive items to be combined using the input field below the check boxes. A variable range is specified by typing the names of two items (separated by a colon) into the input box, for example `e1:e4`. This is often faster than checking and unchecking single items. Typing only one variable name into the box deselects all variables except the specified variable. A quick way of unchecking all variables is to type any character into the field that is not the name of a variable.
 
 
-### Used Packages
+### Links to Packages
 
-Revelle, W. (2012). psych: Procedures for Personality and Psychological Research.
+* [eRm, Extended Rasch Models](http://CRAN.R-project.org/package=eRm)
 
-Bernaards, Coen A. and Jennrich, Robert I. (2005) Gradient Projection Algorithms and Software for Arbitrary Rotation Criteria in Factor Analysis, Educational and Psychological Measurement: 65, 676-696. <http://www.stat.ucla.edu/research/gpa>
+* [lavaan, Structural Equation Models](http://CRAN.R-project.org/package=lavaan)
 
-Yves Rosseel (2012). lavaan: An R Package for Structural Equation Modeling. Journal of Statistical Software, 48(2), 1-36. URL http://www.jstatsoft.org/v48/i02/.
+* [mirt, Multidimensional IRT Models](http://CRAN.R-project.org/package=mirt)
 
-Sunthud Pornprasertmanit, Patrick Miller, Alexander Schoemann and Yves Rosseel (2012). semTools: Useful tools for structural equation modeling. R package version 0.2-11. http://CRAN.R-project.org/package=semTools
+* [psych, Factor Analysis](http://CRAN.R-project.org/package=psych)
 
-H. Wickham. ggplot2: elegant graphics for data analysis. Springer New York, 2009.
+* [semTools, Structural Equation Models](http://CRAN.R-project.org/package=semTools)
 
-Patrick Mair, Reinhold Hatzinger and Marco J. Maier (2012). eRm: Extended Rasch Modeling. R package version 0.15-1. http://CRAN.R-project.org/package=eRm
-
-JJ Allaire, Jeffrey Horner, Vicent Marti and Natacha Porte (2012). markdown: Markdown rendering for R. R package version 0.5.3. http://CRAN.R-project.org/package=markdown
-
-Hadley Wickham (2007). Reshaping Data with the reshape Package. Journal of Statistical Software, 21(12), 1-20. URL http://www.jstatsoft.org/v21/i12/.
-
-Hadley Wickham (2012). stringr: Make it easier to work with strings.. R
-package version 0.6.2. http://CRAN.R-project.org/package=stringr

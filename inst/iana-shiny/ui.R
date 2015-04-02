@@ -5,8 +5,9 @@ library(shinythemes)
 
 shinyUI(fluidPage(
     #theme = shinytheme("cerulean"),
-    theme = shinytheme("cosmo"),
-    #titlePanel("Iana - Item Analysis"),
+    #theme = shinytheme("cosmo"),
+    #theme = shinytheme("spacelab"),
+    theme = shinytheme("united"),
     
     sidebarLayout(
         
@@ -120,10 +121,10 @@ shinyUI(fluidPage(
 
                 tabPanel("ICCs",
                     h3("Empirical Item Characteristic Curves"),
-                    helpText("To examine item characteristics, item scores are plotted against total scores or factor scores. To avoid overplotting, a small amount of jitter is added to overlapping points. (These are the light points in the plot.) In the upper left corner, the correlation of the total/factor score and the item score is given. The lines are locally weighted regression lines, the shaded regions represent 95% confidence intervals around the expected item scores. If you have many data points you might want to decrease the opaqueness of the points and/or to deactivate jitter."),
+                    helpText("To examine item characteristics, item scores are plotted against total scores or factor scores. To avoid overplotting, a small amount of jitter is added to overlapping points. In the upper left corner, the correlation of the total/factor score and the item score is given. The lines are locally weighted regression lines, the shaded regions represent 95% confidence intervals around the expected item scores. If you have many data points you might want to decrease the opaqueness of the points and/or to deactivate jitter."),
                     
                     fluidRow(
-                        column(6,
+                        column(4,
                             selectInput(inputId = "ICCscore",
                                 label = "Score to use:",
                                 choices = c("Factor score (Thomson)" = "factor.thomson",
@@ -132,14 +133,15 @@ shinyUI(fluidPage(
                                     "Total (sum) score" = "sum")),
                             checkboxInput(inputId = "ICClinear", 
                                 label = "Fit linear regression")),
-                        column(6, 
+                        column(4, 
+                            numericInput(inputId = "ICCjitter", 
+                                label = "Amount of jitter:",
+                                min = 0, max = 1, value = 0.3, step = 0.1)),
+                        column(4, 
                             numericInput(inputId = "ICCalpha", 
                                 label = "Opaqueness of points:",
-                                min = 0, max = 1, value = 0.5, step = 0.1),
-                            checkboxInput(inputId = "ICCjitter", 
-                                label = "Jitter",
-                                value = TRUE))
-                        ),
+                                min = 0, max = 1, value = 0.5, step = 0.1))
+                    ),
                     
                     plotOutput(outputId = "ICCs", height = getOption("iana.plotheight")),
                     h3("Notes"),
@@ -341,6 +343,54 @@ shinyUI(fluidPage(
                         helpText("For the PCM, items coded with an origin of 1 are recoded to have an origin of 0. Therefore, the raw (sum) score to person parameter mapping also starts also with 0."),
                         verbatimTextOutput(outputId = "pcm.personstats")
                     )
+                ),
+                
+                tabPanel("IRT",
+                    h3("Multidimensional IRT models"),
+                    fluidRow(
+                        column(6, 
+                            numericInput(inputId = "mirt_nfactors", 
+                                label = "Number of dimensions:",
+                                min = 1, max =5, value = 1, step = 1)),
+                        column(6, 
+                            selectInput(inputId = "mirt_model",
+                                label = "Model:",
+                                choices = c(
+                                    "Rasch or PCM (only for 1 dimension)" = "Rasch", 
+                                    "2PL" = "2PL",
+                                    "Graded response model" = "graded",
+                                    "Rating scale graded response model" = "grsm",
+                                    "Generalized partial credit model" = "gpcm"
+                                )
+                            ))
+                    ),
+                    fluidRow(
+                        column(6, 
+                            selectInput(inputId = "mirt_rotate",
+                                label = "Model:",
+                                choices = c(
+                                    'promax', 'oblimin', 'varimax', 'quartimin', 'targetT', 'targetQ', 'pstT', 'pstQ', 'oblimax', 'entropy', 'quartimax', 'simplimax', 'bentlerT', 'bentlerQ', 'tandemI', 'tandemII', 'geominT', 'geominQ', 'cfT', 'cfQ', 'infomaxT', 'infomaxQ', 'mccammon', 'bifactorT', 'bifactorQ')
+                            )),
+                        column(6, 
+                            selectInput(inputId = "mirt_method",
+                                label = "Method:",
+                                choices = c(
+                                    "EM" = "EM", 
+                                    "Quasi-Monte-Carlo EM (QMCEM)" = "QMCEM",
+                                    "MH-RM" = "MHRM"
+                                )
+                            ))
+                    ),
+                    
+                    helpText("Method: EM is suggested for fitting 1 or 2 dimensions, QMCEM for fitting 3 or more."),
+                    
+                    verbatimTextOutput(outputId = "mirt.summary")
+                    
+#                     conditionalPanel(
+#                         condition = "input.raschOutputOptions == 'Model tests'",
+#                         h3("Model tests"),
+#                         verbatimTextOutput(outputId = "pcm.tests")
+#                     ),
                 ),
                 
                 navbarMenu("Info",

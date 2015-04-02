@@ -4,6 +4,7 @@ require(ggplot2)
 # require(GPArotation)
 require(lavaan)
 require(eRm)
+###require(mirt)
 # require(markdown)
 # require(reshape2)
 # require(stringr)
@@ -172,7 +173,7 @@ shinyServer(function(input, output) {
             return()
         }
         nrow1 <- nrow(Df)
-        log.output(paste("getSubset (2): cases:", nrow0, "complete cases:", nrow1))
+        log.output(paste("getSubset (2): cases:", nrow0, "complete cases:", nrow1, "return.cases.only:", return.cases.only))
         if (return.cases.only) return(list(nrow0 = nrow0, nrow1 = nrow1))
         #####
         #### Called to often!
@@ -183,9 +184,13 @@ shinyServer(function(input, output) {
                           "\nmyData <- ",
                           mycmd, "\n"))
         }
+        log.output(paste("getSubset (3): cases:", nrow0, "complete cases:", nrow1, "return.cases.only:", return.cases.only))
+        
         .old.mycmd <<- mycmd
         ###.currentSubsetCmd <<- mycmd
         #####
+        log.output(paste("getSubset (4): cases:", nrow0, "complete cases:", nrow1, "return.cases.only:", return.cases.only))
+        
         Df
 ####})                
     }
@@ -420,7 +425,7 @@ shinyServer(function(input, output) {
         log.output("Map 2")
         x <- maptest()
         if (!is.null(x)) print(x)
-        cat("") # Needed for Shiny (Shiny otherwise raises error)
+        #cat("") # Needed for Shiny (Shiny otherwise raises error)
     })
 
     output$maptest.plot <- renderPlot({
@@ -433,7 +438,6 @@ shinyServer(function(input, output) {
             plot(x)
         }
     })
-
 
     # EFA ####
 
@@ -648,7 +652,7 @@ shinyServer(function(input, output) {
     # PCM ####
 
     computePCM <- reactive({
-        log.output("RASCH")
+        log.output("computePCM")
         x <- getSubset(checkedVars(), input$selectedDf, 3)
         if (is.null(x)) return()
         x <- na.omit(x) ####
@@ -694,7 +698,7 @@ shinyServer(function(input, output) {
         log.output("pcm.itemfit")
         x <- computePCM()
         if (is.null(x)) return()
-        print(itemfit(x$pp))
+        print(eRm::itemfit(x$pp))
     })
         
         
@@ -726,7 +730,7 @@ shinyServer(function(input, output) {
         cat("\n\nUnique Response Patterns and Personfit Statistics:\n")
 
         # Data frame for response pattern
-        pers.fit <- personfit(x$pp)
+        pers.fit <- eRm::personfit(x$pp)
         case <- row.names(x$pp$X)
         sumscore <- rowSums(x$pp$X)
 
@@ -801,6 +805,56 @@ shinyServer(function(input, output) {
 
     })
 
+    ############################################################################
+    # MIRT ####
+    
+    computeMirt <- reactive({
+        log.output("computeMirt")
+        x <- getSubset(checkedVars(), input$selectedDf, 3)
+        if (is.null(x)) return()
+        x <- na.omit(x) ####
+        
+        nf <- input$mirt_nfactors 
+        model <- input$mirt_model
+        validate(
+            need(!(model == "Rasch" && nf > 1), 
+                "For Rasch models, only 1 dimension is possible. Please choose another model.")
+        )
+        
+        res <- mirt::mirt(x, 
+            model = nf, 
+            itemtype = model, 
+            method = input$mirt_method,
+            rotate = input$mirt_rotate,
+            SE=TRUE, verbose = FALSE)
+        log.output("computeMirt done")
+        res
+    })
+
+    output$mirt.summary <- renderPrint({
+        log.output("mirt (output")
+        x <- computeMirt()
+        if (is.null(x)) return()
+        
+        cat("\nBASICS\n")
+        print(x)
+        cat("\nSUMMARY\n")
+        summary(x)
+#        cat("\nCOEFFICIENTS\n")
+#        print(coef(x))
+        cat("\nMODEL FIT\n")
+        print(mirt::M2(x), digits = 3)
+        #M2(x, residmat = TRUE, suppress = 0.1)
+#        cat("\nWALD TEST\n")
+#        print(mirt::wald(x), digits = 2)
+        cat("\nITEMFIT\n")
+        mirt::itemfit(x)
+        #mirt::personfit(x)
+    })
+    
+    # MIRT FIN ####
+    ############################################################################
+    
     # Help ####
 
     output$info <- renderPrint({

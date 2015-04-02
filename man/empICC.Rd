@@ -5,7 +5,7 @@
 \title{Empirical ICCs}
 \usage{
 empICC(x, score = c("factor.thomson", "factor.bartlett", "mean", "sum"),
-  method = loess, alpha = 0, jitter = TRUE)
+  method = loess, alpha = 0, jitter = 0.4)
 }
 \arguments{
 \item{x}{data frame in which rows are subjects and colums are test items}
@@ -16,13 +16,13 @@ empICC(x, score = c("factor.thomson", "factor.bartlett", "mean", "sum"),
 
 \item{alpha}{opaqueness of the points in the scatterplot}
 
-\item{jitter}{should jitter be added to the points?}
+\item{jitter}{amount of jitter}
 }
 \description{
 Plot of empirical ICCs of the items in a data frame.
 }
 \details{
-To examine item characteristics, item scores are plotted against total scores or factor scores. To avoid overplotting, a small amount of jitter is added to overlapping points. (These are the light points in the plot.) In the upper left corner, the correlation of the total/factor score and the item score is given. The lines are locally weighted regression lines, the shaded regions represent 95\% confidence intervals around the expected item scores. If many data points are present it may be useful to decrease the opaqueness of the points and/or to deactivate jitter.
+To examine item characteristics, item scores are plotted against total scores or factor scores. To avoid overplotting, a small amount of jitter is added to overlapping points. In the upper left corner, the correlation of the total/factor score and the item score is given. The lines are locally weighted regression lines, the shaded regions represent 95\% confidence intervals around the expected item scores. If many data points are present it may be useful to decrease the opaqueness of the points and/or to deactivate jitter.
 }
 \author{
 Michael Hock \email{michael.hock@uni-bamberg.de}

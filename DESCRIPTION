@@ -10,7 +10,8 @@ Description: Browser-based GUI for classical item and test analysis, factor
     items.
 Depends:
     R (>= 2.15.0),
-    shiny (>= 0.6.0)
+    shiny (>= 0.6.0),
+    mirt
 Imports:
     psych,
     ggplot2,

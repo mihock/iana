@@ -211,8 +211,10 @@ frequencies <- function(x) {
 #'
 #' Perform Velicer's Minimum Average Partial test for the variables (usually items) in a data frame.
 #'
-#' @param x a data frame containing the variables (items) to be analyzed
+#' @param data a data frame containing the variables (items) to be analyzed
 #' @param n the maximum number of factors to consider (default: 20)
+#' @param ... ignored
+#' @param x a mapTest object
 #'
 #' @details The \code{plot} method produces a graphical representation of the squared correlations.
 #'
@@ -255,8 +257,8 @@ frequencies <- function(x) {
 #' factanal(Df2, 2)
 #' })
 #'
-mapTest <- function(x, n = 20) {
-    x <- cor(x, use="pairwise")
+mapTest <- function(data, n = 20, ...) {
+    x <- cor(data, use="pairwise")
     nvar <- dim(x)[2]
 
     mean.sqcor <- mean((x[lower.tri(x)])^2)
@@ -281,7 +283,8 @@ mapTest <- function(x, n = 20) {
     return(res)
 }
 
-### @rdname mapTest
+#' @rdname mapTest
+#' @method print mapTest
 #' @export
 print.mapTest <- function(x, ...) {
     cat("Velicer's MAP test reaches its minimum with m =", which.min(x)-1, "components.\nMaximum number of components tested:", length(x) - 1, "\n\n")
@@ -289,8 +292,15 @@ print.mapTest <- function(x, ...) {
     print(MAP, row.names = FALSE)
 }
 
-### @rdname mapTest
+#' Plot mapTest object
+#' 
+#' Plot mapTest object, see \code{\link{mapTest}}.
+#' 
+#' @param x mapTest object
+#' @param ... ignored
+#' @method plot mapTest
 #' @export
+#' 
 plot.mapTest <- function(x, ...) {
     Component <- 0:(length(x) - 1)
     MAP <- data.frame(Component, x)
@@ -316,9 +326,8 @@ plot.mapTest <- function(x, ...) {
         #ylab(ylab) +
         scale_x_continuous(breaks=myticks) # + # Ticks
     #        ggtitle("MAP Test")
-
-    print(p)
-    ###p
+    #print(p)
+    p
 }
 
 #' Reliability
@@ -522,9 +531,9 @@ ggscree.plot <- function(Df, title = NULL,
 #' @param score total score to use
 #' @param method function to use for curve fitting, e.g. loess or lm
 #' @param alpha opaqueness of the points in the scatterplot
-#' @param jitter should jitter be added to the points?
+#' @param jitter amount of jitter
 #'
-#' @details To examine item characteristics, item scores are plotted against total scores or factor scores. To avoid overplotting, a small amount of jitter is added to overlapping points. (These are the light points in the plot.) In the upper left corner, the correlation of the total/factor score and the item score is given. The lines are locally weighted regression lines, the shaded regions represent 95\% confidence intervals around the expected item scores. If many data points are present it may be useful to decrease the opaqueness of the points and/or to deactivate jitter.
+#' @details To examine item characteristics, item scores are plotted against total scores or factor scores. To avoid overplotting, a small amount of jitter is added to overlapping points. In the upper left corner, the correlation of the total/factor score and the item score is given. The lines are locally weighted regression lines, the shaded regions represent 95\% confidence intervals around the expected item scores. If many data points are present it may be useful to decrease the opaqueness of the points and/or to deactivate jitter.
 #'
 #' @author Michael Hock \email{michael.hock@@uni-bamberg.de}
 #'
@@ -533,14 +542,15 @@ empICC <- function(x,
                    score = c("factor.thomson", "factor.bartlett", "mean", "sum"),
                    method = loess,
                    alpha = 0,
-                   jitter = TRUE) {
+                   jitter = 0.4) {
 
-#     if (!require(ggplot2)) stop("Package gglot2 must be installed to run empICC.")
-#     if (!require(reshape2)) stop("Package reshape2 must be installed to run empICC.")
-    #    if (!require(psych)) stop("Package psych must be installed to run empICC.")
     if (!is.data.frame(x)) stop("x must be a data frame.")
 
     x <- na.omit(x) ####
+
+    ####
+    if (is.na(jitter)) jitter <- 0.4  #### needed for shiny (otherwise app crashes if values are outside the "allowed" range)
+    ####
 
     score <- match.arg(score)
     if (score == "factor.thomson") {
@@ -566,30 +576,20 @@ empICC <- function(x,
     corrs <- data.frame(variable, corrs)
 
     x <- melt(x, id.vars = "scores")
-    # head(x)
     x.corrs <- min(x$scores)
     y.corrs <- max(x$value) + 0.25 ###
-    #     require(lattice)
-    #     xyplot(value ~ scores | variable, data = xx, type = c("p", "r"))
-    #     xyplot(value ~ scores, group = variable, data = xx, type = c("p", "r"))
-
-    #     qplot(scores, value, data = xx, facets = ~ variable ) +
-    #         geom_smooth(method = loess)
-    alpha.jitter <- alpha / 2
+    # Control the amount as follows
+    # qplot(am, vs, data = mtcars, position = position_jitter(w = 0.1, h = 0.1))
+    
     p <- qplot(scores, value, data = x,
+               position = position_jitter(width = jitter, height = jitter),
                facets = ~ variable, alpha = I(alpha),
-               xlab = xlab, ylab = "Item Score")  +
-        geom_text(data=corrs,
-                  aes(x=x.corrs, y=y.corrs, label=corrs),
-                  parse=TRUE, hjust = 0, size = 5) +
-        geom_smooth(method = method) +
-        theme(text = element_text(size = 14))
-#               colour = "black"),
-#               axis.title.x = element_text(vjust = 0.2),
-#               axis.title.y = element_text(vjust = 0.3),
-#               plot.title = element_text(vjust = 1.5))
-    if (jitter) p <- p + geom_jitter(alpha = alpha.jitter)
-    #if (TRUE) p <- p + geom_point(alpha = 0.05)
+               xlab = xlab, ylab = "Item Score") +
+      geom_text(data=corrs,
+                aes(x=x.corrs, y=y.corrs, label=corrs),
+                parse=TRUE, hjust = 0, size = 5) +
+      geom_smooth(method = method) +
+          theme(text = element_text(size = 14))
     print(p)
 }
 
@@ -799,7 +799,7 @@ ggplotICC.RM <- function(object, empICC = NULL, empCI = NULL,
 # Item Classification -----------------------------------------------------
 
 #' Subsetting Items
-#'
+#' 
 #' Returns a subset of items in a data frame with the \code{item.text} attribute preserved.
 #'
 #' @param x a data frame containing the items to be subsetted
@@ -823,7 +823,6 @@ subsetItem <- function(x, ...) {
     if (!is.null(old.item.text)) {
         pos <- match(names(newdf), names(x))
         new.item.text <- old.item.text[pos]
-        ### attr(newdf, "item.text") <- new.item.text
         newdf <- setItemText(newdf, items = new.item.text)
     }
     newdf
