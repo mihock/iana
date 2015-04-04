@@ -141,6 +141,7 @@ shinyUI(fluidPage(
                 
                 tabPanel("EFA",
                     h3("Exploratory Factor Analysis and Principal Components Analysis"),
+                    helpText("Analyses are performed with iana::factoranalysis, which uses psych::principal, psych::fa, and psych::fa.poly."),
                     h4("Factoring"),
                     fluidRow(
                         column(4, numericInput(inputId = "nFactors", 
@@ -204,7 +205,7 @@ shinyUI(fluidPage(
                     h3("Reliability and Item Statistics"),
                     helpText("The table shows item means, standard deviations, covariances between item scores and total score, item discriminations (i.e., item-total and item-remainder correlations), and the alpha obtained if the respective item is removed from the scale. At the bottom are statistics for the total score, i.e., the sum or the mean of the item scores for each person."),
                     checkboxInput(inputId = "reliabDetailed", 
-                        label = "Show detailed output (package psych)",
+                        label = "Show detailed output (psych::alpha)",
                         value = FALSE),
                     br(),
                     verbatimTextOutput(outputId = "reliability")
@@ -212,7 +213,7 @@ shinyUI(fluidPage(
                 
                 tabPanel("CFA",
                     h3("Confirmatory Factor Analysis"),
-                    helpText("Confirmatory factor analysis is performed via lavaan::cfa()."),
+                    helpText("Confirmatory factor analysis is performed with lavaan::cfa."),
 ###                    helpText("Because CFAs for a large number of variables are slow, the computation is suppressed if the number of variables exceeds the specified threshold."),
                     br(),
                     fluidRow(
@@ -251,7 +252,7 @@ shinyUI(fluidPage(
                     h3("Rasch Model and Partial Credit Model"),
 ###                    actionButton(inputId = "fitrasch", label = " Run "),
 ###                    helpText('Press the "Run" button to fit or refit the model. (Fitting Rasch models is computationally intensive, therefore computations are not performed automatically.)'),
-                    helpText("The appropriate model is automatically chosen based on the values of the items. For binary items, a Rasch Model is fitted. For items with more than two reponse categories, a Partial Credit Model is fitted. (The former model is actually a special case of the latter, however, the output is somewhat different.)"),
+                    helpText("Analyses are performed with eRm::Rasch and eRm:PCM. The appropriate model is automatically chosen based on the values of the items. For binary items, a Rasch Model is fitted. For items with more than two reponse categories, a Partial Credit Model is fitted. (The former model is actually a special case of the latter, however, the output is somewhat different.)"),
                     selectInput(inputId = "raschOutputOptions",
                         label = "Output:",
                         choices = c("Model tests", 
@@ -322,6 +323,7 @@ shinyUI(fluidPage(
                 
                 tabPanel("IRT",
                     h3("Multidimensional IRT models"),
+                    helpText("Analyses are performed with mirt::mirt."),
                     fluidRow(
                         column(6, 
                             numericInput(inputId = "mirt_nfactors", 
