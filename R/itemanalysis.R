@@ -21,6 +21,7 @@
 #' @aliases iana
 #' @importFrom psych alpha describe principal fa irt.fa KMO skew kurtosi
 #' @importFrom semTools reliability
+#' @importFrom mirt mirt
 #' @import ggplot2 GPArotation lavaan eRm markdown reshape2 stringr tidyr shiny shinythemes
 #' @docType package
 #' @author Michael Hock (\email{michael.hock@@uni-bamberg.de})

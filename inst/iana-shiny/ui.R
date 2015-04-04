@@ -95,7 +95,7 @@ shinyUI(fluidPage(
 
                 tabPanel("ICCs",
                     h3("Empirical Item Characteristic Curves"),
-                    helpText("To examine item characteristics, item scores are plotted against total scores or factor scores. To avoid overplotting, a small amount of jitter is added to overlapping points. In the upper left corner, the correlation of the total/factor score and the item score is given. The lines are locally weighted regression lines, the shaded regions represent 95% confidence intervals around the expected item scores. If you have many data points you might want to decrease the opaqueness of the points and/or to deactivate jitter (by setting it to 0."),
+                    helpText("To examine item characteristics, item scores are plotted against total scores or factor scores. To avoid overplotting, a small amount of jitter is added to overlapping points. In the upper left corner, the correlation of the total/factor score and the item score is given. The lines are locally weighted regression lines, the shaded regions represent 95% confidence intervals around the expected item scores. If you have many data points you might want to decrease the opaqueness of the points and/or to deactivate jitter (by setting it to 0.)"),
                     fluidRow(
                         column(4,
                             selectInput(inputId = "ICCscore",
