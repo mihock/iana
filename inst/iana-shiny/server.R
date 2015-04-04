@@ -1,4 +1,5 @@
 library(shiny)
+library(shinyAce)
 #require(lattice)
 require(ggplot2)
 # require(GPArotation)
@@ -7,7 +8,6 @@ require(eRm)
 ###require(mirt)
 # require(markdown)
 # require(reshape2)
-# require(stringr)
 # require(semTools)
 #
 # Bei Paketen, die in server.R angesprochen werden, brauchen wir das zusätzlich (neben Import)
@@ -572,24 +572,42 @@ shinyServer(function(input, output) {
         
     # CFA ####
 
+#     observe({
+#         print(input$cfaModelEditor)
+#     })
+    
+#     output$cfaoutput <- renderPrint({
+#         input$cfaEvalModel
+#         #return(isolate(eval(parse(text=input$cfaModelEditor))))
+#         isolate(cat("mymodel <-", input$cfaModelEditor))
+#     }) 
+    
     output$cfa <- renderPrint({
         log.output("CFA")
 
         x <- getSubset(checkedVars(), input$selectedDf, 3)
         if (is.null(x)) return()
 
-        maxvars <- input$cfamaxvars
-        if(ncol(x) > maxvars) {
-            cat("CFA was disabled because there are too many variables in the model.")
-            return()
-        }
+#         maxvars <- input$cfamaxvars
+#         if(ncol(x) > maxvars) {
+#             cat("CFA was disabled because there are too many variables in the model.")
+#             return()
+#         }
 
-        myvars <- paste(names(x), collapse = " + ")
-        if (regexpr("\\$", myvars)[1] > -1) {
-            cat("\nAt least on variable name contains a $-sign. This is not allowed in the model specification.\n")
-            return()
+        if (input$cfaUseModel) {
+            input$cfaEvalModel
+            isolate({
+                modelCmd <- paste0("model <- '", str_trim(input$cfaModelEditor), "'")
+                cat(modelCmd, "\n")
+            })
+        } else {
+            myvars <- paste(names(x), collapse = " + ")
+            if (regexpr("\\$", myvars)[1] > -1) {
+                cat("\nAt least on variable name contains a $-sign. This is not allowed in the model specification.\n")
+                return()
+            }
+            modelCmd <- paste0("model <- 'Factor =~ ", myvars, "'")
         }
-        modelCmd <- paste0("model <- 'Factor =~ ", myvars, "'")
         eval(parse(text = modelCmd))
 
         if (input$cfaEstimator == "WLSMV") {
@@ -610,6 +628,7 @@ shinyServer(function(input, output) {
                 input$cfaEstimator,
                 "')")
         }
+        log.output(myCmd)
 
         fit <- try(eval(parse(text = myCmd)))
         if (class(fit) == "try-error") return()

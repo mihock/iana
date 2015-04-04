@@ -1,6 +1,7 @@
 ### TODO: import?
 library(shiny)
 library(shinythemes)
+library(shinyAce)
 
 shinyUI(fluidPage(
     #theme = shinytheme("cerulean"),
@@ -211,21 +212,35 @@ shinyUI(fluidPage(
                 
                 tabPanel("CFA",
                     h3("Confirmatory Factor Analysis"),
-                    helpText("Below is the fit of a confirmatory one-factor model for all of the selected variables (items). This is useful for checking fit indexes such as the SRMR or RMSEA or for obtaining unstandardized factor loadings and their standard errors, which are not given by EFAs. The omegas above the summary are reliability estimates based on the factor loadings. McDonalds (1999) version is omega3. Because CFAs for a large number of variables are slow, the computation is suppressed if the number of variables exceeds the specified threshold."),
+                    helpText("Confirmatory factor analysis is performed via lavaan::cfa()."),
+###                    helpText("Because CFAs for a large number of variables are slow, the computation is suppressed if the number of variables exceeds the specified threshold."),
                     br(),
                     fluidRow(
-                        column(6, 
-                            sliderInput(inputId = "cfamaxvars", 
-                                label = "Threshold for computation:",
-                                min = 0, max = 100, value = 20,
-                                animate = TRUE)),
-                        column(6,
+#                         column(4, 
+#                             sliderInput(inputId = "cfamaxvars", 
+#                                 label = "Threshold for computation:",
+#                                 min = 0, max = 100, value = 20,
+#                                 animate = TRUE)),
+                        column(4,
                             selectInput(inputId = "cfaEstimator",
                                 label = "Estimator:",
-                                # choices = c("ML", "MLM", "WLSMV")))
-                                choices = c("ML", "MLM")))
+                                choices = c("ML", "MLM", "WLSMV")))
                     ),
                     br(),
+                    h4("Model specification"),
+                    helpText('Without explicit model specification, a one-factor model for all of the selected items is fit. For computing multi-factor models, check the "Use model specification" box and describe the model using Lavaan syntax in the editor frame below. Then click on "Evaluate" to compute the model.'),
+                    checkboxInput(inputId = "cfaUseModel", 
+                        label = "Use model specification"),
+                    aceEditor(outputId = "cfaModelEditor",
+                        value = "", 
+                        mode = "r",
+                        fontSize = 14,
+                        wordWrap = TRUE,
+                        height = "200px",
+                        theme = "textmate"),
+                    actionButton(inputId = "cfaEvalModel", "Evaluate"),
+                    br(), br(),
+                    helpText("Reliability estimates should not be used with WLSMV. The omegas above the summary are reliability estimates based on the factor loadings. McDonalds (1999) version is omega3."),
                     verbatimTextOutput(outputId = "cfa"),
                     br(),
                     strong("Reference"),
