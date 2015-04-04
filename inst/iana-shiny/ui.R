@@ -1,5 +1,4 @@
-
-# TODO: import?
+### TODO: import?
 library(shiny)
 library(shinythemes)
 
@@ -10,45 +9,27 @@ shinyUI(fluidPage(
     theme = shinytheme("united"),
     
     sidebarLayout(
-        
-        ###fluid = FALSE,
         position = "right",
-        
         sidebarPanel = sidebarPanel(
-            
-            ### width = 4,
-            
             h3("Item selection"),
-            
             helpText("The dropdown list below contains the data frames present in your R environment. Please select a data frame containing the variables (items) to analyze. You can then select or deselect variables. Notice that only variables coded with integer values are shown."),
             br(),
-            
             ###actionButton(inputId = "stopIana", label = " Stop "),
             ###submitButton("Apply"),
             ###br(),
             ####actionButton(inputId = "applyButton", label = "Apply"),
             ####br(),
-               
             selectInput(inputId = "selectedDf", label = "Data frame to use:",
                 choices = getDataFramesIana()),
             numericInput(inputId = "kUniqueValues", 
                 label = "Exclude variables with values outside the range of 0 and ...:",
                 min = 2, max = 20, value = 9, step = 1),
             helpText("To include all numeric (including non-integer) variables, set this to 20."),
-            
             uiOutput(outputId = "varsindf"),
-            
             helpText("Instead of clicking on the variable names above you can also specify a range of variables using the format 'FirstVar:LastVar'."),
             textInput(inputId = "varrange", label = "Variable range:"),
             helpText("Type Ctrl+A DELETE into the entry to clear to range."),
-            
             uiOutput(outputId = "casesindf")
-            
-            
-            #         numericInput(inputId = "plotHeightMultipanel", 
-            #                      label = "Plot height for multipanel plots:",
-            #                      min = 400, max = 2000, value = 800, step = 100),
-            #         textOutput(outputId = "phmp")
         ),
         
         mainPanel = mainPanel(
@@ -104,13 +85,6 @@ shinyUI(fluidPage(
                         p(""),
                         tableOutput(outputId = "descrStatsTotal")
                     ),
-                    
-                    #                     conditionalPanel(
-                    #                         condition = "input.distrType == 'freq'",
-                    #                         h3("Frequency counts and item stems"),
-                    #                         helpText("'NA' (not available) refers to missing values in the reponses."),
-                    #                         verbatimTextOutput(outputId = "frequencies"))
-                    
                     conditionalPanel(
                         condition = "input.distrType == 'freq'",
                         h3("Frequency counts and item stems"),
@@ -121,8 +95,7 @@ shinyUI(fluidPage(
 
                 tabPanel("ICCs",
                     h3("Empirical Item Characteristic Curves"),
-                    helpText("To examine item characteristics, item scores are plotted against total scores or factor scores. To avoid overplotting, a small amount of jitter is added to overlapping points. In the upper left corner, the correlation of the total/factor score and the item score is given. The lines are locally weighted regression lines, the shaded regions represent 95% confidence intervals around the expected item scores. If you have many data points you might want to decrease the opaqueness of the points and/or to deactivate jitter."),
-                    
+                    helpText("To examine item characteristics, item scores are plotted against total scores or factor scores. To avoid overplotting, a small amount of jitter is added to overlapping points. In the upper left corner, the correlation of the total/factor score and the item score is given. The lines are locally weighted regression lines, the shaded regions represent 95% confidence intervals around the expected item scores. If you have many data points you might want to decrease the opaqueness of the points and/or to deactivate jitter (by setting it to 0."),
                     fluidRow(
                         column(4,
                             selectInput(inputId = "ICCscore",
@@ -131,30 +104,33 @@ shinyUI(fluidPage(
                                     "Factor score (Bartlett)" = "factor.bartlett",
                                     "Total (mean) score" = "mean",
                                     "Total (sum) score" = "sum")),
+                            sliderInput(inputId = "ICCalpha", 
+                                label = "Opaqueness of points:",
+                                min = 0, max = 1, value = 0.5, step = 0.05,
+                                animate = TRUE)),
+                        column(4, 
+                            sliderInput(inputId = "ICCloessspan", 
+                                label = "Span (degree of smoothing):",
+                                min = 0, max = 1, value = 0.75, step = 0.05,
+                                animate = TRUE),
                             checkboxInput(inputId = "ICClinear", 
                                 label = "Fit linear regression")),
                         column(4, 
-                            numericInput(inputId = "ICCjitter", 
+                            sliderInput(inputId = "ICCjitter", 
                                 label = "Amount of jitter:",
-                                min = 0, max = 1, value = 0.3, step = 0.1)),
-                        column(4, 
-                            numericInput(inputId = "ICCalpha", 
-                                label = "Opaqueness of points:",
-                                min = 0, max = 1, value = 0.5, step = 0.1))
+                                min = 0, max = 1, value = 0.3, step = 0.05,
+                                animate = TRUE))
                     ),
-                    
                     plotOutput(outputId = "ICCs", height = getOption("iana.plotheight")),
-                    h3("Notes"),
-                    helpText("The function 'loess' is used to produce locally weighted regression fits. The span (parameter alpha), which determines the degree of smoothing, is 0.75."),
+                h3("Notes"),
+                helpText("The function 'loess' is used to produce locally weighted regression fits. Refer to its help page for details."),
                     helpText("Factor scores are based on based on maximum-likelihood factor analysis. See 'factanal' for details.")
                 ),
 
                 tabPanel("Dimensionality",
                     h3("Parallel Analysis"),
                     helpText("The parallel analysis below is based on the principal components of the data. The circles connected by the thick line show the empirical eigenvalues. The thin lines represent the eigenvalues of 20 simulations with normally distributed random data. A dimension/component is judged to be meaningful if its eigenvalue is larger than the eigenvalues obtained from random data."),
-                    #plotOutput(outputId = "hist", height = "400px", width = "400px")
                     plotOutput(outputId = "parallelanalysis"),
-                    
                     h3("MAP Test"),
                     helpText("The Minimum Average Partial (MAP) test works by computing the average of the squared (partial) correlations between the p variables of a data set after the first m = 1 to (p-1) principal components have been removed (partialled out). The suggestion is to retain components, for which this average reaches its minimum. The table below also shows the average squared correlation between the variables (no component removed; m = 0). If this value is the lowest in the table, there is probably no common variance to analyze. The maximum number of components removed is 20."),
                     verbatimTextOutput(outputId = "maptest"),
@@ -164,7 +140,6 @@ shinyUI(fluidPage(
                 
                 tabPanel("EFA",
                     h3("Exploratory Factor Analysis and Principal Components Analysis"),
-
                     h4("Factoring"),
                     fluidRow(
                         column(4, numericInput(inputId = "nFactors", 
@@ -187,7 +162,6 @@ shinyUI(fluidPage(
                             label = "Use polychoric correlations",
                             value = FALSE))
                     ),
-                    
                     h4("Markers"),
                     fluidRow(
                         column(4, numericInput(inputId = "faMinloading", 
@@ -200,7 +174,6 @@ shinyUI(fluidPage(
                             label = "Maximum complexity:",
                             min = 0, max = 10, value = 2, step = 0.25))
                     ),
-                    
                     h4("Output options"),
                     fluidRow(
                         column(4, numericInput(inputId = "faDigits", 
@@ -210,26 +183,17 @@ shinyUI(fluidPage(
                             label = "Trim item text (characters):",
                             min = 20, max = 500, value = 250, step = 5))
                     ),
-                    
-                    #h3("Results"),
-                    ###verbatimTextOutput(outputId = "efa"),
-                    
                     hr(),
-                    
                     h3("Model fit"),
                     fluidRow(column(12, tableOutput(outputId = "factorfit"))),
-                    
                     h3("Factor loadings"),
                     fluidRow(column(12, tableOutput(outputId = "loadings"))),
                     p("F = Factor, M = Marker, a_j = Factor loadings, h2 = Communality, Cmpl = Factorial complexity"),
-
                     h3("Factor variances"),
                     fluidRow(column(12, tableOutput(outputId = "factorvariances"))),
-                    
                     conditionalPanel(condition = "input.nFactors > 1",
-                    h3("Factor correlations"),
-                    fluidRow(column(12, tableOutput(outputId = "factorcorrelations")))),
-                    
+                        h3("Factor correlations"),
+                        fluidRow(column(12, tableOutput(outputId = "factorcorrelations")))),
                     h3("Code"),
                     p("The following code may be used to create data frames of items assigned to the factors. (Some items may need to be inverted.)"),
                     verbatimTextOutput(outputId = "factorcode")
@@ -245,12 +209,10 @@ shinyUI(fluidPage(
                     verbatimTextOutput(outputId = "reliability")
                 ),
                 
-                
                 tabPanel("CFA",
                     h3("Confirmatory Factor Analysis"),
                     helpText("Below is the fit of a confirmatory one-factor model for all of the selected variables (items). This is useful for checking fit indexes such as the SRMR or RMSEA or for obtaining unstandardized factor loadings and their standard errors, which are not given by EFAs. The omegas above the summary are reliability estimates based on the factor loadings. McDonalds (1999) version is omega3. Because CFAs for a large number of variables are slow, the computation is suppressed if the number of variables exceeds the specified threshold."),
                     br(),
-                    
                     fluidRow(
                         column(6, 
                             sliderInput(inputId = "cfamaxvars", 
@@ -263,7 +225,6 @@ shinyUI(fluidPage(
                                 # choices = c("ML", "MLM", "WLSMV")))
                                 choices = c("ML", "MLM")))
                     ),
-                    
                     br(),
                     verbatimTextOutput(outputId = "cfa"),
                     br(),
@@ -273,10 +234,9 @@ shinyUI(fluidPage(
                 
                 tabPanel("Rasch",
                     h3("Rasch Model and Partial Credit Model"),
-##                    actionButton(inputId = "fitrasch", label = " Run "),
-##                    helpText('Press the "Run" button to fit or refit the model. (Fitting Rasch models is computationally intensive, therefore computations are not performed automatically.)'),
+###                    actionButton(inputId = "fitrasch", label = " Run "),
+###                    helpText('Press the "Run" button to fit or refit the model. (Fitting Rasch models is computationally intensive, therefore computations are not performed automatically.)'),
                     helpText("The appropriate model is automatically chosen based on the values of the items. For binary items, a Rasch Model is fitted. For items with more than two reponse categories, a Partial Credit Model is fitted. (The former model is actually a special case of the latter, however, the output is somewhat different.)"),
-                    
                     selectInput(inputId = "raschOutputOptions",
                         label = "Output:",
                         choices = c("Model tests", 
@@ -292,9 +252,15 @@ shinyUI(fluidPage(
                     conditionalPanel(
                         condition = "input.raschOutputOptions == 'Model tests'",
                         h3("Model tests"),
-                        verbatimTextOutput(outputId = "pcm.tests")
+                        uiOutput(outputId = "factorsindf"),
+                        verbatimTextOutput(outputId = "pcm.tests"),
+                        radioButtons(inputId = "pcm.graphmodeltest.labels",
+                            label = "Item labels:",
+                            choices = c("Name" = "item",
+                                "Number" = "number")),
+                        plotOutput(outputId = "pcm.graphmodeltest", 
+                            height = getOption("iana.plotheight"))
                     ),
-
                     conditionalPanel(
                         condition = "input.raschOutputOptions == 'iccs'",
                         h3("ICCs"),
@@ -308,7 +274,6 @@ shinyUI(fluidPage(
                         plotOutput(outputId = "rasch.icc", 
                             height = getOption("iana.plotheight"))
                     ),
-
                     conditionalPanel(
                         condition = "input.raschOutputOptions == 'Person-item map'",
                         h3("Person-item map"),
@@ -316,27 +281,22 @@ shinyUI(fluidPage(
                         checkboxInput(inputId = "pcm.sortitems", label = "Sort items by location"),
                         plotOutput(outputId = "pcm.pimap", height = getOption("iana.plotheight"))
                     ),
-
                     conditionalPanel(
                         condition = "input.raschOutputOptions == 'testinfo'",
                         h3("Test and item information"),
                         plotOutput(outputId = "pcm.info", height = getOption("iana.plotheight"))
                     ),
-                    
                     conditionalPanel(
                         condition = "input.raschOutputOptions == 'itemfit'",
                         h3("Item fit statistics"),
                         verbatimTextOutput(outputId = "pcm.itemfit")
                     ),
-                    
-
                     conditionalPanel(
                         condition = "input.raschOutputOptions == 'itemstats'",
                         h3("Item parameters and fit statistics"),
                         helpText("For the PCM, items coded with an origin of 1 are recoded to have an origin of 0. Therefore, the raw (sum) score to person parameter mapping also starts also with 0."),
                         verbatimTextOutput(outputId = "pcm.itemstats")
                     ),
-                    
                     conditionalPanel(
                         condition = "input.raschOutputOptions == 'personstats'",
                         h3("Person parameters and fit statistics"),
@@ -381,16 +341,8 @@ shinyUI(fluidPage(
                                 )
                             ))
                     ),
-                    
                     helpText("Method: EM is suggested for fitting 1 or 2 dimensions, QMCEM for fitting 3 or more."),
-                    
                     verbatimTextOutput(outputId = "mirt.summary")
-                    
-#                     conditionalPanel(
-#                         condition = "input.raschOutputOptions == 'Model tests'",
-#                         h3("Model tests"),
-#                         verbatimTextOutput(outputId = "pcm.tests")
-#                     ),
                 ),
                 
                 navbarMenu("Info",

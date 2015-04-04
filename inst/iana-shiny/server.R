@@ -44,9 +44,8 @@ shinyServer(function(input, output) {
     # Data ####
 
     getSelectedDf <- reactive({
-        get(input$selectedDf)
+        na.omit(get(input$selectedDf))
     })
-
 
     getLikertLikeVars <- function(Df, unique.values = 9) {
         # Returns the names of all numeric variables in Df
@@ -57,14 +56,12 @@ shinyServer(function(input, output) {
             is.int <- function(x) {
                 if (is.numeric(x)) {
                     ceiling(x) == floor(x)
-                    #round(x) == x
                 } else {
                     return(FALSE)
                 }
             }
             if (unique.values > 19) {
                 is.numeric(x)
-                #is.int(x)
             } else {
                 is.int(x) &&
                     length(unique(x)) <= unique.values &&
@@ -74,8 +71,8 @@ shinyServer(function(input, output) {
         }
 
         log.output("getlikertlikevars")
-        Df <- na.omit(Df) ### should be be done on column level (?)
-        ### to do: what do we do if no values are left?
+        ###Df <- na.omit(Df) ### no in getSelectedDf()
+        ### todo: what do we do if no values are left?
         if (nrow(Df) == 0) return(NULL)
         ###
 
@@ -89,13 +86,24 @@ shinyServer(function(input, output) {
     getVarsInDf <- reactive({
         log.output("getVarsInDf")
         varnames <- getLikertLikeVars(getSelectedDf(), input$kUniqueValues)
-        if (is.null(varnames)) {
-            log.output("getVarsInDf: varnames is NULL")
+        if (length(varnames) == 0) {
+            log.output("getVarsInDf: No Likert-like variables found in the data frame.")
             varnames <- NULL
         }
         varnames
     })
-
+    
+    getFactorsInDf <- reactive({
+        getFactors <- function(x) {
+            fnames <- names(x)[sapply(x, is.factor)]
+            if (length(fnames) > 0) return(fnames)
+            else return(NULL)
+        }
+        log.output("getFactorsInDf")
+        fnames <- c("median", getFactors(getSelectedDf()))
+        fnames
+    })
+    
     getVarRange <- reactive({
         log.output("getVarRange")
         if (input$varrange == "") {
@@ -103,8 +111,8 @@ shinyServer(function(input, output) {
             if (length(varrange) > 80) varrange <- varrange[1:80]
         } else {
             newDf <- try(subset(getSelectedDf(),
-                                select = eval(parse(text = input$varrange))),
-                         silent = TRUE)
+                select = eval(parse(text = input$varrange))),
+                silent = TRUE)
             if (class(newDf) == "try-error") {
                 log.output("Error in getVarRange")
                 return()
@@ -114,18 +122,28 @@ shinyServer(function(input, output) {
         }
         varrange
     })
-
+    
     output$varsindf <- renderUI({
-        log.output("in outputvarsindf")
+        log.output("outputvarsindf")
         varsInDf <- getVarsInDf()
         if (is.null(varsInDf)) return()
-
+        
         checkboxGroupInput(inputId = "varnamesindf",
-                           label = "Variables to use:",
-                           choices = varsInDf,
-                           selected = getVarRange())
+            label = "Variables to use:",
+            choices = varsInDf,
+            selected = getVarRange())
     })
-
+    
+    output$factorsindf <- renderUI({
+        log.output("outputfactorsindf")
+        factorsInDf <- getFactorsInDf()
+        if (is.null(factorsInDf)) return(NULL)
+        
+        selectInput(inputId = "factorsindf",
+            label = "Split criterion for Andersen und Wald tests:",
+            choices = factorsInDf)
+    })
+    
     checkedVars <- reactive({
         # Return the checked variables. If these need to updated return NULL.
         # Intended to be called at the beginning of statistical functions
@@ -194,7 +212,6 @@ shinyServer(function(input, output) {
         Df
 ####})                
     }
-
 
     output$casesindf <- renderUI({
         log.output("in outputcasesindf")
@@ -336,41 +353,6 @@ shinyServer(function(input, output) {
                 geom_density(color="blue")
         }
         p
-        
-        #stat_function(fun=dnorm, args=list(mean=mean(df$PF), sd=sd(df$PF)))
-        
-        #histogram with density line overlaid
-#         p2<-ggplot(xy, aes(x=xvar)) + 
-#             geom_histogram(aes(y = ..density..), color="black", fill=NA) +
-#             geom_density(color="blue")
-        
-        
-#         if (input$histtype == "density") {
-#             
-#         } else {
-#             
-#         }
-#         if (bins < 4) bins <- round(log2(length(Total)) + 1) # Default
-#         # This first max is only valid for integer scores, the second
-#         # is not always okay.
-#         maxbins <- max(1 + max(sumScore) - min(sumScore),
-#                        length(unique(Total)))
-#         # take the larger of both???
-#         if (bins > maxbins) bins <- maxbins
-#         if (htype == "density") {
-#             print(histogram(~ Total, xlab = "Total Score",
-#                             type = "density",
-#                             nint = bins,
-#                             panel = function(x, ...) {
-#                                 panel.histogram(x, ...)
-#                                 panel.mathdensity(dmath = dnorm,
-#                                                   col = "red", lwd = 2,
-#                                                   args = list(mean=mean(x),sd=sd(x)))
-#                             }))
-#         } else {
-#             print(histogram(~ Total, type = htype, nint = bins,
-#                             xlab = "Total Score"))
-#         }
     })
     
     output$descrStatsTotal <- renderTable({
@@ -390,13 +372,17 @@ shinyServer(function(input, output) {
         x <- getSubset(checkedVars(), input$selectedDf)
         if (is.null(x)) return()
 
-        if (input$ICClinear) {
-            empICC(x, input$ICCscore, method = lm, alpha = input$ICCalpha,
-                   jitter = input$ICCjitter)
-        } else {
-            empICC(x, input$ICCscore, alpha = input$ICCalpha,
-                   jitter = input$ICCjitter)
-        }
+#         if (input$ICClinear) {
+#             empICC(x, input$ICCscore, method = "lm", alpha = input$ICCalpha,
+#                    jitter = input$ICCjitter)
+#         } else {
+#             empICC(x, input$ICCscore, alpha = input$ICCalpha,
+#                    jitter = input$ICCjitter)
+#         }
+        if (input$ICClinear) method = "lm"
+        else method = "loess"
+        empICC(x, input$ICCscore, method = method, span = input$ICCloessspan,
+            alpha = input$ICCalpha, jitter = input$ICCjitter)
     }, res = 96) ### check res
 
 
@@ -655,8 +641,8 @@ shinyServer(function(input, output) {
         log.output("computePCM")
         x <- getSubset(checkedVars(), input$selectedDf, 3)
         if (is.null(x)) return()
-        x <- na.omit(x) ####
-        
+        ###x <- na.omit(x) ####
+
         # Fit a Rasch Model if data have 2 unique values,
         # otherwise fit a Partial credit model
         if ( length(unique(as.vector(as.matrix(x)))) == 2 ) {
@@ -682,18 +668,45 @@ shinyServer(function(input, output) {
             cat("Fitting a Rasch Model for binary items because data\nhave 2 unique values.\n")
         else 
             cat("Fitting a Partial Credit Model because data\n have more than 2 unique values.\n")
-
+        splitcriterion <- input$factorsindf
+        if (length(splitcriterion) == 0) splitcriterion <- "median"
         cat("\nANDERSEN'S LR TEST")
         cat("\n==================\n")
-        tryPrintExpr(LRtest(x$res))
+        cat("Split criterion:", splitcriterion, "\n")
+        if (splitcriterion == "median")
+            tryPrintExpr(LRtest(x$res))
+        else
+            tryPrintExpr(LRtest(x$res, splitcr = getSelectedDf()[[splitcriterion]]))
         cat("\nWALD TEST")
         cat("\n=========\n")
-        tryPrintExpr(Waldtest(x$res))
+        cat("Split criterion:", splitcriterion, "\n")
+        if (splitcriterion == "median")
+            tryPrintExpr(Waldtest(x$res))
+        else ### Todo: Allow only binary factors?
+            tryPrintExpr(Waldtest(x$res, splitcr = getSelectedDf()[[splitcriterion]]))
         cat("\nMARTIN LÖF TEST")
         cat("\n===============\n")
         tryPrintExpr(MLoef(x$res))
     })
+    
+    output$pcm.graphmodeltest <- renderPlot({
+        log.output("pcm.graphmodeltest")
+        x <- computePCM()
+        if (is.null(x)) return()
+        
+        ### Todo: We compute LRTest twice. Catch errors?
+        splitcriterion <- input$factorsindf
+        if (length(splitcriterion) == 0) splitcriterion <- "median"
+        if (splitcriterion == "median")
+            res <- LRtest(x$res, se = TRUE)
+        else
+            res <- LRtest(x$res, splitcr = getSelectedDf()[[splitcriterion]], se = TRUE)
+        #plotGOF(res, conf = list())
+        plotGOF(res, tlab = input$pcm.graphmodeltest.labels, ctrline = list())    
+    }, res = 96)
+    ### Check "res"
 
+    
     output$pcm.itemfit <- renderPrint({
         log.output("pcm.itemfit")
         x <- computePCM()
@@ -860,5 +873,4 @@ shinyServer(function(input, output) {
     output$info <- renderPrint({
         paste0("Working directory: ", getwd(), ", Temp dir: ", tempdir())
     })
-
 })

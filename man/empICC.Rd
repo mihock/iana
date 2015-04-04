@@ -5,14 +5,16 @@
 \title{Empirical ICCs}
 \usage{
 empICC(x, score = c("factor.thomson", "factor.bartlett", "mean", "sum"),
-  method = loess, alpha = 0, jitter = 0.4)
+  method = "loess", span = 0.75, alpha = 0, jitter = 0.4)
 }
 \arguments{
 \item{x}{data frame in which rows are subjects and colums are test items}
 
 \item{score}{total score to use}
 
-\item{method}{function to use for curve fitting, e.g. loess or lm}
+\item{method}{function to use for curve fitting, e.g. "loess" or "lm"}
+
+\item{span}{degree of smoothing used for loess (see \code{\link{loess}})}
 
 \item{alpha}{opaqueness of the points in the scatterplot}
 

@@ -42,10 +42,8 @@ NULL
 #' @export
 getDataFrames <- function() {
     x <- ls(.GlobalEnv)
-    ret <- x[sapply(x, function(x) is.data.frame(get(x)))]
-    #### Todo
-    if (length(ret) == 0) ret <- "No data frames found!"
-    ret
+    x <- x[sapply(x, function(x) is.data.frame(get(x, 1)))]
+    x
 }
 
 #' Data frames in global workspace
@@ -61,12 +59,12 @@ getDataFrames <- function() {
 #' @export
 getDataFramesIana <- function() {
     x <- ls(.GlobalEnv)
-    if (length(x) > 0) x <- x[sapply(x, function(x) is.data.frame(get(x)))]
+    if (length(x) > 0) x <- x[sapply(x, function(x) is.data.frame(get(x, 1)))]
     if (length(x) == 0) {
         load("data/ExampleData.RData", .GlobalEnv)
         load("data/daten_sose14.rda", .GlobalEnv)
         x <- ls(.GlobalEnv)
-        x <- x[sapply(x, function(x) is.data.frame(get(x)))]
+        x <- x[sapply(x, function(x) is.data.frame(get(x, 1)))]
     }
     if (length(x) == 0) ret <- "this should not happen: no data frames found"
     x
@@ -451,7 +449,13 @@ ggscree.plot <- function(Df, title = NULL,
                           xlab = "Component", ylab = "Eigenvalue") {
 #     if (require(ggplot2) == FALSE) {
 #         stop("Package ggplot2 must be installed.")
-#     }
+    #     }
+
+    ### Hack to avoid Note in package check
+    Dimension <- NULL
+    Eigenvalue <- NULL
+    ### End of Hack
+
     mat <- Df
     if (use == "complete.obs")
         mat <- na.omit(Df)
@@ -529,7 +533,8 @@ ggscree.plot <- function(Df, title = NULL,
 #'
 #' @param x data frame in which rows are subjects and colums are test items
 #' @param score total score to use
-#' @param method function to use for curve fitting, e.g. loess or lm
+#' @param method function to use for curve fitting, e.g. "loess" or "lm"
+#' @param span degree of smoothing used for loess (see \code{\link{loess}})
 #' @param alpha opaqueness of the points in the scatterplot
 #' @param jitter amount of jitter
 #'
@@ -540,7 +545,8 @@ ggscree.plot <- function(Df, title = NULL,
 #' @export
 empICC <- function(x,
                    score = c("factor.thomson", "factor.bartlett", "mean", "sum"),
-                   method = loess,
+                   method = "loess",
+                   span = 0.75,
                    alpha = 0,
                    jitter = 0.4) {
 
@@ -575,12 +581,15 @@ empICC <- function(x,
     corrs <- sprintf("r==%.2f", corrs)
     corrs <- data.frame(variable, corrs)
 
+    ### Todo: workaround for Note by check procedure:
+    ### empICC: no visible binding for global variable ?value?
+    ### See: http://stackoverflow.com/questions/8096313/no-visible-binding-for-global-variable-note-in-r-cmd-check
+    value <- NULL
+    ###
     x <- melt(x, id.vars = "scores")
     x.corrs <- min(x$scores)
     y.corrs <- max(x$value) + 0.25 ###
-    # Control the amount as follows
-    # qplot(am, vs, data = mtcars, position = position_jitter(w = 0.1, h = 0.1))
-    
+
     p <- qplot(scores, value, data = x,
                position = position_jitter(width = jitter, height = jitter),
                facets = ~ variable, alpha = I(alpha),
@@ -588,9 +597,9 @@ empICC <- function(x,
       geom_text(data=corrs,
                 aes(x=x.corrs, y=y.corrs, label=corrs),
                 parse=TRUE, hjust = 0, size = 5) +
-      geom_smooth(method = method) +
-          theme(text = element_text(size = 14))
-    print(p)
+      geom_smooth(method = method, span = span) +
+        theme(text = element_text(size = 14))
+    p
 }
 
 #' ICCs for Rasch Model
@@ -635,6 +644,14 @@ ggplotICC.RM <- function(object, empICC = NULL, empCI = NULL,
         })
         return(p.list)
     }
+
+    ### Hack to avoid Note in package check
+    Theta <- NULL
+    Probability <- NULL
+    ICC <- NULL
+    Dimension <- NULL
+    Eigenvalue <- NULL
+    ### End of Hack
     
     # plotICC.Rm from eRm 0.15-1
     ############################################################################
