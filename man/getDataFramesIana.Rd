@@ -4,15 +4,19 @@
 \alias{getDataFramesIana}
 \title{Data frames in global workspace}
 \usage{
-getDataFramesIana()
+getDataFramesIana(min = 20)
+}
+\arguments{
+\item{min}{(integer) minimum number of required cases}
 }
 \value{
 A character vector with the names of the data frames
 }
 \description{
-Returns of a vector with the names of the data frames present in the
-global environment. If no data frame is found, Iana's example data
-are loaded.
+Returns of a vector with the names of the data frames present in
+the global environment that contain at least \code{min} cases
+(after NAs are omitted). If no data frame is found, Iana's example
+data are loaded.
 }
 \author{
 Michael Hock \email{michael.hock@uni-bamberg.de}

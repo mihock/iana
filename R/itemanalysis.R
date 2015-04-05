@@ -22,7 +22,7 @@
 #' @importFrom psych alpha describe principal fa irt.fa KMO skew kurtosi
 #' @importFrom semTools reliability
 #' @importFrom mirt mirt
-#' @import ggplot2 GPArotation lavaan eRm markdown reshape2 stringr tidyr shiny shinythemes
+#' @import ggplot2 GPArotation lavaan eRm markdown reshape2 stringr tidyr shiny shinythemes shinyAce
 #' @docType package
 #' @author Michael Hock (\email{michael.hock@@uni-bamberg.de})
 #' @references Shiny web framework for R: \url{http://www.rstudio.com/shiny/}
@@ -49,25 +49,37 @@ getDataFrames <- function() {
 
 #' Data frames in global workspace
 #'
-#' Returns of a vector with the names of the data frames present in the
-#' global environment. If no data frame is found, Iana's example data
-#' are loaded.
+#' Returns of a vector with the names of the data frames present in
+#' the global environment that contain at least \code{min} cases
+#' (after NAs are omitted). If no data frame is found, Iana's example
+#' data are loaded.
+#'
+#' @param min (integer) minimum number of required cases
 #'
 #' @return A character vector with the names of the data frames
 #'
 #' @author Michael Hock \email{michael.hock@@uni-bamberg.de}
 #'
 #' @export
-getDataFramesIana <- function() {
+getDataFramesIana <- function(min = 20) {
     x <- ls(.GlobalEnv)
-    if (length(x) > 0) x <- x[sapply(x, function(x) is.data.frame(get(x, 1)))]
+    if (length(x) > 0) {
+        x <- x[sapply(x, function(x) is.data.frame(get(x, 1)))]
+        lx <- rep(TRUE, length(x))
+        for (i in 1:length(x)) {
+            if(nrow(na.omit(get(x[i], 1))) < min) lx[i] <- FALSE
+        }
+        x <- x[lx]
+    }
+    
+    ### Clean this
     if (length(x) == 0) {
         load("data/ExampleData.RData", .GlobalEnv)
         load("data/daten_sose14.rda", .GlobalEnv)
         x <- ls(.GlobalEnv)
         x <- x[sapply(x, function(x) is.data.frame(get(x, 1)))]
     }
-    if (length(x) == 0) ret <- "this should not happen: no data frames found"
+    if (length(x) == 0) x <- "this should not happen: no data frames found"
     x
 }
 
@@ -924,7 +936,9 @@ getItemText <- function(x) {
 #' @export
 #
 factoranalysis <- function(x, nfactors, rotate = "promax", fm = "ml",
-                           polychor = FALSE, return.res = FALSE) {
+                   polychor = FALSE, return.res = FALSE) {
+    loadNamespace("GPArotation") ### needed for oblimin and some other
+                                 ### rotations in psych::principal
     if (fm == "principal") {
         q <- psych::principal(x, nfactors, rotate = rotate)
         if (!return.res) cat("PRINCIPAL COMPONENTS ANALYSIS\n")

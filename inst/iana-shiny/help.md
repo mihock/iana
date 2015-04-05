@@ -11,7 +11,7 @@ You may have noticed that the first start takes some time. This is because Iana 
 
 ### Analyzing Data
 
-On startup, Iana checks which data frames are present in your R environment and shows them in the dropdown list located in the right part of the GUI. Selecting a data frame makes its variables available to the functions implemented in Iana. You see these variables as labels of the check boxes located beneath the data frame dropdown list. These labels are updated whenever you select a new data frame. 
+On startup, Iana checks which data frames with a least 20 cases are present in your R environment and shows them in the dropdown list located in the right part of the GUI. Selecting a data frame makes its variables available to the functions implemented in Iana. You see these variables as labels of the check boxes located beneath the data frame dropdown list. These labels are updated whenever you select a new data frame. 
 
 Possibly, not all variables in the data frame are shown as labels. For each variable in the selected data frame, Iana checks whether it looks like a binary or a Likert-type item. Such items normally have a low number of discrete values (2--9), which are usually coded as integers with an origin of 0 or 1. Iana considers variables that meet these criteria as items and hides the other variables in the data frame. You can change these criteria by specifying a different range of values in the numeric input box located above the item list. Setting this value to the maximum (20) shows all numeric variables in the data frame, including variables with non-integer or negative values. Notice, however, that not all functions are able to handle non-integer variables, so that you will get error messages if you try to analyze such variables.
 

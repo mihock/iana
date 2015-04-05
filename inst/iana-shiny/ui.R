@@ -149,7 +149,10 @@ shinyUI(fluidPage(
                             min = 1, max = 20, value = 1, step = 1)),
                         column(4, selectInput(inputId = "faMethod",
                             label = "Factoring method:",
-                            choices = c("Maximum likelihood", "Minimum residuals", "Principal axes", "Principal components"))),
+                            choices = c("Maximum likelihood" = "ml", 
+                                "Minimum residuals" = "minres", 
+                                "Principal axes" = "pa", 
+                                "Principal components" = "princomp"))),
                         column(4, selectInput(inputId = "faRotation",
                             label = "Rotation:",
                             choices = c("varimax", "promax", "oblimin", "none", 
@@ -344,9 +347,16 @@ shinyUI(fluidPage(
                     fluidRow(
                         column(6, 
                             selectInput(inputId = "mirt_rotate",
-                                label = "Model:",
+                                label = "Rotation:",
                                 choices = c(
-                                    'promax', 'oblimin', 'varimax', 'quartimin', 'targetT', 'targetQ', 'pstT', 'pstQ', 'oblimax', 'entropy', 'quartimax', 'simplimax', 'bentlerT', 'bentlerQ', 'tandemI', 'tandemII', 'geominT', 'geominQ', 'cfT', 'cfQ', 'infomaxT', 'infomaxQ', 'mccammon', 'bifactorT', 'bifactorQ')
+                                    'promax', 'oblimin', 'varimax', 'quartimin', 
+                                    'oblimax', 'entropy', 'quartimax', 
+                                    'simplimax', 'bentlerT', 'bentlerQ', 
+                                    'tandemI', 'tandemII', 'geominT', 'geominQ',
+                                    'cfT', 'cfQ', 'infomaxT', 'infomaxQ', 
+                                    'mccammon', 'bifactorT', 'bifactorQ')
+                                #### Not included (need an additional argument): 
+                                #### 'targetT', 'targetQ', 'pstT', 'pstQ', 
                             )),
                         column(6, 
                             selectInput(inputId = "mirt_method",
