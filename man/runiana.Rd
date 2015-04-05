@@ -4,12 +4,14 @@
 \alias{runiana}
 \title{Run \code{iana}}
 \usage{
-runiana(plotheight = 750L, port = NULL)
+runiana(data = NULL, plotheight = 750L, port = NULL)
 }
 \arguments{
-\item{plotheight}{An integer value giving the height of multipanel plots in pixels. The default height is 750 pixels, which may not be enough if many (more than 20) items are analyzed. Valid values range from 300 to 2000.}
+\item{data}{a string specifying the data data frame to select initially}
 
-\item{port}{The TCP port the application should listen on, see \code{\link{runApp}}.}
+\item{plotheight}{an integer value giving the height of multipanel plots in pixels. The default height is 750 pixels, which may not be enough if many (more than 20) items are analyzed. Valid values range from 300 to 2000.}
+
+\item{port}{TCP port the application should listen on, see \code{\link{runApp}}.}
 }
 \description{
 Run \code{iana} in the default browser.
@@ -21,17 +23,21 @@ Before running \code{iana}, you should create one or more data frames that conta
 
 When one of the data frames is selected in the GUI, \code{iana} lists the numeric variables in that data frame. From this list, the items to include in the analyses performed by \code{iana} can then be selected. You can also specify ranges of variables in the input box below the list.
 
-Because responses to ordered-category items are usually coded with integers ranging from 1 to the number of response categories (or from 0 to number of categories minus 1), and the number of categories is usually small (< 10), only variables with a limited range of non-negative integer values are shown. However, this may be changed by increasing the value in the numeric input box located above the variable list. Anyway, the items to be analyzed should be integers and, for some types of analysis (for example, partial credit models), these integers should fall within a small range. Otherwise you will probably get error messages.
+Because responses to ordered-category items are usually coded with integers ranging from 1 to the number of response categories (or from 0 to number of categories minus 1), and the number of categories is usually small (< 10), only variables with a limited range of non-negative integer values are shown. However, this may be changed by increasing the value in the numeric input box located above the variable list. Anyway, the items to be analyzed should be integers and, for some types of analysis (for example, partial credit models), these integers should fall within a small range. Otherwise, computations will probably fail.
 
 Missing values should be handled before \code{iana} is launched. \code{iana} removes rows with incomplete values in a data frame via \code{\link{na.omit}}, which can result in a substantial reduction of the number of cases.
+
+If a \code{data} argument is provided, the corresponding data frame is initially selected. Providing a data frame is recommended because \code{iana} otherwise starts its compuations with first data frame it finds, which may not be the right one.
 
 \code{iana} blocks the console while it is running. Simply press <Escape> in the console (or, in RStudio, click on the red STOP button in the upper right of the console window) to terminate \code{iana} and get the console responsive again. You can then do computations in R and later relaunch \code{iana}. Relaunching \code{iana} will open a new browser tab, so you might want to close the old tab in the browser before you return to R.
 }
 \examples{
 \dontrun{
 runiana()
+# Select a data frame to start with
+runiana("my_data_frame")
 # Increase plot height to 900 pixels
-runiana(900)}
+runiana(plotheight = 900)}
 }
 \author{
 Michael Hock \email{michael.hock@uni-bamberg.de}
