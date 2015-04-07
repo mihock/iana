@@ -2,7 +2,7 @@
 % Please edit documentation in R/itemanalysis.R
 \name{getDataFramesIana}
 \alias{getDataFramesIana}
-\title{Data frames in global workspace}
+\title{Data Frames in Global Environment}
 \usage{
 getDataFramesIana(min = 20)
 }

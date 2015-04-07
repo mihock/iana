@@ -2,7 +2,7 @@
 % Please edit documentation in R/itemanalysis.R
 \name{tryPrintExpr}
 \alias{tryPrintExpr}
-\title{Try to print results of a command}
+\title{Try to Print Results of a Command}
 \usage{
 tryPrintExpr(x)
 }

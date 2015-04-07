@@ -13,7 +13,7 @@ reliability(x, invert = TRUE, digits = 3, dfname = NULL)
 
 \item{digits}{number of digits to use in the output}
 
-\item{dfname}{name of the data frame (only needed by \code{iana})}
+\item{dfname}{name of the data frame (only needed by Iana)}
 }
 \description{
 Performs classical item and reliability analysis of set of items.

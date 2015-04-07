@@ -2,7 +2,7 @@
 % Please edit documentation in R/itemanalysis.R
 \name{setItemText}
 \alias{setItemText}
-\title{Associate variables with text}
+\title{Associate Text with Variables}
 \usage{
 setItemText(x, items = NULL)
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/itemanalysis.R
 \name{dfEFA}
 \alias{dfEFA}
-\title{Degrees of freedom for a factor model}
+\title{Degrees of Freedom for a Factor Model}
 \usage{
 dfEFA(p, m)
 }

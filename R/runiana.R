@@ -1,6 +1,6 @@
-#' Run \code{iana}
+#' Run Iana
 #'
-#' Run \code{iana} in the default browser.
+#' Run Iana in the default browser.
 #'
 #' @param data a string specifying the data data frame to select initially
 #' 
@@ -8,19 +8,19 @@
 #' 
 #' @param port TCP port the application should listen on, see \code{\link{runApp}}.
 #'
-#' @details This is the main function of \code{iana}. Invoking \code{runiana()} saves the data you are currently working with (i,e,, the variables in the global R enviroment) to a temporary RData file and launches \code{iana} in the default web browser. The RData file is then loaded by \code{iana}, so that your data are accessible for item and scale analysis.
+#' @details This is the main function of Iana. Invoking \code{runiana()} saves the data you are currently working with (i,e,, the variables in the global R enviroment) to a temporary RData file and launches Iana in the default web browser. The RData file is then loaded by Iana, so that your data are accessible for item and scale analysis.
 #'
-#' Before running \code{iana}, you should create one or more data frames that contain the items to be analyzed. Normally, for each (hypothesized) scale, one data frame should be defined. If the data are multidimensional it may be convenient to create data frames for the subscales as well.
+#' Before running Iana, you should create one or more data frames that contain the items to be analyzed. Normally, for each (hypothesized) scale, one data frame should be defined. If the data are multidimensional it may be convenient to create data frames for the subscales as well.
 #'
-#' When one of the data frames is selected in the GUI, \code{iana} lists the numeric variables in that data frame. From this list, the items to include in the analyses performed by \code{iana} can then be selected. You can also specify ranges of variables in the input box below the list.
+#' When one of the data frames is selected in the GUI, Iana lists the numeric variables in that data frame. From this list, the items to include in the analyses performed by Iana can then be selected. You can also specify ranges of variables in the input box below the list.
 #'
 #' Because responses to ordered-category items are usually coded with integers ranging from 1 to the number of response categories (or from 0 to number of categories minus 1), and the number of categories is usually small (< 10), only variables with a limited range of non-negative integer values are shown. However, this may be changed by increasing the value in the numeric input box located above the variable list. Anyway, the items to be analyzed should be integers and, for some types of analysis (for example, partial credit models), these integers should fall within a small range. Otherwise, computations will probably fail.
 #'
-#' Missing values should be handled before \code{iana} is launched. \code{iana} removes rows with incomplete values in a data frame via \code{\link{na.omit}}, which can result in a substantial reduction of the number of cases.
+#' Missing values should be handled before Iana is launched. Iana removes rows with incomplete values in a data frame via \code{\link{na.omit}}, which can result in a substantial reduction of the number of cases.
 #' 
-#' If a \code{data} argument is provided, the corresponding data frame is initially selected. Providing a data frame is recommended because \code{iana} otherwise starts its compuations with first data frame it finds, which may not be the right one.
+#' If a \code{data} argument is provided, the corresponding data frame is initially selected. Providing a data frame is recommended because Iana otherwise starts its compuations with first data frame it finds, which may not be the right one.
 #'
-#' \code{iana} blocks the console while it is running. Simply press <Escape> in the console (or, in RStudio, click on the red STOP button in the upper right of the console window) to terminate \code{iana} and get the console responsive again. You can then do computations in R and later relaunch \code{iana}. Relaunching \code{iana} will open a new browser tab, so you might want to close the old tab in the browser before you return to R.
+#' Iana blocks the console while it is running. Simply press <Escape> in the console (or, in RStudio, click on the red STOP button in the upper right of the console window) to terminate Iana and get the console responsive again. You can then do computations in R and later relaunch Iana. Relaunching Iana will open a new browser tab, so you might want to close the old tab in the browser before you return to R.
 #'
 #' @author Michael Hock \email{michael.hock@@uni-bamberg.de}
 #'

@@ -2,7 +2,7 @@
 % Please edit documentation in R/itemanalysis.R
 \name{tryCatch.W.E}
 \alias{tryCatch.W.E}
-\title{tryCatch both warnings (with value) and errors}
+\title{Catch and Save Both Errors and Warnings}
 \usage{
 tryCatch.W.E(expr)
 }

@@ -1,10 +1,10 @@
 #' GUI for Item Analysis and Scale Construction
 #'
-#' \code{iana} is a browser-based GUI for classical item and test analysis, factor analysis, and item response modeling with a focus on items with an ordered-category response format.
+#' Iana is a browser-based GUI for classical item and test analysis, factor analysis, and item response modeling with a focus on items with an ordered-category response format.
 #'
-#' \code{iana} is a browser-based graphical user interface to R functions for the psychometric analysis of questionnaires and tests with an ordinal response format. \code{iana} tries to integrate the essential statistical analysis steps into a convenient interface. \code{iana} covers classical item and test analysis (reliability, item discrimation), dimensionality tests (parallel analysis and MAP test), principal components and exploratory factor analysis (including factor analysis based on polychoric correlations), one-factor confirmatory analysis, and item response models (partial credit model). Graphical output includes histograms of item and test scores, empirical item characteric curves, and person-item maps, among others.
+#' Iana is a browser-based graphical user interface to R functions for the psychometric analysis of questionnaires and tests with an ordinal response format. Iana tries to integrate the essential statistical analysis steps into a convenient interface. Iana covers classical item and test analysis (reliability, item discrimation), dimensionality tests (parallel analysis and MAP test), principal components and exploratory factor analysis (including factor analysis based on polychoric correlations), one-factor confirmatory analysis, and item response models (partial credit model). Graphical output includes histograms of item and test scores, empirical item characteric curves, and person-item maps, among others.
 #'
-#' \code{iana} is based on the \href{http://www.rstudio.com/shiny/}{Shiny Web Framework for R}, which allows a fast bidirectional communication between the browser and R. \code{iana} is "reactive", meaning that its output is instantly updated if any of the inputs (e.g., the selected variables) are changed by the user. This makes it easy to compare the impact of item selection and/or modeling options on the results. \code{iana} keeps track of the R commands it constructs as a response to user input, so the analysis steps are documented and can be replicated. \code{iana} comes with some built-in data sets, with which the interface can be tested, however, other data can easily be used.
+#' Iana is based on the \href{http://www.rstudio.com/shiny/}{Shiny Web Framework for R}, which allows a fast bidirectional communication between the browser and R. Iana is "reactive", meaning that its output is instantly updated if any of the inputs (e.g., the selected variables) are changed by the user. This makes it easy to compare the impact of item selection and/or modeling options on the results. Iana keeps track of the R commands it constructs as a response to user input, so the analysis steps are documented and can be replicated. Iana comes with some built-in data sets, with which the interface can be tested, however, other data can easily be used.
 #'
 #' The basic usage is documented in \code{\link{runiana}}.
 #'
@@ -12,7 +12,7 @@
 #' Package: \tab iana\cr
 #' Type: \tab Package\cr
 #' Version: \tab 0.1\cr
-#' Date: \tab 2013-01-03\cr
+#' Date: \tab 2015-04-07\cr
 #' License: \tab GPL (>= 2)\cr
 #' LazyLoad: \tab yes\cr
 #' }
@@ -31,7 +31,7 @@
 #' \dontrun{runiana()}
 NULL
 
-#' Data frames in global workspace
+#' Data Frames in Global Environment
 #'
 #' Returns of a vector with the names of the data frames present in the
 #' global environment.
@@ -47,7 +47,7 @@ getDataFrames <- function() {
     x
 }
 
-#' Data frames in global workspace
+#' Data Frames in Global Environment
 #'
 #' Returns of a vector with the names of the data frames present in
 #' the global environment that contain at least \code{min} cases
@@ -65,11 +65,13 @@ getDataFramesIana <- function(min = 20) {
     x <- ls(.GlobalEnv)
     if (length(x) > 0) {
         x <- x[sapply(x, function(x) is.data.frame(get(x, 1)))]
-        lx <- rep(TRUE, length(x))
-        for (i in 1:length(x)) {
-            if(nrow(na.omit(get(x[i], 1))) < min) lx[i] <- FALSE
+        if (length(x) > 0) {
+            lx <- rep(TRUE, length(x))
+            for (i in 1:length(x)) {
+                if(nrow(na.omit(get(x[i], 1))) < min) lx[i] <- FALSE
+            }
+            x <- x[lx]
         }
-        x <- x[lx]
     }
     
     ### Clean this
@@ -93,15 +95,16 @@ getDataFramesIana <- function(min = 20) {
 ###  See: demo(error.catching)                                   ###
 ##================================================================##
 
-##' Catch and save both errors and warnings, and in the case of
-##' a warning, also keep the computed result.
-##'
-##' @title tryCatch both warnings (with value) and errors
-##' @param expr an \R expression to evaluate
-##' @return a list with 'value' and 'warning', where
-##'   'value' may be an error caught.
-##' @author Martin Maechler;
-##' Copyright (C) 2010-2012  The R Core Team
+#' Catch and Save Both Errors and Warnings
+#' 
+#' Catch and save both errors and warnings, and in the case of
+#' a warning, also keep the computed result.
+#'
+#' @param expr an \R expression to evaluate
+#' @return a list with 'value' and 'warning', where
+#'   'value' may be an error caught.
+#' @author Martin Maechler;
+#' Copyright (C) 2010-2012  The R Core Team
 tryCatch.W.E <- function(expr) {
     W <- NULL
     w.handler <- function(w){ # warning handler
@@ -113,7 +116,7 @@ tryCatch.W.E <- function(expr) {
          warning = W)
 }
 
-#' Try to print results of a command
+#' Try to Print Results of a Command
 #'
 #' Try to print the results of a command, catching errors and warnings
 #' with \code{\link{tryCatch.W.E}}. Warnings are appended to the
@@ -141,7 +144,7 @@ tryPrintExpr <- function(x) {
     
 }
 
-#' Degrees of freedom for a factor model
+#' Degrees of Freedom for a Factor Model
 #'
 #' Returns the degrees of freedom for a exploratory factor model, fit by maximum
 #' likelihood. If the model cannot be fitted because it involves too many
@@ -172,13 +175,13 @@ dfEFA <- function(p, m) {
     dof
 }
 
-#' Basic descriptive statistics
+#' Basic Descriptive Statistics
 #'
-#' Return mean, standard deviation, skewness, and kurtosis of a variable.
+#' Return mean, standard deviation, skewness, and kurtosis of a variable. Missing values are removed before the computation.
 #'
 #' @param x a numeric variable
 #'
-#' @return a data.frame
+#' @return a data frame
 #'
 #' @export
 #'
@@ -207,7 +210,6 @@ basicDescr <- function(x) {
 #'
 frequencies <- function(x) {
     # needs tidyr::gather_
-    ####require(tidyr)
     if (!is.data.frame(x))
         stop("x must be a data frame.")
     it <- getItemText(x)
@@ -303,7 +305,7 @@ print.mapTest <- function(x, ...) {
     print(MAP, row.names = FALSE)
 }
 
-#' Plot mapTest object
+#' Plot mapTest Object
 #' 
 #' Plot mapTest object, see \code{\link{mapTest}}.
 #' 
@@ -348,7 +350,7 @@ plot.mapTest <- function(x, ...) {
 #' @param x a numeric data frame in which rows represent persons and columns represent items to be analyzed
 #' @param invert logical specifying whether items with negative loadings on the first principal component of the data should be inverted (default: TRUE)
 #' @param digits number of digits to use in the output
-#' @param dfname name of the data frame (only needed by \code{iana})
+#' @param dfname name of the data frame (only needed by Iana)
 #'
 #' @details \code{reliability} checks if items have negative loadings on the first principal component of the data and, if so, inverts these items.
 #'
@@ -460,10 +462,6 @@ reliability <- function(x, invert = TRUE, digits = 3, dfname = NULL) {
 ggscree.plot <- function(Df, title = NULL,
                           use = "complete.obs", simu = 20,
                           xlab = "Component", ylab = "Eigenvalue") {
-#     if (require(ggplot2) == FALSE) {
-#         stop("Package ggplot2 must be installed.")
-    #     }
-
     ### Hack to avoid Note in package check
     Dimension <- NULL
     Eigenvalue <- NULL
@@ -475,15 +473,6 @@ ggscree.plot <- function(Df, title = NULL,
     eigenval <- eigen(cor(mat, use = "pairwise.complete.obs"),
                       symmetric = TRUE)$values
     nev <- length(eigenval)
-
-#     #   mik
-#     eigenvaldata <- eigenval
-#     eigenval
-    #
-    #plot(eigenval, type = "b", pch = 16, bty = "l", main = title,
-    #     xlab = xlab, ylab = ylab)
-    #lines(c(1, nev), c(1, 1), lty = 2)
-
     n <- dim(mat)[1]
     p <- dim(mat)[2]
 
@@ -596,7 +585,6 @@ empICC <- function(x,
 
     ### Todo: workaround for Note by check procedure:
     ### empICC: no visible binding for global variable ?value?
-    ### See: http://stackoverflow.com/questions/8096313/no-visible-binding-for-global-variable-note-in-r-cmd-check
     value <- NULL
     ###
     x <- melt(x, id.vars = "scores")
@@ -633,8 +621,6 @@ empICC <- function(x,
 #' @export
 ggplotICC.RM <- function(object, empICC = NULL, empCI = NULL,
     xlim = c(-4,4), xlab = "Dimension", ylab = "Probability") {
-   
-    ### require(ggplot2)  #### ???
     #### Mik
     plist.internal <- function(object,theta)
         # computes a list of expected probabilities for objects of class Rm
@@ -845,7 +831,7 @@ ggplotICC.RM <- function(object, empICC = NULL, empCI = NULL,
 #'
 subsetItem <- function(x, ...) {
     ### better use standard subsetting?
-    if (!is.data.frame(x)) stop("x must be a data frame.")
+    if (!is.data.frame(x)) stop("x must be a data frame")
     ### for data frame:
     ### old.item.text <- attr(x, "item.text")
     old.item.text <- getItemText(x)
@@ -858,7 +844,7 @@ subsetItem <- function(x, ...) {
     newdf
 }
 
-#' Associate variables with text
+#' Associate Text with Variables
 #'
 #' \code{setItemText} can be used to associate text (usually the item stem or a description of it) with the variables (items) in a data frame.
 #'
@@ -899,7 +885,7 @@ print.itemText <- function(x, ...) {
     print(data.frame(Item = x), right = FALSE)
 }
 
-#' Return the labels associated with items
+#' Return the Labels Associated with Items
 #'
 #' Return the labels associated with items in a data frame.
 #'
@@ -1004,7 +990,7 @@ factoranalysis <- function(x, nfactors, rotate = "promax", fm = "ml",
     }
 }
 
-#' Classify items
+#' Classify Items
 #'
 #' Automatically classify the items in a data frame.
 #'

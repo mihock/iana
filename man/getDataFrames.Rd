@@ -2,7 +2,7 @@
 % Please edit documentation in R/itemanalysis.R
 \name{getDataFrames}
 \alias{getDataFrames}
-\title{Data frames in global workspace}
+\title{Data Frames in Global Environment}
 \usage{
 getDataFrames()
 }

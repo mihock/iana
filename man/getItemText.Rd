@@ -2,7 +2,7 @@
 % Please edit documentation in R/itemanalysis.R
 \name{getItemText}
 \alias{getItemText}
-\title{Return the labels associated with items}
+\title{Return the Labels Associated with Items}
 \usage{
 getItemText(x)
 }

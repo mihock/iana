@@ -6,12 +6,12 @@
 \alias{iana-package}
 \title{GUI for Item Analysis and Scale Construction}
 \description{
-\code{iana} is a browser-based GUI for classical item and test analysis, factor analysis, and item response modeling with a focus on items with an ordered-category response format.
+Iana is a browser-based GUI for classical item and test analysis, factor analysis, and item response modeling with a focus on items with an ordered-category response format.
 }
 \details{
-\code{iana} is a browser-based graphical user interface to R functions for the psychometric analysis of questionnaires and tests with an ordinal response format. \code{iana} tries to integrate the essential statistical analysis steps into a convenient interface. \code{iana} covers classical item and test analysis (reliability, item discrimation), dimensionality tests (parallel analysis and MAP test), principal components and exploratory factor analysis (including factor analysis based on polychoric correlations), one-factor confirmatory analysis, and item response models (partial credit model). Graphical output includes histograms of item and test scores, empirical item characteric curves, and person-item maps, among others.
+Iana is a browser-based graphical user interface to R functions for the psychometric analysis of questionnaires and tests with an ordinal response format. Iana tries to integrate the essential statistical analysis steps into a convenient interface. Iana covers classical item and test analysis (reliability, item discrimation), dimensionality tests (parallel analysis and MAP test), principal components and exploratory factor analysis (including factor analysis based on polychoric correlations), one-factor confirmatory analysis, and item response models (partial credit model). Graphical output includes histograms of item and test scores, empirical item characteric curves, and person-item maps, among others.
 
-\code{iana} is based on the \href{http://www.rstudio.com/shiny/}{Shiny Web Framework for R}, which allows a fast bidirectional communication between the browser and R. \code{iana} is "reactive", meaning that its output is instantly updated if any of the inputs (e.g., the selected variables) are changed by the user. This makes it easy to compare the impact of item selection and/or modeling options on the results. \code{iana} keeps track of the R commands it constructs as a response to user input, so the analysis steps are documented and can be replicated. \code{iana} comes with some built-in data sets, with which the interface can be tested, however, other data can easily be used.
+Iana is based on the \href{http://www.rstudio.com/shiny/}{Shiny Web Framework for R}, which allows a fast bidirectional communication between the browser and R. Iana is "reactive", meaning that its output is instantly updated if any of the inputs (e.g., the selected variables) are changed by the user. This makes it easy to compare the impact of item selection and/or modeling options on the results. Iana keeps track of the R commands it constructs as a response to user input, so the analysis steps are documented and can be replicated. Iana comes with some built-in data sets, with which the interface can be tested, however, other data can easily be used.
 
 The basic usage is documented in \code{\link{runiana}}.
 
@@ -19,7 +19,7 @@ The basic usage is documented in \code{\link{runiana}}.
 Package: \tab iana\cr
 Type: \tab Package\cr
 Version: \tab 0.1\cr
-Date: \tab 2013-01-03\cr
+Date: \tab 2015-04-07\cr
 License: \tab GPL (>= 2)\cr
 LazyLoad: \tab yes\cr
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/itemanalysis.R
 \name{basicDescr}
 \alias{basicDescr}
-\title{Basic descriptive statistics}
+\title{Basic Descriptive Statistics}
 \usage{
 basicDescr(x)
 }
@@ -10,9 +10,9 @@ basicDescr(x)
 \item{x}{a numeric variable}
 }
 \value{
-a data.frame
+a data frame
 }
 \description{
-Return mean, standard deviation, skewness, and kurtosis of a variable.
+Return mean, standard deviation, skewness, and kurtosis of a variable. Missing values are removed before the computation.
 }
 

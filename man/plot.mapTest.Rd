@@ -2,7 +2,7 @@
 % Please edit documentation in R/itemanalysis.R
 \name{plot.mapTest}
 \alias{plot.mapTest}
-\title{Plot mapTest object}
+\title{Plot mapTest Object}
 \usage{
 \method{plot}{mapTest}(x, ...)
 }

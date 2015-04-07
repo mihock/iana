@@ -2,7 +2,7 @@
 % Please edit documentation in R/itemanalysis.R
 \name{classifyItems}
 \alias{classifyItems}
-\title{Classify items}
+\title{Classify Items}
 \usage{
 classifyItems(fm, Df, min.loading = 0.4, max.loading = 0.3,
   max.complexity = 10, itemlength = 0, digits = 2,
