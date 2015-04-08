@@ -241,7 +241,7 @@ shinyUI(fluidPage(
                         value = "", 
                         mode = "r",
                         fontSize = 14,
-                        wordWrap = TRUE,
+                        ### wordWrap = TRUE, ### version 0.1 (on CRAN) does not have this argument (current version is 0.2.1)
                         height = "200px",
                         theme = "textmate"),
                     actionButton(inputId = "cfaEvalModel", "Evaluate"),
