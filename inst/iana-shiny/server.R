@@ -3,9 +3,9 @@ library(shinyAce)
 #require(lattice)
 require(ggplot2)
 # require(GPArotation)
-require(lavaan)
-require(eRm)
-###require(mirt)
+require(lavaan) ### Why needed? Better construct a "runCFA"-command?
+#require(eRm)
+#require(mirt)
 # require(markdown)
 # require(reshape2)
 # require(semTools)
@@ -63,8 +63,8 @@ shinyServer(function(input, output) {
         }
 
         log.output("getlikertlikevars")
-        ### todo: what do we do if no values are left?
-        if (nrow(Df) == 0) return(NULL)
+        ### todo: message if no values are left?
+        if (nrow(Df) == 0) return()
         numvars <- logical(ncol(Df))
         for (i in 1:ncol(Df)) {
             if (maybeLikert(Df[,i], unique.values)) numvars[i] <- TRUE
@@ -86,7 +86,7 @@ shinyServer(function(input, output) {
         getFactors <- function(x) {
             fnames <- names(x)[sapply(x, is.factor)]
             if (length(fnames) > 0) return(fnames)
-            else return(NULL)
+            else return()
         }
         log.output("getFactorsInDf")
         fnames <- c("median", getFactors(getSelectedDf()))
@@ -125,7 +125,7 @@ shinyServer(function(input, output) {
     output$factorsindf <- renderUI({
         log.output("outputfactorsindf")
         factorsInDf <- getFactorsInDf()
-        if (is.null(factorsInDf)) return(NULL)
+        if (is.null(factorsInDf)) return()
         selectInput(inputId = "factorsindf",
             label = "Split criterion for Andersen und Wald tests:",
             choices = factorsInDf)
@@ -141,7 +141,7 @@ shinyServer(function(input, output) {
         vnames <- input$varnamesindf
         res <- vnames %in% getLikertLikeVars(getSelectedDf(), input$kUniqueValues)
         if (all(res) == TRUE) return(vnames)
-        return(NULL)
+        return()
     })
 
     getSubset <- function(vnames, .iana.data.frame.name, minNoVars = 2) {
@@ -153,7 +153,7 @@ shinyServer(function(input, output) {
         vnames <- shQuote(sub(" .*", "", vnames))
         vnames <- paste(vnames, collapse = ", ")
         Df0 <- get(.iana.data.frame.name)
-        mycmd <- paste0("subsetItem(",
+        mycmd <- paste0("iana::subsetItem(",
                        .iana.data.frame.name,
                        ", \n  subset = complete.cases(",
                        .iana.data.frame.name,
@@ -183,19 +183,18 @@ shinyServer(function(input, output) {
         log.output("casesindf")
         x <- getSubset(checkedVars(), input$selectedDf)
         if (is.null(x)) return()
-        msg <- paste0(nrow(x), " cases in data frame.")
-        helpText(msg)
+        helpText(paste0(nrow(x), " cases in data frame."))
     })
 
     # Item text and frequencies ################################################
 
     output$frequencies <-  renderTable({
-        log.output("FREQUENCIES")
+        log.output("frequencies")
         x <- getSubset(checkedVars(), input$selectedDf)
         if (is.null(x)) return()
         cmdLog("# Frequencies\n")
         cmdLog("frequencies(myData)\n")
-        frequencies(x)
+        iana::frequencies(x)
     }, digits = 0)
     
     # Reliability ####
@@ -301,7 +300,7 @@ shinyServer(function(input, output) {
         if (input$ICClinear) method <- "lm"
         else method <- "loess"
         ### cmdLog
-        empICC(x, input$ICCscore, method = method, span = input$ICCloessspan,
+        iana::empICC(x, input$ICCscore, method = method, span = input$ICCloessspan,
             alpha = input$ICCalpha, jitter = input$ICCjitter)
     }, res = 96) ### check res
 
@@ -313,7 +312,7 @@ shinyServer(function(input, output) {
         if (is.null(x)) return()
         cmdLog("# Parallel Analysis")
         cmdLog("ggscree.plot(myData)\n")
-        ggscree.plot(x)
+        iana::ggscree.plot(x)
     })
 
     # MAP test #################################################################
@@ -322,7 +321,7 @@ shinyServer(function(input, output) {
         log.output("maptest")
         x <- getSubset(checkedVars(), input$selectedDf)
         if (is.null(x)) return()
-        mt <- mapTest(x)
+        mt <- iana::mapTest(x)
         mt
     })
 
@@ -368,7 +367,8 @@ shinyServer(function(input, output) {
             else
                 dof <- p - numfac -1
             if (dof < 0) {
-                cat("With only", p, "variables,", numfac, "factor/s is/are too much.\nReduce the number of factors or include more variables.")
+                cat("With only", p, "variables,", numfac, 
+                    "factor/s is/are too much.\nReduce the number of factors or include more variables.")
                 return()
             }
         }
@@ -377,7 +377,8 @@ shinyServer(function(input, output) {
         if (is.null(Df)) return()
         
         if (famethod == "princomp") {
-            possible.rots = c("none", "varimax", "quartimax", "promax", "oblimin", "simplimax", "cluster")
+            possible.rots = c("none", "varimax", "quartimax", "promax", 
+                "oblimin", "simplimax", "cluster")
             if (farot %in% possible.rots) {
                 cmdLog("# Principal Components Analysis")
                 cmdLog(paste0(
@@ -392,7 +393,8 @@ shinyServer(function(input, output) {
                     fm = "principal", 
                     return.res = TRUE)
             } else {
-                cat("With principal components, only the following rotations are possible: ", possible.rots)
+                cat("With principal components, only the following rotations are possible: ",
+                    possible.rots)
                 ### stop?
             }
         } else {
@@ -405,14 +407,14 @@ shinyServer(function(input, output) {
                 ",\n    polychor = '", fairt, "'",
                 ")\n"
             ))
-            fa.res <- factoranalysis(Df, numfac,
+            fa.res <- iana::factoranalysis(Df, numfac,
                 rotate = farot, 
                 fm = famethod, 
                 polychor = fairt, return.res = TRUE)
         }
 
         ### cmdLog
-        classif <- classifyItems(fa.res$res, Df, input$faMinloading, 
+        classif <- iana::classifyItems(fa.res$res, Df, input$faMinloading, 
             input$faMaxloading, input$faComplexity, 
             input$faItemlength, input$faDigits, 
             Df.name = input$selectedDf, return.res = TRUE)
@@ -485,6 +487,7 @@ shinyServer(function(input, output) {
             })
         } else {
             myvars <- paste(names(x), collapse = " + ")
+            ### Reason for this check?
             if (regexpr("\\$", myvars)[1] > -1) {
                 cat("\nAt least on variable name contains a $-sign. This is not allowed in the model specification.\n")
                 return()
@@ -492,19 +495,18 @@ shinyServer(function(input, output) {
             modelCmd <- paste0("model <- 'Factor =~ ", myvars, "'")
         }
         eval(parse(text = modelCmd))
-
+        
         if (input$cfaEstimator == "WLSMV") {
-            # Ordered argument vor WLSMV
             orderedArg <- paste0("ordered = c(",
                 paste("'", names(x), "'", sep = "", collapse = ","),
                 ")")
-            myCmd <- paste0("cfa(model, data = ",
+            myCmd <- paste0("lavaan::cfa(model, data = ",
                 input$selectedDf,
                 ", ",
                 orderedArg,
                 ")")
         } else {
-            myCmd <- paste0("cfa(model, data = ",
+            myCmd <- paste0("lavaan::cfa(model, data = ",
                 input$selectedDf,
                 ", estimator = '",
                 input$cfaEstimator,
@@ -514,19 +516,17 @@ shinyServer(function(input, output) {
 
         fit <- try(eval(parse(text = myCmd)))
         if (class(fit) == "try-error") return()
-
-        fitm <- fitMeasures(fit)
+        log.output(paste("lavaan fit, class:", class(fit)))
+        fitm <- lavaan::fitMeasures(fit)
         if (is.na(fitm["rmsea.scaled"]))
             fitm <- fitm["rmsea"]
         else
             fitm <- fitm[c("rmsea", "rmsea.scaled")]
         cat("RMSEA:\n")
-        # header <- round(c(fitm, semTools::reliability(fit)), 3)
         print(round(fitm, 3))
         cat("\nReliability estimates:\n")
         print(semTools::reliability(fit))
         cat("\n")
-
         cmdLog("# Confirmatory Factor Analysis")
         cmdLog(modelCmd)
         cmdLog(paste0("fit <- ", myCmd))
@@ -545,13 +545,12 @@ shinyServer(function(input, output) {
         # otherwise fit a Partial credit model
         if ( length(unique(as.vector(as.matrix(x)))) == 2 ) {
             model <- "Rasch"
-            res <- RM(x)
+            res <- eRm::RM(x)
         } else {
             model <- "PCM"
-            res <- PCM(x)
+            res <- eRm::PCM(x)
         }
-        pp <- person.parameter(res)
-        log.output("RASCH done")
+        pp <- eRm::person.parameter(res)
         cases <- nrow(x)
         x <- list(res = res, pp = pp, cases = cases, model = model)
         x
@@ -572,19 +571,19 @@ shinyServer(function(input, output) {
         cat("\n==================\n")
         cat("Split criterion:", splitcriterion, "\n")
         if (splitcriterion == "median")
-            tryPrintExpr(LRtest(x$res))
+            iana::tryPrintExpr(eRm::LRtest(x$res))
         else
-            tryPrintExpr(LRtest(x$res, splitcr = getSelectedDf()[[splitcriterion]]))
+            iana::tryPrintExpr(eRm::LRtest(x$res, splitcr = getSelectedDf()[[splitcriterion]]))
         cat("\nWALD TEST")
         cat("\n=========\n")
         cat("Split criterion:", splitcriterion, "\n")
         if (splitcriterion == "median")
-            tryPrintExpr(Waldtest(x$res))
+            iana::tryPrintExpr(eRm::Waldtest(x$res))
         else ### Todo: Allow only binary factors?
-            tryPrintExpr(Waldtest(x$res, splitcr = getSelectedDf()[[splitcriterion]]))
+            iana::tryPrintExpr(eRm::Waldtest(x$res, splitcr = getSelectedDf()[[splitcriterion]]))
         cat("\nMARTIN LÖF TEST")
         cat("\n===============\n")
-        tryPrintExpr(MLoef(x$res))
+        iana::tryPrintExpr(eRm::MLoef(x$res))
     })
     
     output$pcm.graphmodeltest <- renderPlot({
@@ -596,12 +595,12 @@ shinyServer(function(input, output) {
         splitcriterion <- input$factorsindf
         if (length(splitcriterion) == 0) splitcriterion <- "median"
         if (splitcriterion == "median")
-            res <- LRtest(x$res, se = TRUE)
+            res <- eRm::LRtest(x$res, se = TRUE)
         else
-            res <- LRtest(x$res, splitcr = getSelectedDf()[[splitcriterion]], se = TRUE)
-        plotGOF(res, tlab = input$pcm.graphmodeltest.labels, ctrline = list())    
-    }, res = 96)
-    ### Check "res"
+            res <- eRm::LRtest(x$res, 
+                splitcr = getSelectedDf()[[splitcriterion]], se = TRUE)
+        eRm::plotGOF(res, tlab = input$pcm.graphmodeltest.labels, ctrline = list())    
+    }, res = 96) ### Check "res"
 
     output$pcm.itemfit <- renderPrint({
         log.output("pcm.itemfit")
@@ -616,11 +615,10 @@ shinyServer(function(input, output) {
         if (is.null(x)) return()
         
         if (x$model == "Rasch") {
-            ###
             summary(x$res)
         } else {
             cat("Thresholds:")
-            print(thresholds(x$res))
+            print(eRm::thresholds(x$res))
             cat("\n")
             cat("Summary:")
             summary(x$res)
@@ -679,7 +677,7 @@ shinyServer(function(input, output) {
         log.output("RASCH, PI Map")
         x <- computePCM()
         if (is.null(x)) return()
-        plotPImap(x$res, sorted=input$pcm.sortitems,
+        eRm::plotPImap(x$res, sorted=input$pcm.sortitems,
                   warn.ord.colour = "red", cex.gen = 0.8)
     }, res = 96) ### Check "res"
 
@@ -688,10 +686,10 @@ shinyServer(function(input, output) {
         x <- computePCM()
         if (is.null(x)) return()
         if (x$model == "Rasch") {
-            ggplotICC.RM(x$res, empICC = list(input$rasch.icctype))
+            iana::ggplotICC.RM(x$res, empICC = list(input$rasch.icctype))
         } else {
             # Empirical ICCs can only be plotted for a dichotomous Rasch model
-            ggplotICC.RM(x$res)
+            iana::ggplotICC.RM(x$res)
         }
     }, res = 96) ### res
 
@@ -699,7 +697,7 @@ shinyServer(function(input, output) {
         log.output("PCM, Info")
         x <- computePCM()
         if (is.null(x)) return()
-        plotINFO(x$res)
+        eRm::plotINFO(x$res)
 
     })
 

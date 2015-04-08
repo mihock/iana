@@ -22,7 +22,7 @@ shinyUI(fluidPage(
             ####br(),
             selectInput(inputId = "selectedDf", 
                 label = "Data frame to use:",
-                choices = getDataFramesIana(),
+                choices = iana::getDataFramesIana(),
                 selected = getOption("iana.data")),
             numericInput(inputId = "kUniqueValues", 
                 label = "Exclude variables with values outside the range of 0 and ...:",
