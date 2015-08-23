@@ -12,6 +12,7 @@ require(lavaan) ### Why needed? Better construct a "runCFA"-command?
 #
 # Bei Paketen, die in server.R angesprochen werden, brauchen wir das zusätzlich (neben Import)
 require(psych)
+require(dplyr)
 require(tidyr)
 require(stringr)
 
@@ -99,9 +100,8 @@ shinyServer(function(input, output) {
             varrange <- getVarsInDf()
             if (length(varrange) > 80) varrange <- varrange[1:80]
         } else {
-            newDf <- try(subset(getSelectedDf(),
-                select = eval(parse(text = input$varrange))),
-                silent = TRUE)
+            newDf <- try(dplyr::select_(getSelectedDf(),
+                                            .dots = input$varrange))
             if (class(newDf) == "try-error") {
                 log.output("Error in getVarRange")
                 return()
@@ -144,44 +144,16 @@ shinyServer(function(input, output) {
         return()
     })
 
-    getSubset <- function(vnames, .iana.data.frame.name, minNoVars = 2) {
-        ### ".iana.data.frame.name" used to avoid error when data frame 
-        ### already exists.
-        ### Look at getVarrange for an alternative.
+    getSubset <- function(vnames, minNoVars = 2) {
         log.output("getSubset")
         if (is.null(vnames) || length(vnames) < minNoVars) return()
-        vnames <- shQuote(sub(" .*", "", vnames))
-        vnames <- paste(vnames, collapse = ", ")
-        Df0 <- get(.iana.data.frame.name)
-        mycmd <- paste0("iana::subsetItem(",
-                       .iana.data.frame.name,
-                       ", \n  subset = complete.cases(",
-                       .iana.data.frame.name,
-                       "), \n  select = c(",
-                       vnames,
-                       "))")
-        Df <- try(eval(parse(text = mycmd)), silent = TRUE)
-        if (class(Df) == "try-error") {
-            log.output("CATCH Start ..............................................")
-            log.output(Df)
-            log.output(paste0("Cmd was: ", mycmd))
-            log.output("CATCH End   ..............................................")
-            return()
-        }
-        if (mycmd != .old.mycmd) {
-            cmdLog(paste0("\n#---------------------",
-                          "\n# Data have changed...",
-                          "\n#---------------------",
-                          "\nmyData <- ",
-                          mycmd, "\n"))
-        }
-        .old.mycmd <<- mycmd
+        Df <- dplyr::select_(getSelectedDf(), .dots = vnames)
         Df
     }
 
     output$casesindf <- renderUI({
         log.output("casesindf")
-        x <- getSubset(checkedVars(), input$selectedDf)
+        x <- getSubset(checkedVars())
         if (is.null(x)) return()
         helpText(paste0(nrow(x), " cases in data frame."))
     })
@@ -190,7 +162,7 @@ shinyServer(function(input, output) {
 
     output$frequencies <-  renderTable({
         log.output("frequencies")
-        x <- getSubset(checkedVars(), input$selectedDf)
+        x <- getSubset(checkedVars())
         if (is.null(x)) return()
         cmdLog("# Frequencies\n")
         cmdLog("frequencies(myData)\n")
@@ -201,7 +173,7 @@ shinyServer(function(input, output) {
 
     output$reliability <- renderPrint({
         log.output("reliability")
-        x <- getSubset(checkedVars(), input$selectedDf)
+        x <- getSubset(checkedVars())
         if (is.null(x)) return()
         cmdLog("# Reliability")
         if (input$reliabDetailed){
@@ -217,7 +189,7 @@ shinyServer(function(input, output) {
 
     output$hist <- renderPlot({
         log.output("hist")
-        x <- getSubset(checkedVars(), input$selectedDf, 1)
+        x <- getSubset(checkedVars(), 1)
         if (is.null(x)) return()
         ### cmdLog
         d <- gather_(x, "Item", "Score")
@@ -239,7 +211,7 @@ shinyServer(function(input, output) {
     output$histTotal <- renderPlot({
         log.output("histTotal")
 
-        x <- getSubset(checkedVars(), input$selectedDf)
+        x <- getSubset(checkedVars())
         if (is.null(x)) return()
 
         sumScore <- rowSums(x, na.rm = TRUE)
@@ -284,7 +256,7 @@ shinyServer(function(input, output) {
     })
     
     output$descrStatsTotal <- renderTable({
-        x <- getSubset(checkedVars(), input$selectedDf)
+        x <- getSubset(checkedVars())
         if (is.null(x)) return()
         sumScore <- rowSums(x, na.rm = TRUE)
         meanScore <- rowMeans(x, na.rm = TRUE)
@@ -295,7 +267,7 @@ shinyServer(function(input, output) {
 
     output$ICCs <- renderPlot({
         log.output("ICCs")
-        x <- getSubset(checkedVars(), input$selectedDf)
+        x <- getSubset(checkedVars())
         if (is.null(x)) return()
         if (input$ICClinear) method <- "lm"
         else method <- "loess"
@@ -308,7 +280,7 @@ shinyServer(function(input, output) {
 
     output$parallelanalysis <- renderPlot({
         log.output("parallelanalysis")
-        x <- getSubset(checkedVars(), input$selectedDf)
+        x <- getSubset(checkedVars())
         if (is.null(x)) return()
         cmdLog("# Parallel Analysis")
         cmdLog("ggscree.plot(myData)\n")
@@ -319,7 +291,7 @@ shinyServer(function(input, output) {
 
     maptest <- reactive({
         log.output("maptest")
-        x <- getSubset(checkedVars(), input$selectedDf)
+        x <- getSubset(checkedVars())
         if (is.null(x)) return()
         mt <- iana::mapTest(x)
         mt
@@ -373,7 +345,7 @@ shinyServer(function(input, output) {
             }
         }
         
-        Df <- getSubset(checkedVars(), input$selectedDf)
+        Df <- getSubset(checkedVars())
         if (is.null(Df)) return()
         
         if (famethod == "princomp") {
@@ -476,7 +448,7 @@ shinyServer(function(input, output) {
     output$cfa <- renderPrint({
         log.output("cfa")
 
-        x <- getSubset(checkedVars(), input$selectedDf, 3)
+        x <- getSubset(checkedVars(), 3)
         if (is.null(x)) return()
 
         if (input$cfaUseModel) {
@@ -538,7 +510,7 @@ shinyServer(function(input, output) {
 
     computePCM <- reactive({
         log.output("computePCM")
-        x <- getSubset(checkedVars(), input$selectedDf, 3)
+        x <- getSubset(checkedVars(), 3)
         if (is.null(x)) return()
 
         # Fit a Rasch Model if data have 2 unique values,
@@ -705,7 +677,7 @@ shinyServer(function(input, output) {
     
     computeMirt <- reactive({
         log.output("computeMirt")
-        x <- getSubset(checkedVars(), input$selectedDf, 3)
+        x <- getSubset(checkedVars(), 3)
         if (is.null(x)) return()
         nf <- input$mirt_nfactors 
         model <- input$mirt_model

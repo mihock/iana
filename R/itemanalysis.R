@@ -22,6 +22,7 @@
 #' @importFrom psych alpha describe principal fa irt.fa KMO skew kurtosi
 #' @importFrom semTools reliability
 #' @importFrom mirt mirt
+#' @importFrom dplyr select_
 #' @import ggplot2 GPArotation lavaan eRm markdown reshape2 stringr tidyr shiny shinythemes shinyAce
 #' @docType package
 #' @author Michael Hock (\email{michael.hock@@uni-bamberg.de})
@@ -263,7 +264,7 @@ frequencies <- function(x) {
 #' #
 #' # If we remove 1 item the MAP test suggests the wrong number of factors...
 #' #
-#' Df2 <- subset(Df, select = -x6)
+#' Df2 <- dplyr::select(Df, -x6)
 #' mt2 <- mapTest(Df2)
 #' print(mt2)
 #' plot(mt2)
@@ -814,52 +815,22 @@ ggplotICC.RM <- function(object, empICC = NULL, empCI = NULL,
 
 # Item Classification -----------------------------------------------------
 
-#' Subsetting Items
-#' 
-#' Returns a subset of items in a data frame with the \code{item.text} attribute preserved.
-#'
-#' @param x a data frame containing the items to be subsetted
-#' @param ... arguments passed to \code{\link{subset}}
-#'
-#' @return a data frame containing the subsetted items
-#'
-#' @seealso \code{\link{setItemText}} for setting and \code{\link{getItemText}} for retrieving \code{item.text} attributes.
-#'
-#' @author Michael Hock \email{michael.hock@@uni-bamberg.de}
-#'
-#' @export
-#'
-subsetItem <- function(x, ...) {
-    ### better use standard subsetting?
-    if (!is.data.frame(x)) stop("x must be a data frame")
-    ### for data frame:
-    ### old.item.text <- attr(x, "item.text")
-    old.item.text <- getItemText(x)
-    newdf <- subset(x, ...)
-    if (!is.null(old.item.text)) {
-        pos <- match(names(newdf), names(x))
-        new.item.text <- old.item.text[pos]
-        newdf <- setItemText(newdf, items = new.item.text)
-    }
-    newdf
-}
-
 #' Associate Text with Variables
 #'
 #' \code{setItemText} can be used to associate text (usually the item stem or a description of it) with the variables (items) in a data frame.
 #'
 #' @param x a data frame
-#' @param items either a character vector containing the descriptions of the items (columns in the data frame) or the name of a file containing the descriptions for the items. If a file name is given, each descriptions must occupy one line and each item in the data frame must have a description.
+#' @param items either a character vector containing the descriptions of the items (columns in the data frame) or the name of a file containing the descriptions for the items. If a file name is given, each of the descriptions must occupy one line and each item in the data frame must have a description.
 #'
-#' @details Technically, \code{setItemText} sets the \code{item.text} attribute for the variables (items) in a data frame, which corresponds to "variable labels" known form other statistical systems. This text is then displayed along with the variable names in functions such as \code{\link{classifyItems}} as a mnemonic for the content of the item.
+#' @details Technically, \code{setItemText} sets the \code{item.text} attribute for the variables (items) in a data frame, which corresponds to "variable labels" known form other statistical systems. This text is then displayed along with the variable name in functions such as \code{\link{classifyItems}} as a mnemonic for the content of the item.
 #'
 #' The text can be specified either as a character vector of the same length as the number of the columns in the data frame or in a text file that contains the descriptions of the items. The file is read via \code{\link{read.table}}, with the separator set to a newline character (i.e., \code{"\n"}) Consequently, each description must occupy exactly one physical line (which may, of course, span several display lines). The number of descriptions in the file and the number of items must be the same.
 #'
-#' Notice that attributes are lost when data frames are subsetted via \code{\link{subset}}. For preserving the \code{item.text} attribute, \code{\link{subsetItem}} can be used instead of \code{\link{subset}}.
+#' Notice that attributes are lost when data frames are subsettetted via \code{\link{subset}}. For preserving the \code{item.text} attribute, \code{\link[dplyr]{select}} or \code{\link[dplyr]{filter}} can be used instead of \code{\link{subset}}.
 #'
 #' @return A data frame with the \code{item.text} attribute set for variable.
 #'
-#' @seealso \code{\link{getItemText}} for retrieving, and \code{\link{subsetItem}} for preserving \code{item.text} attributes.
+#' @seealso \code{\link{getItemText}} for retrieving \code{item.text} attributes.
 #'
 #' @author Michael Hock \email{michael.hock@@uni-bamberg.de}
 #'
@@ -1133,8 +1104,8 @@ classifyItems <- function(fm, Df, min.loading = 0.4, max.loading = 0.3, max.comp
     for (i in (1:ncol(lmat))) {
         selected <- row.names(x[(x$F == i) & (x$M == "*"), ])
         selected <- paste(selected, collapse = ", ")
-        code <- paste0(code, "F", i, " <- subset(", Df.name,
-                           ", select = c(", selected, "))\n")
+        code <- paste0(code, "F", i, " <- dplyr::select(", Df.name,
+                           ", ", selected, ")\n")
     }
     if (!return.res) {
         cat("\nNOTE\n\nThe following code may be used to create data frames of items\nassigned to the factors. Some items may need to be inverted.\n", code)

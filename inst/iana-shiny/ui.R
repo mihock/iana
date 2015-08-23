@@ -376,7 +376,6 @@ shinyUI(fluidPage(
                 
                 navbarMenu("Info",
                     tabPanel("Help",
-                        h3("Help"),
                         includeMarkdown("help.md")),
                     tabPanel("Some Infos",
                         h3("Some Infos"),
