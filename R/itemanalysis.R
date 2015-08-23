@@ -1113,3 +1113,126 @@ classifyItems <- function(fm, Df, min.loading = 0.4, max.loading = 0.3, max.comp
         list(factorloadings = loadingsDf, factorcorrelations = corrs, factorvariances = tab, factorcode = str_trim(code))
     }
 }
+
+
+#' Classify Items for MIRT
+#'
+#' Automatically classify the items in a data frame.
+#'
+#' @param fm a factor model fitted by mirt::mirt
+#' @param Df a data frame containing the items
+#' @param min.loading minimum loading of an item to be considered a marker of a factor
+#' @param max.loading maximum loading of an item on a secondary factor (i.e., the factor on which the items has its second highest loading) to be considered a marker for the primary factor (i.e., the factor on which the items has its highest loading)
+#' @param max.complexity maximum complexity of an item to be considered a marker item
+#' @param itemlength trim item text to given number characters (0 = automatic trimming)
+#' @param digits number of digits used in the output
+#' @param Df.name name of data frame
+#'
+#' @author Michael Hock \email{michael.hock@@uni-bamberg.de}
+#'
+#' @export
+
+classifyItemsMirt <- function(fm, Df, min.loading = 0.4, max.loading = 0.3, max.complexity = 100, itemlength = 0, digits = 2, Df.name = deparse(substitute(Df))) {
+    
+    max2 <- function(x) {
+        y <- sort(x, decreasing=TRUE)
+        y[2]
+    }
+    
+    fm <- summary(fm)
+    # These will be rounded below...
+    lmat <- fm$rotF
+    communality <- fm$h2
+    complexity <- (rowSums(lmat^2))^2 / rowSums(lmat^4) ### check me
+    
+    F <- apply(abs(lmat), 1, which.max)
+    max.absload <- apply(abs(lmat), 1, max)
+    max.absload2 <- apply(abs(lmat), 1, max2)
+    max.absload2[is.na(max.absload2)] <- 0
+    marker <- ifelse(
+        (max.absload > min.loading) &
+            (max.absload2 < max.loading) &
+            (complexity < max.complexity),
+        "*", " ")
+    varnames <- colnames(Df)
+    lmat <- round(unclass(lmat), digits)
+    communality <- round(communality, digits)
+    complexity <- round(complexity, digits)
+    
+    cat("\nLOADINGS\n\n")
+    #cat("====================\n")
+    cat("M = Marker, a_j = Factor loadings\n")
+    cat("h2 = Communality, Cmpl = Factorial complexity\n")
+    
+    ilength <- getOption("width") -  max(nchar(varnames)) - 3 - (ncol(lmat) + 2) * (digits + 4)
+    items <- getItemText(Df)
+    
+    if (is.null(items)) {
+        shortitems <- rep("-", length(communality))
+        cat("\nHint: You can associate the text of the items with the columns \nof the data frame with 'setItemText()'. \nThis would allow to produce an item table.\n")
+    } else {
+        items <- stringr::str_trim(items)
+        if (itemlength == 0) {
+            shortitems <- substr(items, 1, ilength)
+        }
+        else {
+            maxilen <- max(nchar(items))
+            if (itemlength > maxilen) itemlength <- maxilen
+            shortitems <- substr(items, 1, itemlength)
+        }
+    }
+    
+    x <- data.frame(F, marker, lmat, communality, complexity, shortitems)
+    rownames(x) <- varnames ######
+    x <- x[order(x$F, -max.absload), ]
+    colnames(x) <- c(
+        "F",
+        "M",
+        paste0("a_", 1:ncol(lmat)),
+        "h2",
+        "Cmpl",
+        "Item"
+    )
+    xl <- split(x, x$F)
+    for (i in 1:length(xl)) {
+        cat("\nFactor", i, "\n")
+        print(xl[[i]][,-1], right = FALSE)
+    }
+    
+    # Markers
+    mcount <- sum(ifelse(marker == "*", 1, 0))
+    cat("\n", mcount, "of", ncol(Df), "Items were classified as markers.\n")
+    
+    
+    # Factor Correlations
+    
+    if (exists("Phi", fm)) {
+        corrs <- round(fm$Phi, digits)
+        rownames(corrs) <- colnames(corrs) <- paste0("F", 1:ncol(lmat))
+        cat("\nFACTOR CORRELATIONS\n\n")
+        print(corrs)
+    }
+    
+    # Factors
+    
+    cat("\nFACTORS\n\n")
+    # use fm$rotF, not lmat, because lmat now contains the rounded values
+    colnames(fm$rotF) <- paste0("F", 1:ncol(fm$rotF))
+    ssload <- colSums(fm$rotF^2)
+    expl.var <- ssload / nrow(fm$rotF)
+    cumsum.expl.var <- cumsum(expl.var)
+    tab <- rbind(ssload, expl.var, cumsum.expl.var)
+    row.names(tab) <- c("Sum of squared loadings", "Proportion Variance", "Cumulative Variance")
+    print(round(tab, digits))
+    
+    # Code snippet
+    
+    cat("\nNOTE\n\nThe following code may be used to create data frames of items\nassigned to the factors. Some items may need to be inverted.\n\n")
+    
+    
+    for (i in (1:ncol(lmat))) {
+        selected <- rownames(x[(x$F == i) & (x$M == "*"), ])
+        selected <- paste(selected, collapse = ", ")
+        cat("F", i, " <- dplyr::select(", Df.name, ", ", selected, ")\n", sep = "")
+    }
+}
