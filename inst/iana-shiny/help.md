@@ -1,3 +1,5 @@
+## Iana
+
 Iana is a browser-based graphical user interface to R functions for the psychometric analysis of questionnaires and tests with a binary or ordinal response format (e.g., Likert scales). Iana tries to integrate the essential statistical analysis steps into a convenient interface. The application is "reactive", meaning that its output is immediately updated if any of the inputs (e.g., the selected variables) are changed. This makes it easy to compare the impact of different statistical options or of item selection on the results. Iana keeps track of the R commands it constructs as a response to user input, so the analysis steps are documented and can be replicated. Iana comes with a small built-in data set, with which the interface can be tested, however, other data can easily be read in.
 
 ### First Start
