@@ -1,6 +1,6 @@
 ## Iana
 
-Iana is a browser-based graphical user interface to R functions for the psychometric analysis of questionnaires and tests with a binary or ordinal response format (e.g., Likert scales). Iana tries to integrate the essential statistical analysis steps into a convenient interface. The application is "reactive", meaning that its output is immediately updated if any of the inputs (e.g., the selected variables) are changed. This makes it easy to compare the impact of different statistical options or of item selection on the results. Iana keeps track of the R commands it constructs as a response to user input, so the analysis steps are documented and can be replicated. Iana comes with a small built-in data set, with which the interface can be tested, however, other data can easily be read in.
+Iana is a browser-based graphical user interface to [R](https://www.r-project.org/) functions for the psychometric analysis of questionnaires and tests with a binary or ordinal response format (e.g., Likert scales). Iana tries to integrate the essential statistical analysis steps into a convenient interface. The application is "reactive", meaning that its output is immediately updated if any of the inputs (e.g., the selected variables) are changed. This makes it easy to compare the impact of different statistical options or of item selection on the results. Iana keeps track of the R commands it constructs as a response to user input, so the analysis steps are documented and can be replicated. Iana comes with a small built-in data set, with which the interface can be tested, however, other data can easily be read in.
 
 ### First Start
 
@@ -24,12 +24,16 @@ The check boxes allow you to compile a set of items for analysis. For example, i
 Iana currently lives on [Github](https://github.com/mihock/iana). You can get the latest version with the following commands:
 
 ```
-install.packages("devtools") # Only needed if you haven't already installed the package
+install.packages("devtools")
 library(devtools)
 install_github("mihock/iana")
 ```
 
-### Links to Packages Used by Iana
+The first line is only needed if you haven't already installed the devtools package.
+
+### Framework and Packages
+
+Iana is based on the [Shiny web application framework](http://shiny.rstudio.com/) by [RStudio](https://wwwwrstadio.com/).
 
 For psychometric analyses, Iana builds mainly upon the following packages:
 
