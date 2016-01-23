@@ -321,7 +321,7 @@ plot.mapTest <- function(x, ...) {
     # Compute ticks for x-axis
     myticks <- Component
 
-    p <- ggplot(MAP, aes(Component, x)) +
+    p <- ggplot(MAP, aes_(~Component, ~x)) +
         geom_line() +
         geom_point(size = 5,
                    shape = 21,
@@ -509,10 +509,10 @@ ggscree.plot <- function(Df, title = NULL,
         myticks <- round(seq(from = 1, to = ncol(Df), by = incr))
     }
 
-    pl <- ggplot(eDf, aes(Dimension, Eigenvalue, group = ar)) +
+    pl <- ggplot(eDf, aes_(~Dimension, ~Eigenvalue, group = ~ar)) +
         geom_line(alpha = c(rep(1, p), rep(0.2, p*simu))) +
         geom_point(size = c(rep(5, p), rep(0, p*simu)),
-                   shape = c(rep(21, p), rep(21, p*simu)),
+                   shape = c(rep(21, p), rep(NA, p*simu)),
                    fill = "white") +
         geom_abline(intercept = 1, slope = 0, colour = "darkblue",
                     linetype = "dashed") +
@@ -592,14 +592,14 @@ empICC <- function(x,
     x.corrs <- min(x$scores)
     y.corrs <- max(x$value) + 0.25 ###
 
-    p <- qplot(scores, value, data = x,
-               position = position_jitter(width = jitter, height = jitter),
-               facets = ~ variable, alpha = I(alpha),
-               xlab = xlab, ylab = "Item Score") +
-      geom_text(data=corrs,
-                aes(x=x.corrs, y=y.corrs, label=corrs),
-                parse=TRUE, hjust = 0, size = 5) +
-      geom_smooth(method = method, span = span) +
+    p <- ggplot(x, aes_(~scores, ~value)) +
+        geom_jitter(width = jitter, height = jitter, alpha = I(alpha)) +
+        facet_wrap(~variable) +
+        xlab(xlab) + ylab("Item Score") +
+        geom_text(aes_(x=~x.corrs, y=~y.corrs, label=~corrs),
+                  data=corrs,
+                  parse=TRUE, hjust = 0, size = 5) +
+        geom_smooth(method = method, span = span) +
         theme(text = element_text(size = 14))
     p
 }
@@ -793,22 +793,17 @@ ggplotICC.RM <- function(object, empICC = NULL, empCI = NULL,
         }
     }
 
+    myplot <- ggplot(mikPlotData,
+                     aes_(~Theta, ~Probability, colour = ~ICC)) +
+        facet_wrap(~Item) +
+        geom_line() +
+        xlab(xlab) + ylab(ylab)
     if (emp.plot) {
         onlyEmp <- mikPlotData[as.character(mikPlotData$ICC) == "Empirical",]
-        myplot <- qplot(Theta, Probability, colour = ICC,
-                        facets = ~ Item,
-                        data = mikPlotData,
-                        geom = "line",
-                        xlab = xlab, ylab = ylab) +
-          geom_point(data = onlyEmp, size = 4,
-                     shape = 21,
-                     fill = "white")
-    } else {
-        myplot <- qplot(Theta, Probability, colour = ICC,
-                        facets = ~ Item,
-                        data = mikPlotData,
-                        geom = "line",
-                        xlab = xlab, ylab = ylab)
+        myplot <- myplot +
+            geom_point(data = onlyEmp, size = 4,
+                       shape = 21,
+                       fill = "white")
     }
     print(myplot)
 }

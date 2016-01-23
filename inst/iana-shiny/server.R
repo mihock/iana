@@ -194,14 +194,14 @@ shinyServer(function(input, output) {
         ### cmdLog
         d <- gather_(x, "Item", "Score", names(x))
         if (input$histtypeitem == "count") {
-            ggplot(d, aes(x = as.factor(Score))) +
-                facet_wrap(~ ~Item) +
+            ggplot(d, aes_(x = ~as.factor(Score))) +
+                facet_wrap(~Item) +
                 geom_bar(colour = "black", fill = "white") +
                 xlab("Response") + ylab("Count")
         } else {
-            ggplot(d, aes(x = as.factor(Score))) + 
-                facet_wrap(~ ~Item) +
-                geom_bar(aes(y = 100*(..count..) /
+            ggplot(d, aes_(x = ~as.factor(Score))) + 
+                facet_wrap(~Item) +
+                geom_bar(aes_(y = ~100*(..count..) /
                         tapply(..count..,..PANEL..,sum)[..PANEL..]),
                     colour = "black", fill = "white") +
                 xlab("Response") + ylab("Percent of total")
@@ -229,10 +229,10 @@ shinyServer(function(input, output) {
         myfill = "white" ### better NA?
         
         # Plot
-        p <- ggplot(d, aes(x = Total)) +
+        p <- ggplot(d, aes_(x = ~Total)) +
             xlab("Total score")
         if (input$histtype == "percent")  {
-            p <- p + geom_histogram(aes(y = 100*(..count..) / sum(..count..)),
+            p <- p + geom_histogram(aes_(y = ~100*(..count..) / sum(..count..)),
                 color = mycolor, fill = myfill, 
                 binwidth = binw) +
                 ylab("Percent of total")
@@ -243,7 +243,7 @@ shinyServer(function(input, output) {
         } else { # density
             p <- p + 
                 ylab("Density") +
-                geom_histogram(aes(y = ..density..), 
+                geom_histogram(aes_(y = ~..density..), 
                     color = mycolor, fill = myfill,
                     binwidth=binw) +
                 stat_function(fun=dnorm, 
