@@ -192,7 +192,7 @@ shinyServer(function(input, output) {
         x <- getSubset(checkedVars(), 1)
         if (is.null(x)) return()
         ### cmdLog
-        d <- gather_(x, "Item", "Score")
+        d <- gather_(x, "Item", "Score", names(x))
         if (input$histtypeitem == "count") {
             ggplot(d, aes(x = as.factor(Score))) +
                 facet_wrap(~ ~Item) +

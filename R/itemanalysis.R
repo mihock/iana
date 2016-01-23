@@ -214,7 +214,7 @@ frequencies <- function(x) {
     if (!is.data.frame(x))
         stop("x must be a data frame.")
     it <- getItemText(x)
-    x <- tidyr::gather_(x, "item", "score")
+    x <- tidyr::gather_(x, "item", "score", names(x))
     x <- xtabs(~ item + score, data = x)
     x <- as.data.frame(unclass(x))
     if (!is.null(it)) x$Text <- it
