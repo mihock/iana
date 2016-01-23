@@ -511,8 +511,9 @@ ggscree.plot <- function(Df, title = NULL,
 
     pl <- ggplot(eDf, aes_(~Dimension, ~Eigenvalue, group = ~ar)) +
         geom_line(alpha = c(rep(1, p), rep(0.2, p*simu))) +
-        geom_point(size = c(rep(5, p), rep(0, p*simu)),
-                   shape = c(rep(21, p), rep(NA, p*simu)),
+        geom_point(size = c(rep(5, p), rep(1, p*simu)),
+                   shape = c(rep(21, p), rep(1, p*simu)),
+                   alpha = c(rep(1, p), rep(0.2, p*simu)),
                    fill = "white") +
         geom_abline(intercept = 1, slope = 0, colour = "darkblue",
                     linetype = "dashed") +
