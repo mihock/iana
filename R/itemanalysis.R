@@ -24,7 +24,7 @@
 #' @importFrom mirt mirt
 #' @importFrom tidyr gather_
 #' @importFrom dplyr filter_ select_
-#' @import ggplot2 GPArotation lavaan eRm markdown reshape2 stringr shiny shinythemes shinyAce
+#' @import ggplot2 GPArotation lavaan eRm markdown stringr shiny shinythemes shinyAce
 #' @docType package
 #' @author Michael Hock (\email{michael.hock@@uni-bamberg.de})
 #' @references Shiny web framework for R: \url{http://www.rstudio.com/shiny/}
@@ -586,11 +586,8 @@ empICC <- function(x,
     corrs <- sprintf("r==%.2f", corrs)
     corrs <- data.frame(variable, corrs)
 
-    ### Todo: workaround for Note by check procedure:
-    ### empICC: no visible binding for global variable ?value?
-    value <- NULL
-    ###
-    x <- melt(x, id.vars = "scores")
+    # x <- reshape2::melt(x, id.vars = "scores") # original version
+    x <- tidyr::gather_(x, "variable", "value", names(x)[-1])
     x.corrs <- min(x$scores)
     y.corrs <- max(x$value) + 0.25 ###
 

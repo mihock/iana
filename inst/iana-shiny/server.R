@@ -1,20 +1,7 @@
-library(shiny)
-library(shinyAce)
-#require(lattice)
+require(shiny)
+require(shinyAce)
 require(ggplot2)
-# require(GPArotation)
 require(lavaan) ### Why needed? Better construct a "runCFA"-command?
-#require(eRm)
-#require(mirt)
-# require(markdown)
-# require(reshape2)
-# require(semTools)
-#
-# todo: Bei Paketen, die in server.R angesprochen werden, brauchen wir das zusätzlich (neben Import)
-require(psych)
-require(stringr)
-require(tidyr)
-require(dplyr)
 
 log.output <- function(x = "") {
     t <- proc.time()[3]
@@ -197,14 +184,14 @@ shinyServer(function(input, output) {
         x <- getSubset(checkedVars(), 1)
         if (is.null(x)) return()
         ### cmdLog
-        d <- gather_(x, "Item", "Score", names(x))
+        d <- tidyr::gather_(x, "Item", "Score", names(x))
         if (input$histtypeitem == "count") {
-            ggplot(d, aes_(x = ~as.factor(Score))) +
+            ggplot2::ggplot(d, aes_(x = ~as.factor(Score))) +
                 facet_wrap(~Item) +
                 geom_bar(colour = "black", fill = "white") +
                 xlab("Response") + ylab("Count")
         } else {
-            ggplot(d, aes_(x = ~as.factor(Score))) + 
+            ggplot2::ggplot(d, aes_(x = ~as.factor(Score))) + 
                 facet_wrap(~Item) +
                 geom_bar(aes_(y = ~100*(..count..) /
                         tapply(..count..,..PANEL..,sum)[..PANEL..]),
@@ -234,7 +221,7 @@ shinyServer(function(input, output) {
         myfill = "white" ### better NA?
         
         # Plot
-        p <- ggplot(d, aes_(x = ~Total)) +
+        p <- ggplot2::ggplot(d, aes_(x = ~Total)) +
             xlab("Total score")
         if (input$histtype == "percent")  {
             p <- p + geom_histogram(aes_(y = ~100*(..count..) / sum(..count..)),
