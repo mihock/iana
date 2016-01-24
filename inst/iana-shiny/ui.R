@@ -7,7 +7,9 @@ shinyUI(fluidPage(
     #theme = shinytheme("cerulean"),
     #theme = shinytheme("cosmo"),
     #theme = shinytheme("spacelab"),
-    theme = shinytheme("united"),
+    #theme = shinytheme("united"),
+    theme = shinytheme("flatly"),
+    #theme = shinytheme("readable"),
     
     sidebarLayout(
         position = "right",

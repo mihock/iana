@@ -691,22 +691,21 @@ shinyServer(function(input, output) {
             model = nf, 
             itemtype = model, 
             method = input$mirt_method,
-            rotate = input$mirt_rotate,
             SE = TRUE, verbose = FALSE)
         log.output("computeMirt done")
         res
     })
 
     output$mirt.summary <- renderPrint({
-        log.output("mirt (output")
+        log.output("mirt (output)")
         x <- computeMirt()
         if (is.null(x)) return()
         cat("\nBASICS\n")
         cmdLog("print(res)")
         print(x)
         cat("\nSUMMARY\n")
-        cmdLog("summary(res)")
-        summary(x)
+        cmdLog(paste0("summary(res, rotate = ", input$mirt_rotate, ")"))
+        summary(x, rotate = input$mirt_rotate)
 #        cat("\nCOEFFICIENTS\n")
 #        print(coef(x))
         cat("\nMODEL FIT\n")
