@@ -33,7 +33,7 @@ The first line is only needed if you haven't already installed the devtools pack
 
 ### Framework and Packages
 
-Iana is based on the [Shiny web application framework](http://shiny.rstudio.com/) by [RStudio](https://wwwwrstadio.com/).
+Iana is based on the [Shiny web application framework](http://shiny.rstudio.com/) by [RStudio](https://www.rstudio.com/).
 
 For psychometric analyses, Iana builds mainly upon the following packages:
 
