@@ -19,7 +19,7 @@
 #'
 #' @name iana-package
 #' @aliases iana
-#' @importFrom psych alpha describe principal fa irt.fa KMO skew kurtosi
+#' @importFrom psych describe principal fa irt.fa KMO skew kurtosi
 #' @importFrom semTools reliability
 #' @importFrom mirt mirt
 #' @importFrom tidyr gather_
