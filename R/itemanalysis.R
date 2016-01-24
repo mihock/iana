@@ -1198,7 +1198,6 @@ classifyItemsMirt <- function(fm, Df, min.loading = 0.4, max.loading = 0.3, max.
     mcount <- sum(ifelse(marker == "*", 1, 0))
     cat("\n", mcount, "of", ncol(Df), "Items were classified as markers.\n")
     
-    
     # Factor Correlations
     
     if (exists("Phi", fm)) {
@@ -1223,7 +1222,6 @@ classifyItemsMirt <- function(fm, Df, min.loading = 0.4, max.loading = 0.3, max.
     # Code snippet
     
     cat("\nNOTE\n\nThe following code may be used to create data frames of items\nassigned to the factors. Some items may need to be inverted.\n\n")
-    
     
     for (i in (1:ncol(lmat))) {
         selected <- rownames(x[(x$F == i) & (x$M == "*"), ])
