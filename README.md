@@ -20,6 +20,7 @@ The first line is only needed if you haven't already installed "devtools."
 To launch Iana, type
 
 ```
+library(iana)
 runiana()
 ```
 

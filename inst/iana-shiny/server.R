@@ -390,6 +390,7 @@ shinyServer(function(input, output) {
             input$faMaxloading, input$faComplexity, 
             input$faItemlength, input$faDigits, 
             Df.name = input$selectedDf, return.res = TRUE)
+        ##log.output("computeEFA: DONE")
         list(fa.res = fa.res$res, 
             fit = fa.res$stats,
             factorloadings = classif$factorloadings, 
