@@ -4,7 +4,7 @@
 #'
 #' Iana is a browser-based graphical user interface to R functions for the psychometric analysis of questionnaires and tests with an ordinal response format. Iana tries to integrate the essential statistical analysis steps into a convenient interface. Iana covers classical item and test analysis (reliability, item discrimation), dimensionality tests (parallel analysis and MAP test), principal components and exploratory factor analysis (including factor analysis based on polychoric correlations), one-factor confirmatory analysis, and item response models (partial credit model). Graphical output includes histograms of item and test scores, empirical item characteric curves, and person-item maps, among others.
 #'
-#' Iana is based on the \href{http://www.rstudio.com/shiny/}{Shiny Web Framework for R}, which allows a fast bidirectional communication between the browser and R. Iana is "reactive", meaning that its output is instantly updated if any of the inputs (e.g., the selected variables) are changed by the user. This makes it easy to compare the impact of item selection and/or modeling options on the results. Iana keeps track of the R commands it constructs as a response to user input, so the analysis steps are documented and can be replicated. Iana comes with some built-in data sets, with which the interface can be tested, however, other data can easily be used.
+#' Iana is based on the \href{http://www.rstudio.com/shiny/}{Shiny Web Framework for R}, which allows a fast bidirectional communication between the browser and R. Iana is "reactive", meaning that its output is instantly updated if any of the inputs (e.g., the selected variables) are changed by the user. This makes it easy to compare the impact of item selection and/or modeling options on the results. Iana keeps track of the R commands it constructs as a response to user input, so the analysis steps are documented and can be replicated. Iana comes with some built-in data sets, with which the interface can be tested. However, other data can easily be used.
 #'
 #' The basic usage is documented in \code{\link{runiana}}.
 #'
@@ -22,8 +22,9 @@
 #' @importFrom psych alpha describe principal fa irt.fa KMO skew kurtosi
 #' @importFrom semTools reliability
 #' @importFrom mirt mirt
-#' @importFrom dplyr select_
-#' @import ggplot2 GPArotation lavaan eRm markdown reshape2 stringr tidyr shiny shinythemes shinyAce
+#' @importFrom tidyr gather_
+#' @importFrom dplyr filter_ select_
+#' @import ggplot2 GPArotation lavaan eRm markdown reshape2 stringr shiny shinythemes shinyAce
 #' @docType package
 #' @author Michael Hock (\email{michael.hock@@uni-bamberg.de})
 #' @references Shiny web framework for R: \url{http://www.rstudio.com/shiny/}
@@ -75,14 +76,14 @@ getDataFramesIana <- function(min = 20) {
         }
     }
     
-    ### Clean this
+    ### Clean example data
     if (length(x) == 0) {
         load("data/ExampleData.RData", .GlobalEnv)
         load("data/daten_sose14.rda", .GlobalEnv)
         x <- ls(.GlobalEnv)
         x <- x[sapply(x, function(x) is.data.frame(get(x, 1)))]
     }
-    if (length(x) == 0) x <- "this should not happen: no data frames found"
+    if (length(x) <= 0) x <- "this should not happen: no data frames found"
     x
 }
 
@@ -1023,6 +1024,7 @@ classifyItems <- function(fm, Df, min.loading = 0.4, max.loading = 0.3, max.comp
     ilength <- getOption("width") -  max(nchar(varnames)) - 3 -
       (ncol(lmat) + 2) * (digits + 4)
     items <- getItemText(Df)
+
     if (is.null(items)) {
         shortitems <- rep("-", length(communality))
         if (!return.res) {

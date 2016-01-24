@@ -10,11 +10,11 @@ require(lavaan) ### Why needed? Better construct a "runCFA"-command?
 # require(reshape2)
 # require(semTools)
 #
-# Bei Paketen, die in server.R angesprochen werden, brauchen wir das zusätzlich (neben Import)
+# todo: Bei Paketen, die in server.R angesprochen werden, brauchen wir das zusätzlich (neben Import)
 require(psych)
-require(dplyr)
-require(tidyr)
 require(stringr)
+require(tidyr)
+require(dplyr)
 
 log.output <- function(x = "") {
     t <- proc.time()[3]
@@ -37,7 +37,10 @@ shinyServer(function(input, output) {
     # Data #####################################################################
     
     getSelectedDf <- reactive({
-        na.omit(get(input$selectedDf))
+        print(input$selectedDf)
+        #na.omit(get(input$selectedDf)) # throws attributes away...
+        Df <- get(input$selectedDf)
+        dplyr::filter_(Df, ~complete.cases(Df))
     })
 
     getLikertLikeVars <- function(Df, unique.values = 9) {
@@ -148,6 +151,8 @@ shinyServer(function(input, output) {
         log.output("getSubset")
         if (is.null(vnames) || length(vnames) < minNoVars) return()
         Df <- dplyr::select_(getSelectedDf(), .dots = vnames)
+#        print(attr(Df[,1], "item.text"))
+#        print(attr(getSelectedDf()[,1], "item.text"))
         Df
     }
 
