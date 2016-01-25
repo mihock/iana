@@ -506,9 +506,16 @@ shinyServer(function(input, output) {
         x <- getSubset(checkedVars(), 3)
         if (is.null(x)) return()
 
+        # Exit if the number of unique values in the data is too large.
+        n.values <- length(unique(as.vector(as.matrix(x))))
+        validate(
+            need(n.values < 10, 
+                 paste("Your data have", n.values, "unique values. This is too much for a PCM.\n(maximum is 9 unique values).\n"))
+        )
+        
         # Fit a Rasch Model if data have 2 unique values,
-        # otherwise fit a Partial credit model
-        if ( length(unique(as.vector(as.matrix(x)))) == 2 ) {
+        # otherwise fit a Partial credit model. 
+        if ( n.values == 2 ) {
             model <- "Rasch"
             res <- eRm::RM(x)
         } else {
@@ -672,6 +679,17 @@ shinyServer(function(input, output) {
         log.output("computeMirt")
         x <- getSubset(checkedVars(), 3)
         if (is.null(x)) return()
+        
+        # Exit if the number of unique values in the data is too large.
+        # todo: make a function of it; also check if n.values > 1
+        #       (used also in Rasch models)
+        # todo: also for WLSMV, polychoric corrs.
+        n.values <- length(unique(as.vector(as.matrix(x))))
+        validate(
+            need(n.values < 10, 
+                 paste("Your data have", n.values, "unique values. This is too much for a MIRT model.\n(maximum is 9 unique values).\n"))
+        )
+        
         nf <- input$mirt_nfactors 
         model <- input$mirt_model
         validate(
