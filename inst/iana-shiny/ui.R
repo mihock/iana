@@ -14,12 +14,16 @@ shinyUI(fluidPage(
     sidebarLayout(
         position = "right",
         sidebarPanel = sidebarPanel(
+            h3("Run/Apply"),
+            helpText("Press this button to run an analysis or to apply changes in variables or options."),
+            submitButton("Run/Apply"),
+            
             h3("Item selection"),
             helpText("The dropdown list below contains the data frames present in your R environment. Please select a data frame containing the variables (items) to analyze. You can then select or deselect variables. Notice that only variables coded with integer values are shown."),
             br(),
             ###actionButton(inputId = "stopIana", label = " Stop "),
-            ###submitButton("Apply"),
-            ###br(),
+#             submitButton("Apply"),
+#             br(),
             ####actionButton(inputId = "applyButton", label = "Apply"),
             ####br(),
             selectInput(inputId = "selectedDf", 
@@ -148,6 +152,7 @@ shinyUI(fluidPage(
                                     plotOutput(outputId = "maptest.plot")
                            ),
                            
+                           # EFA ####
                            tabPanel("Exploratory Factor Analysis",
                                     h3("Exploratory Factor Analysis and Principal Components Analysis"),
                                     helpText("Analyses are performed with iana::factoranalysis, which uses psych::principal, psych::fa, and psych::fa.poly."),
@@ -213,6 +218,7 @@ shinyUI(fluidPage(
                                     verbatimTextOutput(outputId = "factorcode")
                            ),
                            
+                           # CFA ####
                            tabPanel("Confirmatory Factor Analysis",
                                     h3("Confirmatory Factor Analysis"),
                                     helpText("Confirmatory factor analysis is performed with lavaan::cfa."),
