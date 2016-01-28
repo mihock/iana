@@ -189,14 +189,16 @@ shinyServer(function(input, output) {
             ggplot2::ggplot(d, aes_(x = ~as.factor(Score))) +
                 facet_wrap(~Item) +
                 geom_bar(colour = "black", fill = "white") +
-                xlab("Response") + ylab("Count")
+                xlab("Response") + ylab("Count") +
+                theme(text = element_text(size = 14))
         } else {
             ggplot2::ggplot(d, aes_(x = ~as.factor(Score))) + 
                 facet_wrap(~Item) +
                 geom_bar(aes_(y = ~100*(..count..) /
                         tapply(..count..,..PANEL..,sum)[..PANEL..]),
                     colour = "black", fill = "white") +
-                xlab("Response") + ylab("Percent of total")
+                xlab("Response") + ylab("Percent of total") +
+                theme(text = element_text(size = 14))
         }
     })
     
@@ -222,7 +224,8 @@ shinyServer(function(input, output) {
         
         # Plot
         p <- ggplot2::ggplot(d, aes_(x = ~Total)) +
-            xlab("Total score")
+            xlab("Total score") +
+            theme(text = element_text(size = 14)) 
         if (input$histtype == "percent")  {
             p <- p + geom_histogram(aes_(y = ~100*(..count..) / sum(..count..)),
                 color = mycolor, fill = myfill, 
