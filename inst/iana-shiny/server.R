@@ -136,17 +136,14 @@ shinyServer(function(input, output) {
 
     getSubset <- function(vnames, minNoVars = 2) {
         log.output("getSubset")
-        if (is.null(vnames) || length(vnames) < minNoVars) return()
+        req(vnames, length(vnames) >= minNoVars)
         Df <- dplyr::select_(getSelectedDf(), .dots = vnames)
-#        print(attr(Df[,1], "item.text"))
-#        print(attr(getSelectedDf()[,1], "item.text"))
         Df
     }
 
     output$casesindf <- renderUI({
         log.output("casesindf")
         x <- getSubset(checkedVars())
-        if (is.null(x)) return()
         helpText(paste0(nrow(x), " cases in data frame."))
     })
 
@@ -155,7 +152,6 @@ shinyServer(function(input, output) {
     output$frequencies <-  renderTable({
         log.output("frequencies")
         x <- getSubset(checkedVars())
-        if (is.null(x)) return()
         cmdLog("# Frequencies\n")
         cmdLog("frequencies(myData)\n")
         iana::frequencies(x)
@@ -166,7 +162,6 @@ shinyServer(function(input, output) {
     output$reliability <- renderPrint({
         log.output("reliability")
         x <- getSubset(checkedVars())
-        if (is.null(x)) return()
         cmdLog("# Reliability")
         if (input$reliabDetailed){
             cmdLog("alpha(myData)\n")
@@ -182,7 +177,6 @@ shinyServer(function(input, output) {
     output$hist <- renderPlot({
         log.output("hist")
         x <- getSubset(checkedVars(), 1)
-        if (is.null(x)) return()
         ### cmdLog
         d <- tidyr::gather_(x, "Item", "Score", names(x))
         if (input$histtypeitem == "count") {
@@ -206,8 +200,6 @@ shinyServer(function(input, output) {
         log.output("histTotal")
 
         x <- getSubset(checkedVars())
-        if (is.null(x)) return()
-
         sumScore <- rowSums(x, na.rm = TRUE)
         binw <- input$histbinwidth
         if (input$totalscoretype == "sum") Total <- sumScore
@@ -252,7 +244,6 @@ shinyServer(function(input, output) {
     
     output$descrStatsTotal <- renderTable({
         x <- getSubset(checkedVars())
-        if (is.null(x)) return()
         sumScore <- rowSums(x, na.rm = TRUE)
         meanScore <- rowMeans(x, na.rm = TRUE)
         rbind("Sum score" = basicDescr(sumScore), "Mean score" = basicDescr(meanScore))
@@ -263,7 +254,6 @@ shinyServer(function(input, output) {
     output$ICCs <- renderPlot({
         log.output("ICCs")
         x <- getSubset(checkedVars())
-        if (is.null(x)) return()
         if (input$ICClinear) method <- "lm"
         else method <- "loess"
         ### cmdLog
@@ -276,7 +266,6 @@ shinyServer(function(input, output) {
     output$parallelanalysis <- renderPlot({
         log.output("parallelanalysis")
         x <- getSubset(checkedVars())
-        if (is.null(x)) return()
         cmdLog("# Parallel Analysis")
         cmdLog("ggscree.plot(myData)\n")
         iana::ggscree.plot(x)
@@ -287,7 +276,6 @@ shinyServer(function(input, output) {
     maptest <- reactive({
         log.output("maptest")
         x <- getSubset(checkedVars())
-        if (is.null(x)) return()
         mt <- iana::mapTest(x)
         mt
     })
@@ -341,8 +329,6 @@ shinyServer(function(input, output) {
         }
         
         Df <- getSubset(checkedVars())
-        if (is.null(Df)) return()
-        
         if (famethod == "princomp") {
             possible.rots = c("none", "varimax", "quartimax", "promax", 
                 "oblimin", "simplimax", "cluster")
@@ -397,21 +383,18 @@ shinyServer(function(input, output) {
     output$factorfit <- renderTable({
         log.output("factorfit")
         res <- computeEFA()
-        if (is.null(res)) return()
         res$fit
     }, include.rownames = FALSE)
 
     output$loadings <- renderTable({
         log.output("loadings")
         res <- computeEFA()
-        if (is.null(res)) return()
         res$factorloadings
     })
     
     output$factorvariances <- renderTable({
         log.output("factorvariances")
         res <- computeEFA()
-        if (is.null(res)) return()
         res$factorvariances
     })
 
@@ -425,7 +408,6 @@ shinyServer(function(input, output) {
     output$factorcode <- renderPrint({
         log.output("factorcode")
         res <- computeEFA()
-        if (is.null(res)) return() ### needed?
         cat(res$factorcode)
     })
     
@@ -445,7 +427,6 @@ shinyServer(function(input, output) {
         log.output("cfa")
 
         x <- getSubset(checkedVars(), 3)
-        if (is.null(x)) return()
 
         if (input$cfaUseModel) {
             input$cfaEvalModel
@@ -507,7 +488,6 @@ shinyServer(function(input, output) {
     computePCM <- reactive({
         log.output("computePCM")
         x <- getSubset(checkedVars(), 3)
-        if (is.null(x)) return()
 
         # Exit if the number of unique values in the data is too large.
         n.values <- length(unique(as.vector(as.matrix(x))))
@@ -534,8 +514,6 @@ shinyServer(function(input, output) {
     output$pcm.tests <- renderPrint({
         log.output("pcm.tests")
         x <- computePCM()
-        if (is.null(x)) return()
-        
         if (x$model == "Rasch") 
             cat("Fitting a Rasch Model for binary items because data\nhave 2 unique values.\n")
         else 
@@ -564,8 +542,6 @@ shinyServer(function(input, output) {
     output$pcm.graphmodeltest <- renderPlot({
         log.output("pcm.graphmodeltest")
         x <- computePCM()
-        if (is.null(x)) return()
-        
         ### Todo: We compute LRTest twice. Catch errors?
         splitcriterion <- input$factorsindf
         if (length(splitcriterion) == 0) splitcriterion <- "median"
@@ -580,15 +556,12 @@ shinyServer(function(input, output) {
     output$pcm.itemfit <- renderPrint({
         log.output("pcm.itemfit")
         x <- computePCM()
-        if (is.null(x)) return()
         print(eRm::itemfit(x$pp))
     })
         
     output$pcm.itemstats <- renderPrint({
         log.output("pcm.itemstats")
         x <- computePCM()
-        if (is.null(x)) return()
-        
         if (x$model == "Rasch") {
             summary(x$res)
         } else {
@@ -603,7 +576,6 @@ shinyServer(function(input, output) {
     output$pcm.personstats <- renderPrint({
         log.output("pcm.itemstats")
         x <- computePCM()
-        if (is.null(x)) return()
         print(x$pp)
 
         # Summary of person fit
@@ -619,7 +591,6 @@ shinyServer(function(input, output) {
         vnames <- paste("patDf$", vnames, sep = "", collapse = ", ")
         shortpat <- paste0("paste(", vnames, ", sep = '')")
         shortpat <- eval(parse(text = shortpat))
-        #pat <- data.frame(case, x$pp$X, total = x$sumscore)
         pat <- data.frame(case, "Response pattern" = shortpat, Sum = sumscore)
 
         # Data frame for fit statistics
@@ -651,7 +622,6 @@ shinyServer(function(input, output) {
     output$pcm.pimap <- renderPlot({
         log.output("RASCH, PI Map")
         x <- computePCM()
-        if (is.null(x)) return()
         eRm::plotPImap(x$res, sorted=input$pcm.sortitems,
                   warn.ord.colour = "red", cex.gen = 0.8)
     }, res = 96) ### Check "res"
@@ -659,7 +629,6 @@ shinyServer(function(input, output) {
     output$rasch.icc <- renderPlot({
         log.output("RASCH, ICC")
         x <- computePCM()
-        if (is.null(x)) return()
         if (x$model == "Rasch") {
             iana::ggplotICC.RM(x$res, empICC = list(input$rasch.icctype))
         } else {
@@ -671,9 +640,7 @@ shinyServer(function(input, output) {
     output$pcm.info <- renderPlot({
         log.output("PCM, Info")
         x <- computePCM()
-        if (is.null(x)) return()
         eRm::plotINFO(x$res)
-
     })
 
     # MIRT #####################################################################
@@ -681,8 +648,7 @@ shinyServer(function(input, output) {
     computeMirt <- reactive({
         log.output("computeMirt")
         x <- getSubset(checkedVars(), 3)
-        if (is.null(x)) return()
-        
+
         # Exit if the number of unique values in the data is too large.
         # todo: make a function of it; also check if n.values > 1
         #       (used also in Rasch models)
@@ -720,7 +686,6 @@ shinyServer(function(input, output) {
     output$mirt.summary <- renderPrint({
         log.output("mirt (output)")
         x <- computeMirt()
-        if (is.null(x)) return()
         cat("\nBASICS\n")
         cmdLog("print(res)")
         print(x)
