@@ -139,8 +139,32 @@ shinyUI(fluidPage(
                            
                            tabPanel("Dimensionality Tests",
                                     h3("Parallel Analysis"),
-                                    helpText("The parallel analysis below is based on the principal components of the data. The circles connected by the thick line show the empirical eigenvalues. The thin lines represent the eigenvalues of 20 simulations with normally distributed random data. A dimension/component is judged to be meaningful if its eigenvalue is larger than the eigenvalues obtained from random data."),
+                                    helpText("The circles connected by the solid line show the empirical eigenvalues. The triangles connected by the dotted line represent the mean eigenvalues of 20 simulations with random (normal or resampled) data. A dimension/component is judged to be meaningful if its eigenvalue is larger than the eigenvalues obtained from random data."),
+                                    fluidRow(
+                                        column(4, selectInput(inputId = "faMethodParallel",
+                                                              label = "Factoring method:",
+                                                              choices = c("Maximum likelihood" = "ml", 
+                                                                          "Minimum residuals" = "minres", 
+                                                                          "Principal axes" = "pa"))),
+                                        column(4, selectInput(inputId = "basisParallel",
+                                                              label = "Basis:",
+                                                              choices = c("Correlations" = "cor", 
+                                                                          # Apparently wrong values by psych
+                                                                          # for 'cov' with resampled data...
+                                                                          #"Covariances" = "cov", 
+                                                                          "Tetrachoric correlations" = "tet",
+                                                                          "Polychoric correlations" = "poly"))),
+                                        column(4, numericInput(inputId = "nFactorsParallel", 
+                                                               label = "Factors to show:*",
+                                                               min = 5, max = 21, value = 21, step = 1)),
+                                        column(4, checkboxInput(inputId = "simParallel", 
+                                                                label = "Random normal data**")),
+                                        column(4, checkboxInput(inputId = "onlyFAParallel", 
+                                                                label = "Show only results from FA"))
+                                    ),
+                                    helpText("*Setting this value to 21 plots all factors. **If unchecked use resampled data."),
                                     plotOutput(outputId = "parallelanalysis"),
+
                                     h3("MAP Test"),
                                     helpText("The Minimum Average Partial (MAP) test works by computing the average of the squared (partial) correlations between the p variables of a data set after the first m = 1 to (p-1) principal components have been removed (partialled out). The suggestion is to retain components, for which this average reaches its minimum. The table below also shows the average squared correlation between the variables (no component removed; m = 0). If this value is the lowest in the table, there is probably no common variance to analyze. The maximum number of components removed is 20."),
                                     verbatimTextOutput(outputId = "maptest"),

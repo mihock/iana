@@ -266,8 +266,16 @@ shinyServer(function(input, output) {
         log.output("parallelanalysis")
         x <- getSubset(checkedVars())
         cmdLog("# Parallel Analysis")
-        cmdLog("ggscree.plot(myData)\n")
-        iana::ggscree.plot(x)
+        #cmdLog("ggscree.plot(myData)\n")
+        #iana::ggscree.plot(x)
+        nfac <- input$nFactorsParallel
+        if (nfac >= 21) nfac <- NULL
+         iana::parallelAnalysis(x, 
+                                fm = input$faMethodParallel,
+                                cor = input$basisParallel,
+                                n.factors = nfac, 
+                                sim = input$simParallel,
+                                onlyFA = input$onlyFAParallel)
     })
 
     # MAP test #################################################################

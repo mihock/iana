@@ -19,7 +19,7 @@
 #'
 #' @name iana-package
 #' @aliases iana
-#' @importFrom psych describe principal fa irt.fa KMO skew kurtosi
+#' @importFrom psych describe principal fa irt.fa fa.parallel KMO skew kurtosi
 #' @importFrom semTools reliability
 #' @importFrom mirt mirt
 #' @importFrom tidyr gather_
@@ -222,6 +222,178 @@ frequencies <- function(x) {
     x
 }
 
+#' Parallel analysis
+#'
+#' Performs a parallel analysis for the variables (usually items) in a data frame.
+#'
+#' @param x a data frame containing the variables (items) to be analyzed
+#' @param fm string specifying the factoring method ("ml", "minres", ...)
+#' @param cor string specifying how the correlations are found: "cor" (correlation), "cov" (covariance), "tet" (tetrachoric correlation), "poly" (polychoric correlation)
+#' @param n.factors integer specifying the number of factors to plot; if NULL plot all factors
+#' @param sim logical; if TRUE, sample from normal distribution, otherwise resample from the data
+#' @param onlyFA logical; if TRUE, show only factor analysis results, if FALSE show also results from principal components
+#'
+# #' @details ...
+#'
+#' @return a ggplot2 object 
+#'
+#' @author Computation: William Revelle, see \code{\link{psych}}, specifically \code{\link{fa.parallel}}.
+#' @author Plot: Michael Hock, \email{michael.hock@@uni-bamberg.de}
+#'
+#' @export
+#'
+parallelAnalysis <- function(x, fm = "ml", cor = "cor", n.factors = NULL, sim = TRUE, onlyFA = FALSE) {
+    #     require(ggplot2)
+    #     require(psych)
+    #     require(tidyr)
+    
+    if (!is.data.frame(x)) stop("x must be data frame")
+    x0 <- psych::fa.parallel(x, fm = fm, cor = cor, sim = sim)
+    nfac <- length(x0$pc.values)
+    x <- data.frame(Factor = 1:nfac,
+                    pc = x0$pc.values,
+                    fa = x0$fa.values)
+    if (sim) {
+        x$pc.sim = x0$pc.sim
+        x$fa.sim = x0$fa.sim        
+    } else {
+        x$pc.sim = x0$pc.simr
+        x$fa.sim = x0$fa.simr        
+    }
+
+    mydata <- tidyr::gather_(x, "Source", "ev", names(x)[-1])
+    mydata$sim <- c(rep("Empirical", 2*nfac), rep("Simulated", 2*nfac))
+    mydata$type <- c(rep("Principal Components Analysis", nfac),
+                     rep("Factor Analysis", nfac),
+                     rep("Principal Components Analysis", nfac),
+                     rep("Factor Analysis", nfac))
+
+    if (is.null(n.factors)) n.factors  <- nfac
+    mydata <- mydata[mydata$Factor <= n.factors,]
+    n.factors <- max(mydata$Factor)
+    
+    # Compute ticks for x-axis
+    if (n.factors < 11) {
+        myticks <- 1:n.factors
+    } else {
+        incr <- round(n.factors/10)
+        myticks <- seq(from = 1, to = n.factors, by = incr)
+    }
+    
+    # Plot
+    if (onlyFA) {
+        mydata <- mydata[mydata$type == "Factor Analysis",]
+        pl <- ggplot2::ggplot(mydata, aes_(~Factor, ~ev, shape=~sim, colour=~sim)) +
+            xlab("Factor")
+    } else {
+        pl <- ggplot2::ggplot(mydata, aes_(~Factor, ~ev, shape=~sim, colour=~sim)) +
+            xlab("Factor/Component") +
+            facet_wrap(~ type)
+    }
+    pl <- pl +
+        ylab("Eigenvalue") +
+        geom_point(size = I(4)) +
+        geom_line(aes(linetype=sim)) +
+        scale_linetype_manual(breaks=c("Empirical", "Simulated"), values=c(1,5)) +
+        scale_color_manual(values=c("#000000", "#9999CC")) +
+        theme(legend.title=element_blank(),
+              legend.position=c(1, 1),
+              legend.justification=c(1, 1),
+              legend.box.just = "left") +
+        scale_x_continuous(breaks = myticks) +
+        geom_abline(intercept = 0:1, slope = 0, colour = "#9999CC",
+                    linetype = "dashed")
+    pl
+}
+
+# #' Parallel Analysis
+# #'
+# #' Performs parallel analysis of a set of items.
+# #'
+# #' @param Df a data frame containing the items
+# #' @param title title of the plot
+# #' @param use handling of missig values
+# #' @param simu number of simulations
+# #' @param xlab x-axis label of the plot
+# #' @param ylab y-axis label of the plot
+# #'
+# #' @details Adapted from \code{psy}-package (Bruno Falissard).
+# #'
+# #' @author Michael Hock \email{michael.hock@@uni-bamberg.de}
+# #'
+# #' @export
+# ggscree.plot <- function(Df, title = NULL,
+#                           use = "complete.obs", simu = 20,
+#                           xlab = "Component", ylab = "Eigenvalue") {
+#     ### Hack to avoid Note in package check
+#     Dimension <- NULL
+#     Eigenvalue <- NULL
+#     ### End of Hack
+# 
+#     mat <- Df
+#     if (use == "complete.obs")
+#         mat <- na.omit(Df)
+#     eigenval <- eigen(cor(mat, use = "pairwise.complete.obs"),
+#                       symmetric = TRUE)$values
+#     nev <- length(eigenval)
+#     n <- dim(mat)[1]
+#     p <- dim(mat)[2]
+# 
+#     ev.mat <- matrix(nrow = p*(simu + 1), ncol = 2)
+#     ev.mat[, 1] <- rep(1:p, simu + 1)
+#     ev.mat[1:p, 2] <- eigenval
+# 
+#     matsimu <- matrix(nrow = n, ncol = p)
+#     int <- rep(1, n * p)
+#     attr(int, "dim") <- c(n, p)
+#     mat <- pmax(as.matrix(mat), int)
+#     newrow <- 1
+#     for (i in 1:simu) {
+#         matnorm <- rnorm(n * p)
+#         attr(matnorm, "dim") <- c(n, p)
+#         matsimu <- (mat/mat) * matnorm
+#         eigenval <- eigen(cor(matsimu, use = "pairwise.complete.obs"))$values
+#         newrow <- newrow + p
+#         ev.mat[newrow:(newrow + p - 1), 2] <- eigenval
+#     }
+# 
+#     eDf <- data.frame(ev.mat)
+#     ar = rep(1:(simu+1), each = p)
+#     ar <- factor(ar)
+#     eDf <- cbind(eDf, ar)
+#     names(eDf) <- c("Dimension", "Eigenvalue", "ar")
+# 
+#     # Compute ticks for x-axis
+#     if (ncol(Df) < 11) {
+#         myticks <- 1:ncol(Df)
+#     } else {
+#         incr <- round(ncol(Df)/10)
+#         myticks <- round(seq(from = 1, to = ncol(Df), by = incr))
+#     }
+# 
+#     pl <- ggplot(eDf, aes_(~Dimension, ~Eigenvalue, group = ~ar)) +
+#         geom_line(alpha = c(rep(1, p), rep(0.2, p*simu))) +
+#         geom_point(size = c(rep(5, p), rep(1, p*simu)),
+#                    shape = c(rep(21, p), rep(1, p*simu)),
+#                    alpha = c(rep(1, p), rep(0.2, p*simu)),
+#                    fill = "white") +
+#         geom_abline(intercept = 1, slope = 0, colour = "darkblue",
+#                     linetype = "dashed") +
+#         theme(text = element_text(size = 20, colour = "black"),
+#               axis.title.x = element_text(vjust = 0.2),
+#               axis.title.y = element_text(vjust = 0.3),
+#               plot.title = element_text(vjust = 1.5)) +
+#         xlab(xlab) + ylab(ylab) +
+#         scale_x_continuous(breaks=myticks) # Ticks
+#     #        scale_shape_manual(values = c(21, 20))
+#     if (!is.null(title)) {
+#         pl <- pl + ggtitle(title)
+#     }
+#     print(pl)
+#     ###pl  ### remove?
+# }
+
+
 #' Velicer's MAP Test
 #'
 #' Perform Velicer's Minimum Average Partial test for the variables (usually items) in a data frame.
@@ -265,7 +437,7 @@ frequencies <- function(x) {
 #' #
 #' # If we remove 1 item the MAP test suggests the wrong number of factors...
 #' #
-#' Df2 <- dplyr::select(Df, -x6)
+#' Df2 <- dplyr::select_(Df, quote(-x6))
 #' mt2 <- mapTest(Df2)
 #' print(mt2)
 #' plot(mt2)
@@ -443,93 +615,6 @@ reliability <- function(x, invert = TRUE, digits = 3, dfname = NULL) {
     Total <- data.frame(Sum_score = rowSums(x), Mean_score = rowMeans(x))
     print(describe(Total))
     cat("\n")
-}
-
-#' Parallel Analysis
-#'
-#' Performs parallel analysis of a set of items.
-#'
-#' @param Df a data frame containing the items
-#' @param title title of the plot
-#' @param use handling of missig values
-#' @param simu number of simulations
-#' @param xlab x-axis label of the plot
-#' @param ylab y-axis label of the plot
-#'
-#' @details Adapted from \code{psy}-package (Bruno Falissard).
-#'
-#' @author Michael Hock \email{michael.hock@@uni-bamberg.de}
-#'
-#' @export
-ggscree.plot <- function(Df, title = NULL,
-                          use = "complete.obs", simu = 20,
-                          xlab = "Component", ylab = "Eigenvalue") {
-    ### Hack to avoid Note in package check
-    Dimension <- NULL
-    Eigenvalue <- NULL
-    ### End of Hack
-
-    mat <- Df
-    if (use == "complete.obs")
-        mat <- na.omit(Df)
-    eigenval <- eigen(cor(mat, use = "pairwise.complete.obs"),
-                      symmetric = TRUE)$values
-    nev <- length(eigenval)
-    n <- dim(mat)[1]
-    p <- dim(mat)[2]
-
-    ev.mat <- matrix(nrow = p*(simu + 1), ncol = 2)
-    ev.mat[, 1] <- rep(1:p, simu + 1)
-    ev.mat[1:p, 2] <- eigenval
-
-    matsimu <- matrix(nrow = n, ncol = p)
-    int <- rep(1, n * p)
-    attr(int, "dim") <- c(n, p)
-    mat <- pmax(as.matrix(mat), int)
-    newrow <- 1
-    for (i in 1:simu) {
-        matnorm <- rnorm(n * p)
-        attr(matnorm, "dim") <- c(n, p)
-        matsimu <- (mat/mat) * matnorm
-        eigenval <- eigen(cor(matsimu, use = "pairwise.complete.obs"))$values
-        newrow <- newrow + p
-        ev.mat[newrow:(newrow + p - 1), 2] <- eigenval
-    }
-
-    eDf <- data.frame(ev.mat)
-    ar = rep(1:(simu+1), each = p)
-    ar <- factor(ar)
-    eDf <- cbind(eDf, ar)
-    names(eDf) <- c("Dimension", "Eigenvalue", "ar")
-
-    # Compute ticks for x-axis
-    if (ncol(Df) < 11) {
-        myticks <- 1:ncol(Df)
-    } else {
-        incr <- round(ncol(Df)/10)
-        myticks <- round(seq(from = 1, to = ncol(Df), by = incr))
-    }
-
-    pl <- ggplot(eDf, aes_(~Dimension, ~Eigenvalue, group = ~ar)) +
-        geom_line(alpha = c(rep(1, p), rep(0.2, p*simu))) +
-        geom_point(size = c(rep(5, p), rep(1, p*simu)),
-                   shape = c(rep(21, p), rep(1, p*simu)),
-                   alpha = c(rep(1, p), rep(0.2, p*simu)),
-                   fill = "white") +
-        geom_abline(intercept = 1, slope = 0, colour = "darkblue",
-                    linetype = "dashed") +
-        theme(text = element_text(size = 20, colour = "black"),
-              axis.title.x = element_text(vjust = 0.2),
-              axis.title.y = element_text(vjust = 0.3),
-              plot.title = element_text(vjust = 1.5)) +
-        xlab(xlab) + ylab(ylab) +
-        scale_x_continuous(breaks=myticks) # Ticks
-    #        scale_shape_manual(values = c(21, 20))
-    if (!is.null(title)) {
-        pl <- pl + ggtitle(title)
-    }
-    print(pl)
-    ###pl  ### remove?
 }
 
 #' Empirical ICCs
