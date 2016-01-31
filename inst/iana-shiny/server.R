@@ -244,7 +244,7 @@ shinyServer(function(input, output) {
         x <- getSubset(checkedVars())
         sumScore <- rowSums(x, na.rm = TRUE)
         meanScore <- rowMeans(x, na.rm = TRUE)
-        rbind("Sum score" = basicDescr(sumScore), "Mean score" = basicDescr(meanScore))
+        rbind("Sum score" = iana::basicDescr(sumScore), "Mean score" = iana::basicDescr(meanScore))
     })
 
     # ICCs #####################################################################
@@ -496,16 +496,20 @@ shinyServer(function(input, output) {
         
         # Fit a Rasch Model if data have 2 unique values,
         # otherwise fit a Partial credit model. 
-        if ( n.values == 2 ) {
-            model <- "Rasch"
-            res <- eRm::RM(x)
-        } else {
-            model <- "PCM"
-            res <- eRm::PCM(x)
-        }
-        pp <- eRm::person.parameter(res)
-        cases <- nrow(x)
-        x <- list(res = res, pp = pp, cases = cases, model = model)
+        withProgress(message = 'RM/PCM', detail = "running", max = 2, {
+            if ( n.values == 2 ) {
+                model <- "Rasch"
+                res <- eRm::RM(x)
+            } else {
+                model <- "PCM"
+                res <- eRm::PCM(x)
+            }
+            incProgress(1, detail = "person parameters")
+            pp <- eRm::person.parameter(res)
+            incProgress(1, detail = "done")
+            cases <- nrow(x)
+            x <- list(res = res, pp = pp, cases = cases, model = model)
+        })
         x
     })
 
@@ -672,11 +676,14 @@ shinyServer(function(input, output) {
             ",\n    rotate = '", input$mirt_rotate, "'",
             ",\n    SE = TRUE, verbose = FALSE)"
         ))
-        res <- mirt::mirt(x, 
-            model = nf, 
-            itemtype = model, 
-            method = input$mirt_method,
-            SE = TRUE, verbose = FALSE)
+        withProgress(message = 'MIRT', detail = "running", max = 1, {
+            res <- mirt::mirt(x, 
+                              model = nf, 
+                              itemtype = model, 
+                              method = input$mirt_method,
+                              SE = TRUE, verbose = FALSE)
+            incProgress(1, detail = "done")
+        })
         log.output("computeMirt done")
         res
     })
