@@ -107,6 +107,7 @@ shinyServer(function(input, output) {
         checkboxGroupInput(inputId = "varnamesindf",
             label = "Variables to use:",
             choices = varsInDf,
+            #inline = TRUE,
             selected = getVarRange())
     })
     

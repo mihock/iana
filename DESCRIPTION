@@ -20,7 +20,6 @@ Imports:
     eRm,
     mirt,
     markdown,
-    reshape2,
     stringr,
     semTools,
     tidyr,
