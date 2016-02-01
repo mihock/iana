@@ -311,7 +311,7 @@ shinyServer(function(input, output) {
         log.output("computeEFA")
         vnames <- checkedVars()
         if (is.null(vnames)) return()
-        
+
         numfac <- input$nFactors
         famethod <- input$faMethod
         farot <- input$faRotation
@@ -337,43 +337,48 @@ shinyServer(function(input, output) {
         }
         
         Df <- getSubset(checkedVars())
-        if (famethod == "princomp") {
-            possible.rots = c("none", "varimax", "quartimax", "promax", 
-                "oblimin", "simplimax", "cluster")
-            if (farot %in% possible.rots) {
-                cmdLog("# Principal Components Analysis")
+        
+        withProgress(message = 'Factoranalysis', detail = "running", max = 1, {        
+                         
+            if (famethod == "princomp") {
+                possible.rots = c("none", "varimax", "quartimax", "promax", 
+                                  "oblimin", "simplimax", "cluster")
+                if (farot %in% possible.rots) {
+                    cmdLog("# Principal Components Analysis")
+                    cmdLog(paste0(
+                        "factoranalysis(myData",
+                        ", ", numfac,
+                        ",\n    rotate = '", farot, "'",
+                        ",\n    fm = 'principal'",
+                        ")\n"
+                    ))
+                    fa.res <- factoranalysis(Df, numfac, 
+                                             rotate = farot, 
+                                             fm = "principal", 
+                                             return.res = TRUE)
+                } else {
+                    cat("With principal components, only the following rotations are possible: ",
+                        possible.rots)
+                    ### stop?
+                }
+            } else {
+                cmdLog("# Exploratory Factor Analysis")
                 cmdLog(paste0(
                     "factoranalysis(myData",
                     ", ", numfac,
                     ",\n    rotate = '", farot, "'",
-                    ",\n    fm = 'principal'",
+                    ",\n    fm = '", famethod, "'",
+                    ",\n    polychor = '", fairt, "'",
                     ")\n"
                 ))
-                fa.res <- factoranalysis(Df, numfac, 
-                    rotate = farot, 
-                    fm = "principal", 
-                    return.res = TRUE)
-            } else {
-                cat("With principal components, only the following rotations are possible: ",
-                    possible.rots)
-                ### stop?
+                fa.res <- iana::factoranalysis(Df, numfac,
+                                               rotate = farot, 
+                                               fm = famethod, 
+                                               polychor = fairt, return.res = TRUE)
             }
-        } else {
-            cmdLog("# Exploratory Factor Analysis")
-            cmdLog(paste0(
-                "factoranalysis(myData",
-                ", ", numfac,
-                ",\n    rotate = '", farot, "'",
-                ",\n    fm = '", famethod, "'",
-                ",\n    polychor = '", fairt, "'",
-                ")\n"
-            ))
-            fa.res <- iana::factoranalysis(Df, numfac,
-                rotate = farot, 
-                fm = famethod, 
-                polychor = fairt, return.res = TRUE)
-        }
-
+            incProgress(1, detail = "done")
+        })
+        
         ### cmdLog
         classif <- iana::classifyItems(fa.res$res, Df, input$faMinloading, 
             input$faMaxloading, input$faComplexity, 
