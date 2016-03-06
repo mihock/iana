@@ -57,7 +57,8 @@ shinyServer(function(input, output) {
         if (nrow(Df) == 0) return()
         numvars <- logical(ncol(Df))
         for (i in 1:ncol(Df)) {
-            if (maybeLikert(Df[,i], unique.values)) numvars[i] <- TRUE
+            ### if (maybeLikert(Df[,i], unique.values)) numvars[i] <- TRUE # dplyr!
+            if (maybeLikert(Df[[i]], unique.values)) numvars[i] <- TRUE
         }
         varnames <- names(Df)[numvars]
     }

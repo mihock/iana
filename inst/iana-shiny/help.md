@@ -43,4 +43,4 @@ For psychometric analyses, Iana builds mainly upon the following packages:
 
 * [eRm](http://CRAN.R-project.org/package=eRm) for Rasch models,
 
-* [mirt](http://CRAN.R-project.org/package=mirt) for multidimensional IRT models.
+* [mirt](http://CRAN.R-project.org/package=mirt) for (multidimensional) IRT models.
