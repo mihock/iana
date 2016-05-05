@@ -70,7 +70,7 @@ getDataFramesIana <- function(min = 20) {
         if (length(x) > 0) {
             lx <- rep(TRUE, length(x))
             for (i in 1:length(x)) {
-                if(nrow(na.omit(get(x[i], 1))) < min) lx[i] <- FALSE
+                if(nrow(stats::na.omit(get(x[i], 1))) < min) lx[i] <- FALSE
             }
             x <- x[lx]
         }
@@ -332,7 +332,7 @@ parallelAnalysis <- function(x, fm = "ml", cor = "cor", n.factors = NULL, sim = 
 # 
 #     mat <- Df
 #     if (use == "complete.obs")
-#         mat <- na.omit(Df)
+#         mat <- stats::na.omit(Df)
 #     eigenval <- eigen(cor(mat, use = "pairwise.complete.obs"),
 #                       symmetric = TRUE)$values
 #     nev <- length(eigenval)
@@ -540,7 +540,7 @@ reliability <- function(x, invert = TRUE, digits = 3, dfname = NULL) {
     if (n < 2)
         stop("At least 2 items are needed.")
     cases.orig <- nrow(x)
-    x <- na.omit(x)
+    x <- stats::na.omit(x)
     cases <- nrow(x)
     if (cases < cases.orig) {
         warning("Missing values encountered")
@@ -642,7 +642,7 @@ empICC <- function(x,
 
     if (!is.data.frame(x)) stop("x must be a data frame.")
 
-    x <- na.omit(x) ####
+    x <- stats::na.omit(x) ####
 
     ####
     if (is.na(jitter)) jitter <- 0.4  #### needed for shiny (otherwise app crashes if values are outside the "allowed" range)

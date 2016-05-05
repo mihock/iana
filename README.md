@@ -25,4 +25,3 @@ runiana()
 ```
 
 into an R console.
-
