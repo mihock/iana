@@ -1,6 +1,7 @@
 require(shiny)
 require(shinyAce)
 require(ggplot2)
+require(tidyr)
 require(lavaan) ### Why needed? Better construct a "runCFA"-command?
 
 log.output <- function(x = "") {
@@ -187,7 +188,7 @@ shinyServer(function(input, output) {
                 xlab("Response") + ylab("Count") +
                 theme(text = element_text(size = 14))
         } else {
-            ggplot2::ggplot(d, aes_(x = ~as.factor(Score))) + 
+            ggplot2::ggplot(d, aes_(x = ~as.factor(Score))) +
                 facet_wrap(~Item) +
                 geom_bar(aes_(y = ~100*(..count..) /
                         tapply(..count..,..PANEL..,sum)[..PANEL..]),
