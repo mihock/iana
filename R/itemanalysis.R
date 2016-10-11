@@ -930,7 +930,7 @@ setItemText <- function(x, items = NULL) {
         if (length(items) != ncol(x)) stop(paste0("number of items and columns in data frame do not match. Number of items =", length(items), ", number of columns =", ncol(x)))
     }
     for (i in 1:ncol(x))
-        attr(x[,i], "item.text") <- items[i]
+        attr(x[[i]], "item.text") <- items[i]
     invisible(x)
 }
 
@@ -997,7 +997,7 @@ factoranalysis <- function(x, nfactors, rotate = "promax", fm = "ml",
         cat("\nFIT STATISTICS\n\n")
     }
     
-    # BIC = χ2 + ln(N)[k(k + 1)/2 - df]
+    # BIC = chi2 + ln(N)[k(k + 1)/2 - df]
     if (fm == "principal") {
         Statistic = c("Chi-Square", "Degrees of Freedom", "p")
         Value <- c(q$STATISTIC, q$dof, q$PVAL)
