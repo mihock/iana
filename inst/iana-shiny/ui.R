@@ -16,7 +16,7 @@ shinyUI(fluidPage(
         sidebarPanel = sidebarPanel(
             h3("Run/Apply"),
             helpText("Press this button to run an analysis or to apply changes in variables or options."),
-            submitButton("Run/Apply"),
+####            submitButton("Run/Apply"),
             
             h3("Item selection"),
             helpText("The dropdown list below contains the data frames present in your R environment. Please select a data frame containing the variables (items) to analyze. You can then select or deselect variables. Notice that only variables coded with integer values are shown."),
@@ -154,9 +154,10 @@ shinyUI(fluidPage(
                                                                           #"Covariances" = "cov", 
                                                                           "Tetrachoric correlations" = "tet",
                                                                           "Polychoric correlations" = "poly"))),
-                                        column(4, numericInput(inputId = "nFactorsParallel", 
-                                                               label = "Factors to show:*",
-                                                               min = 5, max = 21, value = 21, step = 1)),
+                                        column(4, sliderInput(inputId = "nFactorsParallel", 
+                                            label = "Factors to show:*",
+                                            min = 5, max = 21, value = 21, step = 1,
+                                            animate = FALSE)),
                                         column(4, checkboxInput(inputId = "simParallel", 
                                                                 label = "Random normal data**")),
                                         column(4, checkboxInput(inputId = "onlyFAParallel", 

@@ -340,7 +340,7 @@ shinyServer(function(input, output) {
         
         Df <- getSubset(checkedVars())
         
-        withProgress(message = 'Factoranalysis', detail = "running", max = 1, {        
+        withProgress(message = 'Factoranalysis', detail = "running", max = 1, {
                          
             if (famethod == "princomp") {
                 possible.rots = c("none", "varimax", "quartimax", "promax", 
