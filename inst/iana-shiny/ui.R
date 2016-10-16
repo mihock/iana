@@ -13,6 +13,8 @@ shinyUI(fluidPage(
     
     sidebarLayout(
         position = "right",
+        
+        # Sidebar ----
         sidebarPanel = sidebarPanel(
             ####            h3("Run/Apply"),
             ####            helpText("Press this button to run an analysis or to apply changes in variables or options."),
@@ -28,7 +30,7 @@ shinyUI(fluidPage(
                 selected = getOption("iana.data")),
             sliderInput(inputId = "kUniqueValues", 
                 label = "Exclude variables with values outside the range of 0 and ...:",
-                min = 2, max = 20, value = 9, step = 1),
+                min = 1, max = 20, value = 9, step = 1),
             helpText("To include all numeric (including non-integer) variables, set this to 20."),
             uiOutput(outputId = "varsindf"),
             helpText("Instead of clicking on the variable names above you can also specify a range of variables using the format 'FirstVar:LastVar'."),
@@ -37,12 +39,14 @@ shinyUI(fluidPage(
             uiOutput(outputId = "casesindf")
         ),
         
+        # Main panel ----
         mainPanel = mainPanel(
             navbarPage(
                 title = "Iana",
                 id = "mainTabset",
                 
                 ### navbarMenu("Distributions", ...) # Bug in shiny (the 1st item must not be a menu)
+                # Distribution ----
                 tabPanel("Distribution",
                     h3("Distributions of items and total score"),
                     

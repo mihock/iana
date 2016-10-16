@@ -217,10 +217,16 @@ frequencies <- function(x) {
     # needs tidyr::gather_
     if (!is.data.frame(x))
         stop("x must be a data frame.")
-    #it <- getItemText(x)
-    x <- tidyr::gather_(x, "item", "score", names(x))
+    it <- getItemText(x)
+    names.x <- names(x)
+    x <- tidyr::gather_(x, "item", "score", names.x)
     x <- xtabs(~ item + score, data = x)
     x <- as.data.frame(unclass(x))
+    # Sort the rows of x according to the orginal item order
+    x <- x[match(names.x, rownames(x)),]
+    if (!is.null(it)) {
+        x$Text <- it
+    }
     x
 }
 
