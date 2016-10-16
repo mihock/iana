@@ -157,7 +157,7 @@ shinyServer(function(input, output) {
         cmdLog("# Frequencies\n")
         cmdLog("frequencies(myData)\n")
         iana::frequencies(x)
-    }, digits = 0)
+    }, rownames = TRUE, striped = TRUE, digits = 0)
     
     # Reliability ####
 
@@ -249,7 +249,7 @@ shinyServer(function(input, output) {
         sumScore <- rowSums(x, na.rm = TRUE)
         meanScore <- rowMeans(x, na.rm = TRUE)
         rbind("Sum score" = iana::basicDescr(sumScore), "Mean score" = iana::basicDescr(meanScore))
-    })
+    }, rownames = TRUE, striped = TRUE)
 
     # ICCs #####################################################################
 
@@ -399,26 +399,26 @@ shinyServer(function(input, output) {
         log.output("factorfit")
         res <- computeEFA()
         res$fit
-    }, include.rownames = FALSE)
+    }, striped = TRUE)
 
     output$loadings <- renderTable({
         log.output("loadings")
         res <- computeEFA()
         res$factorloadings
-    })
-    
+    }, rownames = TRUE, striped = TRUE, auto = TRUE) # auto: for input$faDigits, see xtable
+
     output$factorvariances <- renderTable({
         log.output("factorvariances")
         res <- computeEFA()
         res$factorvariances
-    })
+    }, rownames = TRUE, striped = TRUE, auto = TRUE)
 
     output$factorcorrelations <- renderTable({
         log.output("factorcorrelations")
         res <- computeEFA()
         if (is.null(res$factorcorrelations)) log.output("factor correlations are NULL")
         res$factorcorrelations
-    })
+    }, rownames = TRUE, striped = TRUE, auto = TRUE)
 
     output$factorcode <- renderPrint({
         log.output("factorcode")
@@ -499,8 +499,8 @@ shinyServer(function(input, output) {
     })
     
     # Rasch & PCM ##############################################################
-
-    computePCM <- reactive({
+    #computePCM <- reactive({
+    computePCM <- eventReactive(input$rasch_apply_button, {
         log.output("computePCM")
         x <- getSubset(checkedVars(), 3)
 
@@ -664,7 +664,8 @@ shinyServer(function(input, output) {
 
     # MIRT #####################################################################
     
-    computeMirt <- reactive({
+####    computeMirt <- reactive({
+        computeMirt <- eventReactive(input$mirt_apply_button, {
         log.output("computeMirt")
         x <- getSubset(checkedVars(), 3)
 

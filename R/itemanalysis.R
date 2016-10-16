@@ -217,11 +217,10 @@ frequencies <- function(x) {
     # needs tidyr::gather_
     if (!is.data.frame(x))
         stop("x must be a data frame.")
-    it <- getItemText(x)
+    #it <- getItemText(x)
     x <- tidyr::gather_(x, "item", "score", names(x))
     x <- xtabs(~ item + score, data = x)
     x <- as.data.frame(unclass(x))
-    if (!is.null(it)) x$Text <- it
     x
 }
 
@@ -1164,8 +1163,9 @@ classifyItems <- function(fm, Df, min.loading = 0.4, max.loading = 0.3, max.comp
     expl.var <- ssload / nrow(fm$loadings)
     cumsum.expl.var <- cumsum(expl.var)
     tab <- rbind(ssload, expl.var, cumsum.expl.var)
+    tab <- round(tab, digits)
     row.names(tab) <- c("Sum of squared loadings", "Proportion Variance", "Cumulative Variance")
-    if (!return.res) print(round(tab, digits))
+    if (!return.res) print(tab)
     
     # Factor Correlations
     
