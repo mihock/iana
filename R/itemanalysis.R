@@ -1,13 +1,3 @@
-# sportDf$sport7[sportDf$sport7 == 6] <- 4
-# sportDf$sport10[sportDf$sport10 == 6] <- 4
-# sportDf$sport11[sportDf$sport11 == 6] <- 4
-# 
-# sportDf$sport12[sportDf$sport12 == 0] <- 1
-# descriptives(sportDf)
-# 
-# save(ausprobDf, sportDf, vorbildDf, zaDf, zastudDf, file = "~/arbeit/tools/R/iana/iana/inst/iana-shiny/data/ExampleData.RData")
-
-
 #' GUI for Item Analysis and Scale Construction
 #'
 #' Iana is a browser-based GUI for classical item and test analysis, factor analysis, and item response modeling with a focus on items with an ordered-category response format.

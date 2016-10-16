@@ -10,7 +10,6 @@ log.output <- function(x = "") {
 }
 
 #### Todo
-#### cmdLogFile <- paste(tempdir(), "iana_cmd_log.R", sep = "/")
 cmdLogFile <- path.expand(paste("~", "iana_cmd_log.R", sep = "/"))
 .old.mycmd <<- ""
 cat("# Command Log for IANA\n\n", file = cmdLogFile)
@@ -21,7 +20,7 @@ log.output(paste("Command log is in", cmdLogFile))
 ###
 
 shinyServer(function(input, output) {
-
+    
     # Data #####################################################################
     
     getSelectedDf <- reactive({
@@ -29,12 +28,12 @@ shinyServer(function(input, output) {
         Df <- get(input$selectedDf)
         dplyr::filter_(Df, ~complete.cases(Df))
     })
-
+    
     getLikertLikeVars <- function(Df, unique.values = 9) {
         # Returns the names of all numeric variables in Df
         # with less than the specified number of unique values. If this
         # number is > 19, the names of all numeric variables are returned.
-
+        
         maybeLikert <- function(x, unique.values = 9) {
             is.int <- function(x) {
                 if (is.numeric(x)) {
@@ -52,7 +51,7 @@ shinyServer(function(input, output) {
                     max(x) <= unique.values
             }
         }
-
+        
         log.output("getlikertlikevars")
         ### todo: message if no values are left?
         if (nrow(Df) == 0) return()
@@ -63,7 +62,7 @@ shinyServer(function(input, output) {
         }
         varnames <- names(Df)[numvars]
     }
-
+    
     getVarsInDf <- reactive({
         log.output("getVarsInDf")
         varnames <- getLikertLikeVars(getSelectedDf(), input$kUniqueValues)
@@ -92,7 +91,7 @@ shinyServer(function(input, output) {
             if (length(varrange) > 80) varrange <- varrange[1:80]
         } else {
             newDf <- try(dplyr::select_(getSelectedDf(),
-                                            .dots = input$varrange))
+                .dots = input$varrange))
             if (class(newDf) == "try-error") {
                 log.output("Error in getVarRange")
                 return()
@@ -128,29 +127,29 @@ shinyServer(function(input, output) {
         # Intended to be called at the beginning of statistical functions
         # to make sure that the variables are already in the selected
         # data frame.
-
+        
         log.output("checkedvars")
         vnames <- input$varnamesindf
         res <- vnames %in% getLikertLikeVars(getSelectedDf(), input$kUniqueValues)
         if (all(res) == TRUE) return(vnames)
         return()
     })
-
+    
     getSubset <- function(vnames, minNoVars = 2) {
         log.output("getSubset")
         req(vnames, length(vnames) >= minNoVars)
         Df <- dplyr::select_(getSelectedDf(), .dots = vnames)
         Df
     }
-
+    
     output$casesindf <- renderUI({
         log.output("casesindf")
         x <- getSubset(checkedVars())
         helpText(paste0(nrow(x), " cases in data frame."))
     })
-
+    
     # Item text and frequencies ################################################
-
+    
     output$frequencies <-  renderTable({
         log.output("frequencies")
         x <- getSubset(checkedVars())
@@ -160,7 +159,7 @@ shinyServer(function(input, output) {
     }, rownames = TRUE, striped = TRUE, digits = 0)
     
     # Reliability ####
-
+    
     output$reliability <- renderPrint({
         log.output("reliability")
         x <- getSubset(checkedVars())
@@ -173,9 +172,9 @@ shinyServer(function(input, output) {
             iana::reliability(x, dfname = input$selectedDf)
         }
     })
-
+    
     # Histogram ################################################################
-
+    
     output$hist <- renderPlot({
         log.output("hist")
         x <- getSubset(checkedVars(), 1)
@@ -200,7 +199,7 @@ shinyServer(function(input, output) {
     
     output$histTotal <- renderPlot({
         log.output("histTotal")
-
+        
         x <- getSubset(checkedVars())
         sumScore <- rowSums(x, na.rm = TRUE)
         binw <- input$histbinwidth
@@ -250,9 +249,9 @@ shinyServer(function(input, output) {
         meanScore <- rowMeans(x, na.rm = TRUE)
         rbind("Sum score" = iana::basicDescr(sumScore), "Mean score" = iana::basicDescr(meanScore))
     }, rownames = TRUE, striped = TRUE)
-
+    
     # ICCs #####################################################################
-
+    
     output$ICCs <- renderPlot({
         log.output("ICCs")
         x <- getSubset(checkedVars())
@@ -262,9 +261,9 @@ shinyServer(function(input, output) {
         iana::empICC(x, input$ICCscore, method = method, span = input$ICCloessspan,
             alpha = input$ICCalpha, jitter = input$ICCjitter)
     }, res = 96) ### check res
-
+    
     # Parallel analysis ########################################################
-
+    
     output$parallelanalysis <- renderPlot({
         log.output("parallelanalysis")
         x <- getSubset(checkedVars())
@@ -273,29 +272,29 @@ shinyServer(function(input, output) {
         #iana::ggscree.plot(x)
         nfac <- input$nFactorsParallel
         if (nfac >= 21) nfac <- NULL
-         iana::parallelAnalysis(x, 
-                                fm = input$faMethodParallel,
-                                cor = input$basisParallel,
-                                n.factors = nfac, 
-                                sim = input$simParallel,
-                                onlyFA = input$onlyFAParallel)
+        iana::parallelAnalysis(x, 
+            fm = input$faMethodParallel,
+            cor = input$basisParallel,
+            n.factors = nfac, 
+            sim = input$simParallel,
+            onlyFA = input$onlyFAParallel)
     })
-
+    
     # MAP test #################################################################
-
+    
     maptest <- reactive({
         log.output("maptest")
         x <- getSubset(checkedVars())
         mt <- iana::mapTest(x)
         mt
     })
-
+    
     output$maptest <- renderPrint({
         log.output("maptest (output)")
         x <- maptest()
         if (!is.null(x)) print(x)
     })
-
+    
     output$maptest.plot <- renderPlot({
         log.output("maptest.plot")
         x <- maptest()
@@ -306,14 +305,14 @@ shinyServer(function(input, output) {
             plot(x)
         }
     })
-
+    
     # EFA ######################################################################
-
+    
     computeEFA <- reactive({
         log.output("computeEFA")
         vnames <- checkedVars()
         if (is.null(vnames)) return()
-
+        
         numfac <- input$nFactors
         famethod <- input$faMethod
         farot <- input$faRotation
@@ -341,10 +340,10 @@ shinyServer(function(input, output) {
         Df <- getSubset(checkedVars())
         
         withProgress(message = 'Factoranalysis', detail = "running", max = 1, {
-                         
+            
             if (famethod == "princomp") {
                 possible.rots = c("none", "varimax", "quartimax", "promax", 
-                                  "oblimin", "simplimax", "cluster")
+                    "oblimin", "simplimax", "cluster")
                 if (farot %in% possible.rots) {
                     cmdLog("# Principal Components Analysis")
                     cmdLog(paste0(
@@ -355,9 +354,9 @@ shinyServer(function(input, output) {
                         ")\n"
                     ))
                     fa.res <- factoranalysis(Df, numfac, 
-                                             rotate = farot, 
-                                             fm = "principal", 
-                                             return.res = TRUE)
+                        rotate = farot, 
+                        fm = "principal", 
+                        return.res = TRUE)
                 } else {
                     cat("With principal components, only the following rotations are possible: ",
                         possible.rots)
@@ -374,9 +373,9 @@ shinyServer(function(input, output) {
                     ")\n"
                 ))
                 fa.res <- iana::factoranalysis(Df, numfac,
-                                               rotate = farot, 
-                                               fm = famethod, 
-                                               polychor = fairt, return.res = TRUE)
+                    rotate = farot, 
+                    fm = famethod, 
+                    polychor = fairt, return.res = TRUE)
             }
             incProgress(1, detail = "done")
         })
@@ -400,26 +399,26 @@ shinyServer(function(input, output) {
         res <- computeEFA()
         res$fit
     }, striped = TRUE)
-
+    
     output$loadings <- renderTable({
         log.output("loadings")
         res <- computeEFA()
         res$factorloadings
     }, rownames = TRUE, striped = TRUE, auto = TRUE) # auto: for input$faDigits, see xtable
-
+    
     output$factorvariances <- renderTable({
         log.output("factorvariances")
         res <- computeEFA()
         res$factorvariances
     }, rownames = TRUE, striped = TRUE, auto = TRUE)
-
+    
     output$factorcorrelations <- renderTable({
         log.output("factorcorrelations")
         res <- computeEFA()
         if (is.null(res$factorcorrelations)) log.output("factor correlations are NULL")
         res$factorcorrelations
     }, rownames = TRUE, striped = TRUE, auto = TRUE)
-
+    
     output$factorcode <- renderPrint({
         log.output("factorcode")
         res <- computeEFA()
@@ -427,22 +426,12 @@ shinyServer(function(input, output) {
     })
     
     # CFA ######################################################################
-
-#     observe({
-#         print(input$cfaModelEditor)
-#     })
-    
-#     output$cfaoutput <- renderPrint({
-#         input$cfaEvalModel
-#         #return(isolate(eval(parse(text=input$cfaModelEditor))))
-#         isolate(cat("mymodel <-", input$cfaModelEditor))
-#     }) 
     
     output$cfa <- renderPrint({
         log.output("cfa")
-
+        
         x <- getSubset(checkedVars(), 3)
-
+        
         if (input$cfaUseModel) {
             input$cfaEvalModel
             isolate({
@@ -477,7 +466,7 @@ shinyServer(function(input, output) {
                 "')")
         }
         log.output(myCmd)
-
+        
         fit <- try(eval(parse(text = myCmd)))
         if (class(fit) == "try-error") return()
         log.output(paste("lavaan fit, class:", class(fit)))
@@ -499,16 +488,15 @@ shinyServer(function(input, output) {
     })
     
     # Rasch & PCM ##############################################################
-    #computePCM <- reactive({
     computePCM <- eventReactive(input$rasch_apply_button, {
         log.output("computePCM")
         x <- getSubset(checkedVars(), 3)
-
+        
         # Exit if the number of unique values in the data is too large.
         n.values <- length(unique(as.vector(as.matrix(x))))
         validate(
             need(n.values < 10, 
-                 paste("Your data have", n.values, "unique values. This is too much for a PCM.\n(maximum is 9 unique values).\n"))
+                paste("Your data have", n.values, "unique values. This is too much for a PCM.\n(maximum is 9 unique values).\n"))
         )
         
         # Fit a Rasch Model if data have 2 unique values,
@@ -529,7 +517,7 @@ shinyServer(function(input, output) {
         })
         x
     })
-
+    
     output$pcm.tests <- renderPrint({
         log.output("pcm.tests")
         x <- computePCM()
@@ -571,13 +559,13 @@ shinyServer(function(input, output) {
                 splitcr = getSelectedDf()[[splitcriterion]], se = TRUE)
         eRm::plotGOF(res, tlab = input$pcm.graphmodeltest.labels, ctrline = list())    
     }, res = 96) ### Check "res"
-
+    
     output$pcm.itemfit <- renderPrint({
         log.output("pcm.itemfit")
         x <- computePCM()
         print(eRm::itemfit(x$pp))
     })
-        
+    
     output$pcm.itemstats <- renderPrint({
         log.output("pcm.itemstats")
         x <- computePCM()
@@ -596,38 +584,38 @@ shinyServer(function(input, output) {
         log.output("pcm.itemstats")
         x <- computePCM()
         print(x$pp)
-
+        
         # Summary of person fit
         cat("\n\nUnique Response Patterns and Personfit Statistics:\n")
-
+        
         # Data frame for response pattern
         pers.fit <- eRm::personfit(x$pp)
         case <- row.names(x$pp$X)
         sumscore <- rowSums(x$pp$X)
-
+        
         patDf <- as.data.frame(x$pp$X)
         vnames <- names(patDf)
         vnames <- paste("patDf$", vnames, sep = "", collapse = ", ")
         shortpat <- paste0("paste(", vnames, ", sep = '')")
         shortpat <- eval(parse(text = shortpat))
         pat <- data.frame(case, "Response pattern" = shortpat, Sum = sumscore)
-
+        
         # Data frame for fit statistics
         p <- pchisq(pers.fit$p.fit, pers.fit$p.df-1, lower.tail = FALSE)
         sig <- ifelse(p < 0.01, "*", "")
         case <- names(pers.fit$p.fit)
         deviating <- case[p < 0.01]
         pfit <- data.frame(case,
-                           Chisq = round(pers.fit$p.fit, 2),
-                           df = pers.fit$p.df-1,
-                           p = round(p, 3),
-                           sig,
-                           "Outfit MSQ" = round(pers.fit$p.outfitMSQ, 2),
-                           "Infit MSQ" =  round(pers.fit$p.infitMSQ, 2))
+            Chisq = round(pers.fit$p.fit, 2),
+            df = pers.fit$p.df-1,
+            p = round(p, 3),
+            sig,
+            "Outfit MSQ" = round(pers.fit$p.outfitMSQ, 2),
+            "Infit MSQ" =  round(pers.fit$p.infitMSQ, 2))
         mm <- merge(pat, pfit, by = "case", all = TRUE)
         mm <- unique(mm[,-1])
         mm <- mm[order(mm[,"Sum"]),]
-
+        
         cat("\nPerson fit could be computed for", length(case), "cases")
         cat("\nTotal number of cases:", x$cases)
         cat("\nCases with deviating response patterns (p < .01):", length(deviating))
@@ -637,14 +625,14 @@ shinyServer(function(input, output) {
         print(mm, row.names = FALSE)
         cat("")
     })
-
+    
     output$pcm.pimap <- renderPlot({
         log.output("RASCH, PI Map")
         x <- computePCM()
         eRm::plotPImap(x$res, sorted=input$pcm.sortitems,
-                  warn.ord.colour = "red", cex.gen = 0.8)
+            warn.ord.colour = "red", cex.gen = 0.8)
     }, res = 96) ### Check "res"
-
+    
     output$rasch.icc <- renderPlot({
         log.output("RASCH, ICC")
         x <- computePCM()
@@ -655,20 +643,19 @@ shinyServer(function(input, output) {
             iana::ggplotICC.RM(x$res)
         }
     }, res = 96) ### res
-
+    
     output$pcm.info <- renderPlot({
         log.output("PCM, Info")
         x <- computePCM()
         eRm::plotINFO(x$res)
     })
-
+    
     # MIRT #####################################################################
     
-####    computeMirt <- reactive({
-        computeMirt <- eventReactive(input$mirt_apply_button, {
+    computeMirt <- eventReactive(input$mirt_apply_button, {
         log.output("computeMirt")
         x <- getSubset(checkedVars(), 3)
-
+        
         # Exit if the number of unique values in the data is too large.
         # todo: make a function of it; also check if n.values > 1
         #       (used also in Rasch models)
@@ -676,7 +663,7 @@ shinyServer(function(input, output) {
         n.values <- length(unique(as.vector(as.matrix(x))))
         validate(
             need(n.values < 10, 
-                 paste("Your data have", n.values, "unique values. This is too much for a MIRT model.\n(maximum is 9 unique values).\n"))
+                paste("Your data have", n.values, "unique values. This is too much for a MIRT model.\n(maximum is 9 unique values).\n"))
         )
         
         nf <- input$mirt_nfactors 
@@ -696,16 +683,16 @@ shinyServer(function(input, output) {
         ))
         withProgress(message = 'MIRT', detail = "running", max = 1, {
             res <- mirt::mirt(x, 
-                              model = nf, 
-                              itemtype = model, 
-                              method = input$mirt_method,
-                              SE = TRUE, verbose = FALSE)
+                model = nf, 
+                itemtype = model, 
+                method = input$mirt_method,
+                SE = TRUE, verbose = FALSE)
             incProgress(1, detail = "done")
         })
         log.output("computeMirt done")
         res
     })
-
+    
     output$mirt.summary <- renderPrint({
         log.output("mirt (output)")
         x <- computeMirt()
@@ -715,14 +702,14 @@ shinyServer(function(input, output) {
         cat("\nSUMMARY\n")
         cmdLog(paste0("summary(res, rotate = ", input$mirt_rotate, ")"))
         summary(x, rotate = input$mirt_rotate)
-#        cat("\nCOEFFICIENTS\n")
-#        print(coef(x))
+        #        cat("\nCOEFFICIENTS\n")
+        #        print(coef(x))
         cat("\nMODEL FIT\n")
         cmdLog("print(mirt::M2(res))")
         print(mirt::M2(x), digits = 3)
-#        M2(x, residmat = TRUE, suppress = 0.1)
-#        cat("\nWALD TEST\n")
-#        print(mirt::wald(x), digits = 2)
+        #        M2(x, residmat = TRUE, suppress = 0.1)
+        #        cat("\nWALD TEST\n")
+        #        print(mirt::wald(x), digits = 2)
         cat("\nITEMFIT\n")
         cmdLog("mirt::itemfit(res)")
         mirt::itemfit(x)
@@ -730,7 +717,7 @@ shinyServer(function(input, output) {
     })
     
     # Help #####################################################################
-
+    
     output$info <- renderPrint({
         paste0("Working directory: ", getwd(), ", Temp dir: ", tempdir())
     })

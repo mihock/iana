@@ -4,21 +4,13 @@ library(shinythemes)
 library(shinyAce)
 
 shinyUI(fluidPage(
-    #theme = shinytheme("cerulean"),
-    #theme = shinytheme("cosmo"),
-    #theme = shinytheme("spacelab"),
-    #theme = shinytheme("united"),
     theme = shinytheme("flatly"),
-    #theme = shinytheme("readable"),
     
     sidebarLayout(
         position = "right",
         
         # Sidebar ----
         sidebarPanel = sidebarPanel(
-            ####            h3("Run/Apply"),
-            ####            helpText("Press this button to run an analysis or to apply changes in variables or options."),
-            ####            submitButton("Run/Apply"),
             
             h3("Item selection"),
             helpText("The dropdown list below contains the data frames present in your R environment. Please select a data frame containing the variables (items) to analyze. You can then select or deselect variables. Notice that only variables coded with integer values are shown."),
@@ -253,11 +245,6 @@ shinyUI(fluidPage(
                         ###                    helpText("Because CFAs for a large number of variables are slow, the computation is suppressed if the number of variables exceeds the specified threshold."),
                         br(),
                         fluidRow(
-                            #                         column(4, 
-                            #                             sliderInput(inputId = "cfamaxvars", 
-                            #                                 label = "Threshold for computation:",
-                            #                                 min = 0, max = 100, value = 20,
-                            #                                 animate = TRUE)),
                             column(4,
                                 selectInput(inputId = "cfaEstimator",
                                     label = "Estimator:",
