@@ -9,7 +9,7 @@ Description: Browser-based GUI for classical item and test analysis, factor
     analysis, and item response modeling with an focus on ordered-category
     items.
 Depends:
-    R (>= 3.2.3),
+    R (>= 3.2.2),
     shiny (>= 0.13.0)
 Imports:
     dplyr,

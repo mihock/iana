@@ -3,6 +3,7 @@
 # Example code in package build process
 *-Ex.R
 # Others
+.DS_Store
 Read-and-delete-me
 iana.Rproj
 .Rproj.user/
