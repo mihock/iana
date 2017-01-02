@@ -987,7 +987,8 @@ factoranalysis <- function(x, nfactors, rotate = "promax", fm = "ml",
         if (!return.res) cat("PRINCIPAL COMPONENTS ANALYSIS\n")
     } else if (polychor) {
         q <- psych::irt.fa(x, nfactors, fm = fm,
-                           rotate = rotate, plot = FALSE)$fa
+            rotate = rotate, plot = FALSE, 
+            sort = FALSE)$fa
         if (!return.res) cat("FACTOR ANALYSIS OF POLYCHORIC CORRELATIONS\n")
     } else {
         q <- psych::fa(x, nfactors, fm = fm, rotate = rotate)

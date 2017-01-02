@@ -2,7 +2,7 @@ Package: iana
 Type: Package
 Title: GUI for Item Analysis
 Version: 0.1
-Date: 2016-10-11
+Date: 2017-01-02
 Author: Michael Hock <michael.hock@uni-bamberg.de>
 Maintainer: Michael Hock <michael.hock@uni-bamberg.de>
 Description: Browser-based GUI for classical item and test analysis, factor
