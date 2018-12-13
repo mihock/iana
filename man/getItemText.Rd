@@ -18,4 +18,3 @@ Return the labels associated with items in a data frame.
 \author{
 Michael Hock \email{michael.hock@uni-bamberg.de}
 }
-

@@ -31,4 +31,3 @@ Computation: William Revelle, see \code{\link{psych}}, specifically \code{\link{
 
 Plot: Michael Hock, \email{michael.hock@uni-bamberg.de}
 }
-

@@ -15,4 +15,3 @@ a data frame
 \description{
 Return mean, standard deviation, skewness, and kurtosis of a variable. Missing values are removed before the computation.
 }
-

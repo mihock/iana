@@ -31,4 +31,3 @@ Automatically classify the items in a data frame.
 \author{
 Michael Hock \email{michael.hock@uni-bamberg.de}
 }
-

@@ -59,12 +59,11 @@ factanal(Df2, 2)
 })
 
 }
+\references{
+Velicer, W. (1976) Determining the number of components from the matrix of partial correlations. \emph{Psychometrika, 41,} 321-327.
+}
 \author{
 Computation: William Revelle, see \code{\link{psych}}, specifically \code{\link{VSS}}.
 
 Plot: Michael Hock, \email{michael.hock@uni-bamberg.de}
 }
-\references{
-Velicer, W. (1976) Determining the number of components from the matrix of partial correlations. \emph{Psychometrika, 41,} 321-327.
-}
-

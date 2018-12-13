@@ -436,7 +436,7 @@ shinyServer(function(input, output) {
             input$cfaEvalModel
             isolate({
                 modelCmd <- paste0("model <- '", 
-                    str_trim(input$cfaModelEditor), "'")
+                    stringr::str_trim(input$cfaModelEditor), "'")
             })
         } else {
             myvars <- paste(names(x), collapse = " + ")

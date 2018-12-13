@@ -24,4 +24,3 @@ Performs classical item and reliability analysis of set of items.
 \author{
 Michael Hock \email{michael.hock@uni-bamberg.de}
 }
-

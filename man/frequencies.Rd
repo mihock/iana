@@ -17,4 +17,3 @@ as the last row of the table.
 \author{
 Michael Hock \email{michael.hock@uni-bamberg.de}
 }
-

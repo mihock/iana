@@ -29,4 +29,3 @@ This a slightly modified version of plotICC.Rm from package eRm (version 0.15-1)
 \author{
 Michael Hock \email{michael.hock@uni-bamberg.de}
 }
-

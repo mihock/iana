@@ -42,4 +42,3 @@ runiana(plotheight = 900)}
 \author{
 Michael Hock \email{michael.hock@uni-bamberg.de}
 }
-

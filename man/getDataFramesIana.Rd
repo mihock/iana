@@ -21,4 +21,3 @@ data are loaded.
 \author{
 Michael Hock \email{michael.hock@uni-bamberg.de}
 }
-

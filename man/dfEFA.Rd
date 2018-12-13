@@ -22,4 +22,3 @@ observed variables a negative value is returned.
 \author{
 Michael Hock \email{michael.hock@uni-bamberg.de}
 }
-

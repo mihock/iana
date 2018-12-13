@@ -29,4 +29,3 @@ To examine item characteristics, item scores are plotted against total scores or
 \author{
 Michael Hock \email{michael.hock@uni-bamberg.de}
 }
-

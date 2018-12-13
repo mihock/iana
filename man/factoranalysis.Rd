@@ -29,4 +29,3 @@ Perform principal components or exploratory factor analysis of a set of variable
 \author{
 Michael Hock \email{michael.hock@uni-bamberg.de}
 }
-

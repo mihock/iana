@@ -21,4 +21,3 @@ a warning, also keep the computed result.
 Martin Maechler;
 Copyright (C) 2010-2012  The R Core Team
 }
-

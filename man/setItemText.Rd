@@ -24,10 +24,9 @@ The text can be specified either as a character vector of the same length as the
 
 Notice that attributes are lost when data frames are subsettetted via \code{\link{subset}}. For preserving the \code{item.text} attribute, \code{\link[dplyr]{select}} or \code{\link[dplyr]{filter}} can be used instead of \code{\link{subset}}.
 }
-\author{
-Michael Hock \email{michael.hock@uni-bamberg.de}
-}
 \seealso{
 \code{\link{getItemText}} for retrieving \code{item.text} attributes.
 }
-
+\author{
+Michael Hock \email{michael.hock@uni-bamberg.de}
+}

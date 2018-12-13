@@ -2,8 +2,8 @@
 % Please edit documentation in R/itemanalysis.R
 \docType{package}
 \name{iana-package}
-\alias{iana}
 \alias{iana-package}
+\alias{iana}
 \title{GUI for Item Analysis and Scale Construction}
 \description{
 Iana is a browser-based GUI for classical item and test analysis, factor analysis, and item response modeling with a focus on items with an ordered-category response format.
@@ -27,11 +27,10 @@ LazyLoad: \tab yes\cr
 \examples{
 \dontrun{runiana()}
 }
-\author{
-Michael Hock (\email{michael.hock@uni-bamberg.de})
-}
 \references{
 Shiny web framework for R: \url{http://www.rstudio.com/shiny/}
 }
+\author{
+Michael Hock (\email{michael.hock@uni-bamberg.de})
+}
 \keyword{package}
-

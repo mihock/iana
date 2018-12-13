@@ -14,4 +14,3 @@
 \description{
 Plot mapTest object, see \code{\link{mapTest}}.
 }
-
