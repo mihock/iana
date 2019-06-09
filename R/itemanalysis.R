@@ -24,8 +24,8 @@
 #' @importFrom psych describe principal fa irt.fa fa.parallel KMO skew kurtosi
 #' @importFrom semTools reliability
 #' @importFrom mirt mirt
-#' @importFrom tidyr gather_
-#' @importFrom dplyr filter_ select_
+#' @importFrom tidyr gather
+#' @importFrom dplyr filter select
 #' @import ggplot2 GPArotation lavaan eRm markdown stringr shiny shinythemes shinyAce
 #' @docType package
 #' @author Michael Hock (\email{michael.hock@@uni-bamberg.de})
@@ -213,12 +213,12 @@ basicDescr <- function(x) {
 #' @export
 #'
 frequencies <- function(x) {
-    # needs tidyr::gather_
+    # needs tidyr::gather
     if (!is.data.frame(x))
         stop("x must be a data frame.")
     it <- getItemText(x)
     names.x <- names(x)
-    x <- tidyr::gather_(x, "item", "score", names.x)
+    x <- tidyr::gather(x, key = "item", value = "score", names.x)
     x <- xtabs(~ item + score, data = x)
     x <- as.data.frame(unclass(x))
     # Sort the rows of x according to the orginal item order
@@ -268,7 +268,7 @@ parallelAnalysis <- function(x, fm = "ml", cor = "cor", n.factors = NULL, sim = 
         x$fa.sim = x0$fa.simr        
     }
 
-    mydata <- tidyr::gather_(x, "Source", "ev", names(x)[-1])
+    mydata <- tidyr::gather(x, key = "Source", value = "ev", names(x)[-1])
     mydata$sim <- c(rep("Empirical", 2*nfac), rep("Simulated", 2*nfac))
     mydata$type <- c(rep("Principal Components Analysis", nfac),
                      rep("Factor Analysis", nfac),
@@ -444,7 +444,7 @@ parallelAnalysis <- function(x, fm = "ml", cor = "cor", n.factors = NULL, sim = 
 #' #
 #' # If we remove 1 item the MAP test suggests the wrong number of factors...
 #' #
-#' Df2 <- dplyr::select_(Df, quote(-x6))
+#' Df2 <- dplyr::select(Df, -6)
 #' mt2 <- mapTest(Df2)
 #' print(mt2)
 #' plot(mt2)
@@ -679,7 +679,7 @@ empICC <- function(x,
     corrs <- data.frame(variable, corrs)
 
     # x <- reshape2::melt(x, id.vars = "scores") # original version
-    x <- tidyr::gather_(x, "variable", "value", names(x)[-1])
+    x <- tidyr::gather(x, key = "variable", value = "value", names(x)[-1])
     x.corrs <- min(x$scores)
     y.corrs <- max(x$value) + 0.25 ###
 
@@ -912,7 +912,7 @@ ggplotICC.RM <- function(object, empICC = NULL, empCI = NULL,
 #'
 #' The text can be specified either as a character vector of the same length as the number of the columns in the data frame or in a text file that contains the descriptions of the items. The file is read via \code{\link{read.table}}, with the separator set to a newline character (i.e., \code{"\n"}) Consequently, each description must occupy exactly one physical line (which may, of course, span several display lines). The number of descriptions in the file and the number of items must be the same.
 #'
-#' Notice that attributes are lost when data frames are subsettetted via \code{\link{subset}}. For preserving the \code{item.text} attribute, \code{\link[dplyr]{select}} or \code{\link[dplyr]{filter}} can be used instead of \code{\link{subset}}.
+#' Notice that attributes are lost when data frames are subsetted via \code{\link{subset}}. For preserving the \code{item.text} attribute, \code{\link[dplyr]{select}} or \code{\link[dplyr]{filter}} can be used instead of \code{\link{subset}}.
 #'
 #' @return A data frame with the \code{item.text} attribute set for variable.
 #'

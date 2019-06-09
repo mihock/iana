@@ -22,7 +22,7 @@ Technically, \code{setItemText} sets the \code{item.text} attribute for the vari
 
 The text can be specified either as a character vector of the same length as the number of the columns in the data frame or in a text file that contains the descriptions of the items. The file is read via \code{\link{read.table}}, with the separator set to a newline character (i.e., \code{"\n"}) Consequently, each description must occupy exactly one physical line (which may, of course, span several display lines). The number of descriptions in the file and the number of items must be the same.
 
-Notice that attributes are lost when data frames are subsettetted via \code{\link{subset}}. For preserving the \code{item.text} attribute, \code{\link[dplyr]{select}} or \code{\link[dplyr]{filter}} can be used instead of \code{\link{subset}}.
+Notice that attributes are lost when data frames are subsetted via \code{\link{subset}}. For preserving the \code{item.text} attribute, \code{\link[dplyr]{select}} or \code{\link[dplyr]{filter}} can be used instead of \code{\link{subset}}.
 }
 \seealso{
 \code{\link{getItemText}} for retrieving \code{item.text} attributes.

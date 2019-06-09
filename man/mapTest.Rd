@@ -51,7 +51,7 @@ plot(mt)
 #
 # If we remove 1 item the MAP test suggests the wrong number of factors...
 #
-Df2 <- dplyr::select_(Df, quote(-x6))
+Df2 <- dplyr::select(Df, -6)
 mt2 <- mapTest(Df2)
 print(mt2)
 plot(mt2)

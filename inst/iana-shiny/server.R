@@ -26,7 +26,8 @@ shinyServer(function(input, output) {
     getSelectedDf <- reactive({
         log.output(paste("getSelectedDf:", input$selectedDf))
         Df <- get(input$selectedDf)
-        dplyr::filter_(Df, ~complete.cases(Df))
+        ##### dplyr::filter_(Df, ~complete.cases(Df))
+        na.omit(Df)
     })
     
     getLikertLikeVars <- function(Df, unique.values = 9) {
@@ -90,8 +91,14 @@ shinyServer(function(input, output) {
             varrange <- getVarsInDf()
             if (length(varrange) > 80) varrange <- varrange[1:80]
         } else {
-            newDf <- try(dplyr::select_(getSelectedDf(),
-                .dots = input$varrange))
+            ##### newDf <- try(dplyr::select_(getSelectedDf(),
+            #####    .dots = input$varrange))
+            ##### CHECK ME!   
+            ##### quo(s) / enquo(s) input$varrange?
+            ##### 
+            ##### newDf <- try(dplyr::select(getSelectedDf(), !!! input$varrange))
+            inpvarrange <- quos(input$varrange)
+            newDf <- try(dplyr::select(getSelectedDf(), !!! inpvarrange))
             if (class(newDf) == "try-error") {
                 log.output("Error in getVarRange")
                 return()
@@ -138,7 +145,10 @@ shinyServer(function(input, output) {
     getSubset <- function(vnames, minNoVars = 2) {
         log.output("getSubset")
         req(vnames, length(vnames) >= minNoVars)
-        Df <- dplyr::select_(getSelectedDf(), .dots = vnames)
+        ##### CHECK ME!
+        ##### Df <- dplyr::select_(getSelectedDf(), .dots = vnames)
+        vnames <- enquos(vnames)
+        Df <- dplyr::select(getSelectedDf(), !!! vnames)
         Df
     }
     
@@ -179,7 +189,7 @@ shinyServer(function(input, output) {
         log.output("hist")
         x <- getSubset(checkedVars(), 1)
         ### cmdLog
-        d <- tidyr::gather_(x, "Item", "Score", names(x))
+        d <- tidyr::gather(x, key = "Item", value = "Score", names(x))
         if (input$histtypeitem == "count") {
             ggplot2::ggplot(d, aes_(x = ~as.factor(Score))) +
                 facet_wrap(~Item) +
