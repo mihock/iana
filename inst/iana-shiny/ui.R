@@ -174,7 +174,7 @@ shinyUI(fluidPage(
                     # EFA ####
                     tabPanel("Exploratory Factor Analysis",
                         h3("Exploratory Factor Analysis and Principal Components Analysis"),
-                        helpText("Analyses are performed with iana::factoranalysis, which uses psych::principal, psych::fa, and psych::fa.poly."),
+                        helpText("Analyses are performed with iana::factoranalysis, which uses psych::principal, psych::fa, and psych::irt.fa."),
                         h4("Factoring"),
                         fluidRow(
                             column(8, sliderInput(inputId = "nFactors", 

@@ -24,7 +24,7 @@ factoranalysis(x, nfactors, rotate = "promax", fm = "ml",
 if \code{return.res} is TRUE, a list with components \code{res} (the results of factor analysis) and \code{stats} (the fit statistics)
 }
 \description{
-Perform principal components or exploratory factor analysis of a set of variables. This is a wrapper around psych::principal, psych::fa, and psych::fa.poly.
+Perform principal components or exploratory factor analysis of a set of variables. This is a wrapper around psych::principal, psych::fa, and psych::irt.fa.
 }
 \author{
 Michael Hock \email{michael.hock@uni-bamberg.de}

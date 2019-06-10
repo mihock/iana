@@ -1469,7 +1469,7 @@ getItemText <- function(x) {
 
 #' Principal Components and Exploratory Factor Analysis
 #'
-#' Perform principal components or exploratory factor analysis of a set of variables. This is a wrapper around psych::principal, psych::fa, and psych::fa.poly.
+#' Perform principal components or exploratory factor analysis of a set of variables. This is a wrapper around psych::principal, psych::fa, and psych::irt.fa.
 #' 
 #' @param x a data frame of variables to be analyzed
 #' @param nfactors (integer) number of factors to be extracted
@@ -1585,7 +1585,7 @@ classifyItems <- function(fm, Df, min.loading = 0.4, max.loading = 0.3, max.comp
         y[2]
     }
     
-    # for fa.poly and irt.fa
+    # for irt.fa
     if (exists("fa", fm)) fm <- fm$fa
     
     # These will be rounded below...
