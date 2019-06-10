@@ -10,7 +10,7 @@ The documentation is included in the package. A short description can be found [
 The following R commands install the packages "devtools" (needed to install Iana) and "iana."
 
 ```
-install.packages("devtools")
+if (!require(devtools)) install.packages("devtools")
 library(devtools)
 install_github("mihock/iana")
 ```
