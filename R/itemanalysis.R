@@ -26,7 +26,7 @@
 #' @importFrom semTools reliability
 #' @importFrom mirt mirt
 #' @importFrom tidyr gather
-#' @importFrom dplyr filter select
+#' @importFrom dplyr select
 #' @import ggplot2 GPArotation lavaan eRm markdown stringr shiny shinythemes shinyAce
 #' @docType package
 #' @author Michael Hock (\email{michael.hock@@uni-bamberg.de})

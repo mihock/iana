@@ -26,7 +26,6 @@ shinyServer(function(input, output) {
     getSelectedDf <- reactive({
         log.output(paste("getSelectedDf:", input$selectedDf))
         Df <- get(input$selectedDf)
-        ##### dplyr::filter_(Df, ~complete.cases(Df))
         na.omit(Df)
     })
     
