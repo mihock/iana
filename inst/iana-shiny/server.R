@@ -90,14 +90,8 @@ shinyServer(function(input, output) {
             varrange <- getVarsInDf()
             if (length(varrange) > 80) varrange <- varrange[1:80]
         } else {
-            ##### newDf <- try(dplyr::select_(getSelectedDf(),
-            #####    .dots = input$varrange))
-            ##### CHECK ME!   
-            ##### quo(s) / enquo(s) input$varrange?
-            ##### 
-            ##### newDf <- try(dplyr::select(getSelectedDf(), !!! input$varrange))
-            inpvarrange <- quos(input$varrange)
-            newDf <- try(dplyr::select(getSelectedDf(), !!! inpvarrange))
+            inpvarrange <- quo(input$varrange)
+            newDf <- try(dplyr::select(getSelectedDf(), !! inpvarrange))
             if (class(newDf) == "try-error") {
                 log.output("Error in getVarRange")
                 return()
