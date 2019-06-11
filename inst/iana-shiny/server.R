@@ -144,10 +144,10 @@ shinyServer(function(input, output) {
     getSubset <- function(vnames, minNoVars = 2) {
         log.output("getSubset")
         req(vnames, length(vnames) >= minNoVars)
-        ##### CHECK ME!
-        ##### Df <- dplyr::select_(getSelectedDf(), .dots = vnames)
-        vnames <- enquos(vnames)
-        Df <- dplyr::select(getSelectedDf(), !!! vnames)
+        # The following 2 lines work because select supports 
+        # character vectors (see last example in ?select).
+        vnames <- enquo(vnames)
+        Df <- dplyr::select(getSelectedDf(), !! vnames)
         Df
     }
     
