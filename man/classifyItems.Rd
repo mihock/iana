@@ -4,9 +4,17 @@
 \alias{classifyItems}
 \title{Classify Items}
 \usage{
-classifyItems(fm, Df, min.loading = 0.4, max.loading = 0.3,
-  max.complexity = 10, itemlength = 0, digits = 2,
-  Df.name = deparse(substitute(Df)), return.res = FALSE)
+classifyItems(
+  fm,
+  Df,
+  min.loading = 0.4,
+  max.loading = 0.3,
+  max.complexity = 2,
+  itemlength = 0,
+  digits = 2,
+  Df.name = deparse(substitute(Df)),
+  return.res = FALSE
+)
 }
 \arguments{
 \item{fm}{a factor model fitted by psych::fa or principal components computed with psych::principal}

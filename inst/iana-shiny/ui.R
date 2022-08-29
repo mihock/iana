@@ -228,8 +228,6 @@ shinyUI(fluidPage(
                         h3("Factor loadings"),
                         fluidRow(column(12, tableOutput(outputId = "loadings"))),
                         p("F = Factor, M = Marker, a_j = Factor loadings, h2 = Communality, Cmpl = Factorial complexity"),
-                        h3("Factor variances"),
-                        fluidRow(column(12, tableOutput(outputId = "factorvariances"))),
                         conditionalPanel(condition = "input.nFactors > 1",
                             h3("Factor correlations"),
                             fluidRow(column(12, tableOutput(outputId = "factorcorrelations")))),

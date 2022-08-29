@@ -4,8 +4,14 @@
 \alias{factoranalysis}
 \title{Principal Components and Exploratory Factor Analysis}
 \usage{
-factoranalysis(x, nfactors, rotate = "promax", fm = "ml",
-  polychor = FALSE, return.res = FALSE)
+factoranalysis(
+  x,
+  nfactors,
+  rotate = "oblimin",
+  fm = "minres",
+  polychor = FALSE,
+  return.res = FALSE
+)
 }
 \arguments{
 \item{x}{a data frame of variables to be analyzed}

@@ -4,8 +4,14 @@
 \alias{empICC}
 \title{Empirical ICCs}
 \usage{
-empICC(x, score = c("factor.thomson", "factor.bartlett", "mean", "sum"),
-  method = "loess", span = 0.75, alpha = 0, jitter = 0.4)
+empICC(
+  x,
+  score = c("factor.thomson", "factor.bartlett", "mean", "sum"),
+  method = "loess",
+  span = 0.75,
+  alpha = 0,
+  jitter = 0.4
+)
 }
 \arguments{
 \item{x}{data frame in which rows are subjects and colums are test items}

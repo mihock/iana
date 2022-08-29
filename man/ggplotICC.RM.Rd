@@ -4,8 +4,14 @@
 \alias{ggplotICC.RM}
 \title{ICCs for Rasch Model}
 \usage{
-ggplotICC.RM(object, empICC = NULL, empCI = NULL, xlim = c(-4, 4),
-  xlab = "Dimension", ylab = "Probability")
+ggplotICC.RM(
+  object,
+  empICC = NULL,
+  empCI = NULL,
+  xlim = c(-4, 4),
+  xlab = "Dimension",
+  ylab = "Probability"
+)
 }
 \arguments{
 \item{object}{of class RM}

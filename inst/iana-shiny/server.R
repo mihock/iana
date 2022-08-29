@@ -392,7 +392,6 @@ shinyServer(function(input, output) {
         list(fa.res = fa.res$res, 
             fit = fa.res$stats,
             factorloadings = classif$factorloadings, 
-            factorvariances = classif$factorvariance, 
             factorcorrelations = classif$factorcorrelations,
             factorcode = classif$factorcode)
     })
@@ -408,12 +407,6 @@ shinyServer(function(input, output) {
         res <- computeEFA()
         res$factorloadings
     }, rownames = TRUE, striped = TRUE, auto = TRUE) # auto: for input$faDigits, see xtable
-    
-    output$factorvariances <- renderTable({
-        log.output("factorvariances")
-        res <- computeEFA()
-        res$factorvariances
-    }, rownames = TRUE, striped = TRUE, auto = TRUE)
     
     output$factorcorrelations <- renderTable({
         log.output("factorcorrelations")

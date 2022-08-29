@@ -4,8 +4,14 @@
 \alias{parallelAnalysis}
 \title{Parallel analysis}
 \usage{
-parallelAnalysis(x, fm = "ml", cor = "cor", n.factors = NULL,
-  sim = TRUE, onlyFA = FALSE)
+parallelAnalysis(
+  x,
+  fm = "ml",
+  cor = "cor",
+  n.factors = NULL,
+  sim = TRUE,
+  onlyFA = FALSE
+)
 }
 \arguments{
 \item{x}{a data frame containing the variables (items) to be analyzed}

@@ -1483,7 +1483,7 @@ getItemText <- function(x) {
 #'
 #' @export
 #
-factoranalysis <- function(x, nfactors, rotate = "promax", fm = "ml",
+factoranalysis <- function(x, nfactors, rotate = "oblimin", fm = "minres",
                    polychor = FALSE, return.res = FALSE) {
     loadNamespace("GPArotation") ### needed for oblimin and some other
                                  ### rotations in psych::principal
@@ -1572,7 +1572,7 @@ factoranalysis <- function(x, nfactors, rotate = "promax", fm = "ml",
 #' @export
 ## Needs: getItemText from iana, str_trim from stringr
 
-classifyItems <- function(fm, Df, min.loading = 0.4, max.loading = 0.3, max.complexity = 10, itemlength = 0, digits = 2, Df.name = deparse(substitute(Df)), return.res = FALSE) {
+classifyItems <- function(fm, Df, min.loading = 0.4, max.loading = 0.3, max.complexity = 2, itemlength = 0, digits = 2, Df.name = deparse(substitute(Df)), return.res = FALSE) {
 
     if(!inherits(fm, "fa") && !inherits(fm, "principal") ) 
         stop("fm was not computed with psych::fa oder psych::principal")
@@ -1665,19 +1665,6 @@ classifyItems <- function(fm, Df, min.loading = 0.4, max.loading = 0.3, max.comp
         cat("\n", mcount, "of", ncol(Df), "Items were classified as markers.\n")
     }
 
-    # Factor variances
-    
-    if (!return.res) cat("\nFACTOR VARIANCES\n\n")
-    # use fm$loadings, not lmat because lmat now contains the rounded values
-    colnames(fm$loadings) <- paste0("F", 1:ncol(fm$loadings))
-    ssload <- colSums(fm$loadings^2)
-    expl.var <- ssload / nrow(fm$loadings)
-    cumsum.expl.var <- cumsum(expl.var)
-    tab <- rbind(ssload, expl.var, cumsum.expl.var)
-    tab <- round(tab, digits)
-    row.names(tab) <- c("Sum of squared loadings", "Proportion Variance", "Cumulative Variance")
-    if (!return.res) print(tab)
-    
     # Factor Correlations
     
     if (exists("Phi", fm)) {
@@ -1704,7 +1691,9 @@ classifyItems <- function(fm, Df, min.loading = 0.4, max.loading = 0.3, max.comp
     if (!return.res) {
         cat("\nNOTE\n\nThe following code may be used to create data frames of items\nassigned to the factors. Some items may need to be inverted.\n", code)
     } else {
-        list(factorloadings = loadingsDf, factorcorrelations = corrs, factorvariances = tab, factorcode = str_trim(code))
+        list(factorloadings = loadingsDf, 
+            factorcorrelations = corrs, 
+            factorcode = str_trim(code))
     }
 }
 

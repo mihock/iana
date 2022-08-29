@@ -4,9 +4,16 @@
 \alias{classifyItemsMirt}
 \title{Classify Items for MIRT}
 \usage{
-classifyItemsMirt(fm, Df, min.loading = 0.4, max.loading = 0.3,
-  max.complexity = 100, itemlength = 0, digits = 2,
-  Df.name = deparse(substitute(Df)))
+classifyItemsMirt(
+  fm,
+  Df,
+  min.loading = 0.4,
+  max.loading = 0.3,
+  max.complexity = 100,
+  itemlength = 0,
+  digits = 2,
+  Df.name = deparse(substitute(Df))
+)
 }
 \arguments{
 \item{fm}{a factor model fitted by mirt::mirt}
