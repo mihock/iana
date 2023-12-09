@@ -795,12 +795,14 @@ parallelAnalysis <- function(x, fm = "ml", cor = "cor", n.factors = NULL, sim = 
     # Plot
     if (onlyFA) {
         mydata <- mydata[mydata$type == "Factor Analysis",]
-        pl <- ggplot2::ggplot(mydata, aes_(~Factor, ~ev, shape=~sim, colour=~sim)) +
+        pl <- ggplot2::ggplot(mydata, aes(Factor, ev, shape=sim, colour=sim)) +
             xlab("Factor")
+        
     } else {
-        pl <- ggplot2::ggplot(mydata, aes_(~Factor, ~ev, shape=~sim, colour=~sim)) +
+        pl <- ggplot2::ggplot(mydata, aes(Factor, ev, shape= sim, colour= sim)) +
             xlab("Factor/Component") +
             facet_wrap(~ type)
+        
     }
     pl <- pl +
         ylab("Eigenvalue") +
@@ -817,94 +819,6 @@ parallelAnalysis <- function(x, fm = "ml", cor = "cor", n.factors = NULL, sim = 
             linetype = "dashed")
     pl
 }
-
-# #' Parallel Analysis
-# #'
-# #' Performs parallel analysis of a set of items.
-# #'
-# #' @param Df a data frame containing the items
-# #' @param title title of the plot
-# #' @param use handling of missig values
-# #' @param simu number of simulations
-# #' @param xlab x-axis label of the plot
-# #' @param ylab y-axis label of the plot
-# #'
-# #' @details Adapted from \code{psy}-package (Bruno Falissard).
-# #'
-# #' @author Michael Hock \email{michael.hock@@uni-bamberg.de}
-# #'
-# #' @export
-# ggscree.plot <- function(Df, title = NULL,
-#                           use = "complete.obs", simu = 20,
-#                           xlab = "Component", ylab = "Eigenvalue") {
-#     ### Hack to avoid Note in package check
-#     Dimension <- NULL
-#     Eigenvalue <- NULL
-#     ### End of Hack
-# 
-#     mat <- Df
-#     if (use == "complete.obs")
-#         mat <- na.omit(Df)
-#     eigenval <- eigen(cor(mat, use = "pairwise.complete.obs"),
-#                       symmetric = TRUE)$values
-#     nev <- length(eigenval)
-#     n <- dim(mat)[1]
-#     p <- dim(mat)[2]
-# 
-#     ev.mat <- matrix(nrow = p*(simu + 1), ncol = 2)
-#     ev.mat[, 1] <- rep(1:p, simu + 1)
-#     ev.mat[1:p, 2] <- eigenval
-# 
-#     matsimu <- matrix(nrow = n, ncol = p)
-#     int <- rep(1, n * p)
-#     attr(int, "dim") <- c(n, p)
-#     mat <- pmax(as.matrix(mat), int)
-#     newrow <- 1
-#     for (i in 1:simu) {
-#         matnorm <- rnorm(n * p)
-#         attr(matnorm, "dim") <- c(n, p)
-#         matsimu <- (mat/mat) * matnorm
-#         eigenval <- eigen(cor(matsimu, use = "pairwise.complete.obs"))$values
-#         newrow <- newrow + p
-#         ev.mat[newrow:(newrow + p - 1), 2] <- eigenval
-#     }
-# 
-#     eDf <- data.frame(ev.mat)
-#     ar = rep(1:(simu+1), each = p)
-#     ar <- factor(ar)
-#     eDf <- cbind(eDf, ar)
-#     names(eDf) <- c("Dimension", "Eigenvalue", "ar")
-# 
-#     # Compute ticks for x-axis
-#     if (ncol(Df) < 11) {
-#         myticks <- 1:ncol(Df)
-#     } else {
-#         incr <- round(ncol(Df)/10)
-#         myticks <- round(seq(from = 1, to = ncol(Df), by = incr))
-#     }
-# 
-#     pl <- ggplot(eDf, aes_(~Dimension, ~Eigenvalue, group = ~ar)) +
-#         geom_line(alpha = c(rep(1, p), rep(0.2, p*simu))) +
-#         geom_point(size = c(rep(5, p), rep(1, p*simu)),
-#                    shape = c(rep(21, p), rep(1, p*simu)),
-#                    alpha = c(rep(1, p), rep(0.2, p*simu)),
-#                    fill = "white") +
-#         geom_abline(intercept = 1, slope = 0, colour = "darkblue",
-#                     linetype = "dashed") +
-#         theme(text = element_text(size = 20, colour = "black"),
-#               axis.title.x = element_text(vjust = 0.2),
-#               axis.title.y = element_text(vjust = 0.3),
-#               plot.title = element_text(vjust = 1.5)) +
-#         xlab(xlab) + ylab(ylab) +
-#         scale_x_continuous(breaks=myticks) # Ticks
-#     #        scale_shape_manual(values = c(21, 20))
-#     if (!is.null(title)) {
-#         pl <- pl + ggtitle(title)
-#     }
-#     print(pl)
-#     ###pl  ### remove?
-# }
-
 
 #' Velicer's MAP Test
 #'
@@ -1006,15 +920,11 @@ plot.mapTest <- function(x, ...) {
     # Compute ticks for x-axis
     myticks <- Component
     
-    p <- ggplot(MAP, aes_(~Component, ~x)) +
+    p <- ggplot(MAP, aes(Component, x)) +
         geom_line() +
         geom_point(size = 5,
             shape = 21,
             fill = "white") +
-        #geom_line(alpha = c(rep(1, p), rep(0.2, p*simu))) +
-        #        geom_point(size = c(rep(5, p), rep(0, p*simu)),
-        #                   shape = c(rep(21, p), rep(21, p*simu)),
-        #                   fill = "white") +
         geom_abline(intercept = x[1], slope = 0, colour = "darkblue",
             linetype = "dashed") +
         theme(text = element_text(size = 20, colour = "black"),
@@ -1022,10 +932,7 @@ plot.mapTest <- function(x, ...) {
             axis.title.y = element_text(vjust = 0.3),
             plot.title = element_text(vjust = 1.5)) +
         xlab("Components Removed") +
-        #ylab(ylab) +
         scale_x_continuous(breaks=myticks) # + # Ticks
-    #        ggtitle("MAP Test")
-    #print(p)
     p
 }
 
@@ -1188,11 +1095,11 @@ empICC <- function(x,
     x.corrs <- min(x$scores)
     y.corrs <- max(x$value) + 0.25 ###
     
-    p <- ggplot(x, aes_(~scores, ~value)) +
+    p <- ggplot(x, aes(scores, value)) +
         geom_jitter(width = jitter, height = jitter, alpha = I(alpha)) +
         facet_wrap(~variable) +
         xlab(xlab) + ylab("Item Score") +
-        geom_text(aes_(x=~x.corrs, y=~y.corrs, label=~corrs),
+        geom_text(aes(x=x.corrs, y=y.corrs, label=corrs),
             data=corrs,
             parse=TRUE, hjust = 0, size = 5) +
         geom_smooth(method = method, span = span) +
@@ -1390,7 +1297,7 @@ ggplotICC.RM <- function(object, empICC = NULL, empCI = NULL,
     }
     
     myplot <- ggplot(mikPlotData,
-        aes_(~Theta, ~Probability, colour = ~ICC)) +
+        aes(Theta, Probability, colour = ICC)) +
         facet_wrap(~Item) +
         geom_line() +
         xlab(xlab) + ylab(ylab)
