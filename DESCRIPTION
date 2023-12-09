@@ -2,14 +2,14 @@ Package: iana
 Type: Package
 Title: GUI for Item Analysis
 Version: 0.1
-Date: 2017-01-02
+Date: 2023-12-09
 Author: Michael Hock <michael.hock@uni-bamberg.de>
 Maintainer: Michael Hock <michael.hock@uni-bamberg.de>
 Description: Browser-based GUI for classical item and test analysis, factor
     analysis, and item response modeling with an focus on ordered-category
     items.
 Depends:
-    R (>= 3.2.2),
+    R (>= 3.5.0),
     shiny (>= 0.13.0)
 Imports:
     dplyr,

@@ -1062,7 +1062,7 @@ reliability <- function(x, invert = TRUE, digits = 3, dfname = NULL) {
     if (cases < 3)
         stop("At least 3 cases are needed.")
     loadings <- try(principal(x)$loadings[, 1], silent = TRUE)
-    if (class(loadings) == "try-error") {
+    if (inherits(loadings, "try-error")) {
         warning("principal component loadings cannot be computed")
     } else {
         if (any(loadings < 0)) {

@@ -84,7 +84,7 @@ shinyServer(function(input, output) {
         } else {
             inpvarrange <- quo(input$varrange)
             newDf <- try(dplyr::select(getSelectedDf(), !! inpvarrange))
-            if (class(newDf) == "try-error") {
+            if (inherits(newDf, "try-error")) {
                 log.output("Error in getVarRange")
                 return()
             } else {
@@ -456,7 +456,7 @@ shinyServer(function(input, output) {
         log.output(myCmd)
         
         fit <- try(eval(parse(text = myCmd)))
-        if (class(fit) == "try-error") return()
+        if (inherits(fit, "try-error")) return()
         log.output(paste("lavaan fit, class:", class(fit)))
         fitm <- lavaan::fitMeasures(fit)
         if (is.na(fitm["rmsea.scaled"]))
