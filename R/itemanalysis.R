@@ -117,8 +117,8 @@ tryCatch.W.E <- function(expr) {
         invokeRestart("muffleWarning")
     }
     list(value = withCallingHandlers(tryCatch(expr, error = function(e) e),
-             warning = w.handler),
-         warning = W)
+        warning = w.handler),
+        warning = W)
 }
 
 #' Try to Print Results of a Command
@@ -174,7 +174,7 @@ dfEFA <- function(p, m) {
     #         dif <- b - a
     #         list(a, b, dif)
     #     }
-
+    
     if (p < m) return(-1)
     dof <- 0.5 * ((p - m)^2 - p - m)
     dof
@@ -194,11 +194,11 @@ basicDescr <- function(x) {
     # require(psych)
     if (! is.numeric(x)) stop("x must be numeric")
     data.frame(Mean = mean(x, na.rm = TRUE),
-               SD = sd(x, na.rm = TRUE),
-               Skew = psych::skew(x),
-               Kurtosis = psych::kurtosi(x),
-               Min = min(x, na.rm = TRUE),
-               Max = max(x, na.rm = TRUE))
+        SD = sd(x, na.rm = TRUE),
+        Skew = psych::skew(x),
+        Kurtosis = psych::kurtosi(x),
+        Min = min(x, na.rm = TRUE),
+        Max = max(x, na.rm = TRUE))
 }
 
 #' Frequencies
@@ -258,7 +258,7 @@ parallelAnalysis <- function(x, fm = "ml", cor = "cor", n.factors = NULL, sim = 
     # Modified version of fa.parallel from psych, version 1.8.12.
     # Changes:
     # - replacement of mclappy by lapply.
-
+    
     fa.parallel_modified <- function (x, n.obs = NULL, fm = "minres", fa = "both", nfactors = 1,
         main = "Parallel Analysis Scree Plots", n.iter = 20, error.bars = FALSE,
         se.bars = FALSE, SMC = FALSE, ylabel = NULL, show.legend = TRUE,
@@ -758,13 +758,13 @@ parallelAnalysis <- function(x, fm = "ml", cor = "cor", n.factors = NULL, sim = 
     }
     
     if (!is.data.frame(x)) stop("x must be data frame")
-    ##### x0 <- psych::fa.parallel(x, fm = fm, cor = cor, sim = sim)
+    ### x0 <- psych::fa.parallel(x, fm = fm, cor = cor, sim = sim)
     x0 <- fa.parallel_modified(x, fm = fm, cor = cor, sim = sim)
     
     nfac <- length(x0$pc.values)
     x <- data.frame(Factor = 1:nfac,
-                    pc = x0$pc.values,
-                    fa = x0$fa.values)
+        pc = x0$pc.values,
+        fa = x0$fa.values)
     if (sim) {
         x$pc.sim = x0$pc.sim
         x$fa.sim = x0$fa.sim        
@@ -772,14 +772,14 @@ parallelAnalysis <- function(x, fm = "ml", cor = "cor", n.factors = NULL, sim = 
         x$pc.sim = x0$pc.simr
         x$fa.sim = x0$fa.simr        
     }
-
+    
     mydata <- tidyr::gather(x, key = "Source", value = "ev", names(x)[-1])
     mydata$sim <- c(rep("Empirical", 2*nfac), rep("Simulated", 2*nfac))
     mydata$type <- c(rep("Principal Components Analysis", nfac),
-                     rep("Factor Analysis", nfac),
-                     rep("Principal Components Analysis", nfac),
-                     rep("Factor Analysis", nfac))
-
+        rep("Factor Analysis", nfac),
+        rep("Principal Components Analysis", nfac),
+        rep("Factor Analysis", nfac))
+    
     if (is.null(n.factors)) n.factors  <- nfac
     mydata <- mydata[mydata$Factor <= n.factors,]
     n.factors <- max(mydata$Factor)
@@ -809,12 +809,12 @@ parallelAnalysis <- function(x, fm = "ml", cor = "cor", n.factors = NULL, sim = 
         scale_linetype_manual(breaks=c("Empirical", "Simulated"), values=c(1,5)) +
         scale_color_manual(values=c("#000000", "#9999CC")) +
         theme(legend.title=element_blank(),
-              legend.position=c(1, 1),
-              legend.justification=c(1, 1),
-              legend.box.just = "left") +
+            legend.position=c(1, 1),
+            legend.justification=c(1, 1),
+            legend.box.just = "left") +
         scale_x_continuous(breaks = myticks) +
         geom_abline(intercept = 0:1, slope = 0, colour = "#9999CC",
-                    linetype = "dashed")
+            linetype = "dashed")
     pl
 }
 
@@ -959,13 +959,13 @@ parallelAnalysis <- function(x, fm = "ml", cor = "cor", n.factors = NULL, sim = 
 mapTest <- function(data, n = 20, ...) {
     x <- cor(data, use="pairwise")
     nvar <- dim(x)[2]
-
+    
     mean.sqcor <- mean((x[lower.tri(x)])^2)
     mean.sqcor
-
+    
     if (n >= nvar) n1 <- nvar - 1
     else n1 <- n
-
+    
     min.partial <- rep(NA, n1)
     e <- eigen(x)
     evect <- e$vectors
@@ -1005,22 +1005,22 @@ plot.mapTest <- function(x, ...) {
     MAP <- data.frame(Component, x)
     # Compute ticks for x-axis
     myticks <- Component
-
+    
     p <- ggplot(MAP, aes_(~Component, ~x)) +
         geom_line() +
         geom_point(size = 5,
-                   shape = 21,
-                   fill = "white") +
+            shape = 21,
+            fill = "white") +
         #geom_line(alpha = c(rep(1, p), rep(0.2, p*simu))) +
         #        geom_point(size = c(rep(5, p), rep(0, p*simu)),
         #                   shape = c(rep(21, p), rep(21, p*simu)),
         #                   fill = "white") +
         geom_abline(intercept = x[1], slope = 0, colour = "darkblue",
-                    linetype = "dashed") +
+            linetype = "dashed") +
         theme(text = element_text(size = 20, colour = "black"),
-              axis.title.x = element_text(vjust = 0.2),
-              axis.title.y = element_text(vjust = 0.3),
-              plot.title = element_text(vjust = 1.5)) +
+            axis.title.x = element_text(vjust = 0.2),
+            axis.title.y = element_text(vjust = 0.3),
+            plot.title = element_text(vjust = 1.5)) +
         xlab("Components Removed") +
         #ylab(ylab) +
         scale_x_continuous(breaks=myticks) # + # Ticks
@@ -1146,20 +1146,20 @@ reliability <- function(x, invert = TRUE, digits = 3, dfname = NULL) {
 #'
 #' @export
 empICC <- function(x,
-                   score = c("factor.thomson", "factor.bartlett", "mean", "sum"),
-                   method = "loess",
-                   span = 0.75,
-                   alpha = 0,
-                   jitter = 0.4) {
-
+    score = c("factor.thomson", "factor.bartlett", "mean", "sum"),
+    method = "loess",
+    span = 0.75,
+    alpha = 0,
+    jitter = 0.4) {
+    
     if (!is.data.frame(x)) stop("x must be a data frame.")
-
-    x <- na.omit(x) ####
-
-    ####
+    
+    x <- na.omit(x) ###
+    
+    ###
     if (is.na(jitter)) jitter <- 0.4  #### needed for shiny (otherwise app crashes if values are outside the "allowed" range)
-    ####
-
+    ###
+    
     score <- match.arg(score)
     if (score == "factor.thomson") {
         xlab <- ("Factor Score")
@@ -1176,25 +1176,25 @@ empICC <- function(x,
         xlab <- ("Total (Mean) Score")
         scores <- rowMeans(x, na.rm = TRUE) ####
     }
-
+    
     variable <- factor(names(x))
     x <- cbind(scores, x)
     corrs <- round(cor(x)[-1,1], 2)
     corrs <- sprintf("r==%.2f", corrs)
     corrs <- data.frame(variable, corrs)
-
+    
     # x <- reshape2::melt(x, id.vars = "scores") # original version
     x <- tidyr::gather(x, key = "variable", value = "value", names(x)[-1])
     x.corrs <- min(x$scores)
     y.corrs <- max(x$value) + 0.25 ###
-
+    
     p <- ggplot(x, aes_(~scores, ~value)) +
         geom_jitter(width = jitter, height = jitter, alpha = I(alpha)) +
         facet_wrap(~variable) +
         xlab(xlab) + ylab("Item Score") +
         geom_text(aes_(x=~x.corrs, y=~y.corrs, label=~corrs),
-                  data=corrs,
-                  parse=TRUE, hjust = 0, size = 5) +
+            data=corrs,
+            parse=TRUE, hjust = 0, size = 5) +
         geom_smooth(method = method, span = span) +
         theme(text = element_text(size = 14))
     p
@@ -1218,7 +1218,7 @@ empICC <- function(x,
 #' @export
 ggplotICC.RM <- function(object, empICC = NULL, empCI = NULL,
     xlim = c(-4,4), xlab = "Dimension", ylab = "Probability") {
-    #### Mik
+    ### Mik
     plist.internal <- function(object,theta)
         # computes a list of expected probabilities for objects of class Rm
         # with 0th category included!
@@ -1240,7 +1240,7 @@ ggplotICC.RM <- function(object, empICC = NULL, empCI = NULL,
         })
         return(p.list)
     }
-
+    
     ### Hack to avoid Note in package check
     Theta <- NULL
     Probability <- NULL
@@ -1291,14 +1291,14 @@ ggplotICC.RM <- function(object, empICC = NULL, empCI = NULL,
     p.mat <- matrix(unlist(p.list),ncol=length(p.list))  # matrix with solving probabilities
     text.ylab <- p.mat[(1:length(theta))[theta==median(theta)],]
     
-    ## plot for RMs #################
+    ### plot for RMs #################
     for (j in 1:length(ivec)) { # runs over items
         i <- ivec[j]
         yp <- as.matrix(p.list[[i]])
         yy <- yp[th.ord,]
         
         ####################################################################
-        #### ICC: 'model', 'empirical'
+        ### ICC: 'model', 'empirical'
         if (j == 1)
             mikPlotData <- data.frame(
                 ICC = factor(rep("Model", length(theta)),
@@ -1312,7 +1312,7 @@ ggplotICC.RM <- function(object, empICC = NULL, empCI = NULL,
                         levels = c("Empirical", "Model")),
                     Item = rep(textlab[i], length(theta)),
                     Theta = sort(theta), Probability = yy))
-        ####
+        ###
         
         ## empirical ICC
         if (emp.plot) {
@@ -1324,73 +1324,73 @@ ggplotICC.RM <- function(object, empICC = NULL, empCI = NULL,
             
             if(empICC[[1]]=="loess")
                 if(!is.null(empICC$smooth)) smooth <- empICC$smooth else smooth <- 0.75
-                if(empICC[[1]]=="kernel")
-                    if(!is.null(empICC$smooth)) smooth<-empICC$smooth else smooth<-0.5
-                    
-                    nn <- rowSums(freq.table)
-                    switch(empICC[[1]],
-                        "raw"={},
-                        "loess"={xy[,2]<-loess(xy[,2]~xy[,1],span=smooth)$fitted},
-                        "tukey"={xy[,2]<-smooth(xy[,2])},
-                        "kernel"={xy[,2]<-ksmooth(xy[,1],xy[,2],bandwidth=smooth,x.points=xy[,1])[[2]]}
-                    )
-                    xy[,2] <- ifelse(xy[,2]>1,1,ifelse(xy[,2]<0,0,xy[,2])) # bounding p in [0,1]
-                    
-                    #            if(is.null(empICC$type)) empICC$type <- "p"
-                    #            if(is.null(empICC$pch)) empICC$pch <- 1
-                    #            if(is.null(empICC$col)) empICC$col <- "black"
-                    #            if(is.null(empICC$lty)) empICC$lty <- "solid"
-                    
-                    
-                    # confidence intervals for empirical ICC
-                    if(!is.null(empCI)) {
-                        # functions from prop.test()
-                        p.L <- function(x, n, alpha) {
-                            if (x <= 0) 0 else qbeta(alpha, x, n - x + 1)}
-                        p.U <- function(x, n, alpha) {
-                            if (x >= n) 1 else qbeta(1 - alpha, x + 1, n - x)}
-                        CINT <- function(x, n, conf.level){
-                            alpha <- (1 - conf.level)/2
-                            c(p.L(x,n, alpha), p.U(x,n, alpha))
-                        }
-                        
-                        if(is.null(empCI$clevel)) empCI$clevel <- 0.95
-                        #               if(is.null(empCI$col)) empCI$col <- "red"
-                        #               if(is.null(empCI$lty)) empCI$lty <- "dotted"
-                        
-                        
-                        cyf<-cbind(xy[,2] * nn, nn)
-                        cy<-apply(cyf,1,function(x) CINT(x[1],x[2],empCI$clevel))
-                        
-                        
-                        ###                apply(cbind(xy[,1],t(cy)),1,function(x)segments(x[1],x[2],x[1],x[3],lty=empCI$lty,col=empCI$col))
-                    }
-                    
-                    #################################################################
-                    #             # plots the point estimates of the empirical ICC
-                    #             lines(xy[,1],xy[,2],type=empICC$type, pch=empICC$pch, col=empICC$col, lty=empICC$lty, ...)
-                    #             ####
-                    
-                    len <- length(xy[,1])
-                    mikPlotData <- rbind(mikPlotData,
-                        data.frame(
-                            ICC = factor(rep("Empirical", len,
-                                levels = c("Empirical", "Model"))),
-                            Item = rep(textlab[i], len),
-                            Theta = xy[,1], Probability = xy[,2]))
-                    
-                    #             geom_line(alpha = c(rep(1, p), rep(0.2, p*simu))) +
-                    #                 geom_point(size = c(rep(5, p), rep(0, p*simu)),
-                    #                     shape = c(rep(21, p), rep(21, p*simu)),
-                    #                     fill = "white") +
-                    
-                    ####
-                    
+            if(empICC[[1]]=="kernel")
+                if(!is.null(empICC$smooth)) smooth<-empICC$smooth else smooth<-0.5
+            
+            nn <- rowSums(freq.table)
+            switch(empICC[[1]],
+                "raw"={},
+                "loess"={xy[,2]<-loess(xy[,2]~xy[,1],span=smooth)$fitted},
+                "tukey"={xy[,2]<-smooth(xy[,2])},
+                "kernel"={xy[,2]<-ksmooth(xy[,1],xy[,2],bandwidth=smooth,x.points=xy[,1])[[2]]}
+            )
+            xy[,2] <- ifelse(xy[,2]>1,1,ifelse(xy[,2]<0,0,xy[,2])) # bounding p in [0,1]
+            
+            #            if(is.null(empICC$type)) empICC$type <- "p"
+            #            if(is.null(empICC$pch)) empICC$pch <- 1
+            #            if(is.null(empICC$col)) empICC$col <- "black"
+            #            if(is.null(empICC$lty)) empICC$lty <- "solid"
+            
+            
+            # confidence intervals for empirical ICC
+            if(!is.null(empCI)) {
+                # functions from prop.test()
+                p.L <- function(x, n, alpha) {
+                    if (x <= 0) 0 else qbeta(alpha, x, n - x + 1)}
+                p.U <- function(x, n, alpha) {
+                    if (x >= n) 1 else qbeta(1 - alpha, x + 1, n - x)}
+                CINT <- function(x, n, conf.level){
+                    alpha <- (1 - conf.level)/2
+                    c(p.L(x,n, alpha), p.U(x,n, alpha))
+                }
+                
+                if(is.null(empCI$clevel)) empCI$clevel <- 0.95
+                #               if(is.null(empCI$col)) empCI$col <- "red"
+                #               if(is.null(empCI$lty)) empCI$lty <- "dotted"
+                
+                
+                cyf<-cbind(xy[,2] * nn, nn)
+                cy<-apply(cyf,1,function(x) CINT(x[1],x[2],empCI$clevel))
+                
+                
+                ###                apply(cbind(xy[,1],t(cy)),1,function(x)segments(x[1],x[2],x[1],x[3],lty=empCI$lty,col=empCI$col))
+            }
+            
+            #################################################################
+            #             # plots the point estimates of the empirical ICC
+            #             lines(xy[,1],xy[,2],type=empICC$type, pch=empICC$pch, col=empICC$col, lty=empICC$lty, ...)
+            ###
+            
+            len <- length(xy[,1])
+            mikPlotData <- rbind(mikPlotData,
+                data.frame(
+                    ICC = factor(rep("Empirical", len,
+                        levels = c("Empirical", "Model"))),
+                    Item = rep(textlab[i], len),
+                    Theta = xy[,1], Probability = xy[,2]))
+            
+            #             geom_line(alpha = c(rep(1, p), rep(0.2, p*simu))) +
+            #                 geom_point(size = c(rep(5, p), rep(0, p*simu)),
+            #                     shape = c(rep(21, p), rep(21, p*simu)),
+            #                     fill = "white") +
+            
+            ###
+            
         }
     }
-
+    
     myplot <- ggplot(mikPlotData,
-                     aes_(~Theta, ~Probability, colour = ~ICC)) +
+        aes_(~Theta, ~Probability, colour = ~ICC)) +
         facet_wrap(~Item) +
         geom_line() +
         xlab(xlab) + ylab(ylab)
@@ -1398,8 +1398,8 @@ ggplotICC.RM <- function(object, empICC = NULL, empCI = NULL,
         onlyEmp <- mikPlotData[as.character(mikPlotData$ICC) == "Empirical",]
         myplot <- myplot +
             geom_point(data = onlyEmp, size = 4,
-                       shape = 21,
-                       fill = "white")
+                shape = 21,
+                fill = "white")
     }
     print(myplot)
 }
@@ -1484,9 +1484,9 @@ getItemText <- function(x) {
 #' @export
 #
 factoranalysis <- function(x, nfactors, rotate = "oblimin", fm = "minres",
-                   polychor = FALSE, return.res = FALSE) {
+    polychor = FALSE, return.res = FALSE) {
     loadNamespace("GPArotation") ### needed for oblimin and some other
-                                 ### rotations in psych::principal
+    ### rotations in psych::principal
     if (fm == "principal") {
         q <- psych::principal(x, nfactors, rotate = rotate)
         if (!return.res) cat("PRINCIPAL COMPONENTS ANALYSIS\n")
@@ -1499,7 +1499,7 @@ factoranalysis <- function(x, nfactors, rotate = "oblimin", fm = "minres",
         q <- psych::fa(x, nfactors, fm = fm, rotate = rotate)
         if (!return.res) cat("FACTOR ANALYSIS\n")
     }
-
+    
     if (!return.res) {
         cat("\nMethod:  ", fm)
         cat("\nRotation:", q$rotation)
@@ -1524,14 +1524,14 @@ factoranalysis <- function(x, nfactors, rotate = "oblimin", fm = "minres",
         ### p-1 -> RMSR
         srmr = sqrt( sum( (q$residual[upper.tri(q$residual)])^2 ) / (p * (p+1) / 2) )
         Value <- c(q$STATISTIC, q$dof, q$PVAL,
-                   q$TLI,
-                   q$rms,
-                   srmr,
-                   q$RMSEA[1], q$RMSEA[2], q$RMSEA[3],
-                   q$BIC, q$SABIC,
-                   max(abs(q$residual[upper.tri(q$residual)])),
-                   KMO(x)$MSA
-                   )
+            q$TLI,
+            q$rms,
+            srmr,
+            q$RMSEA[1], q$RMSEA[2], q$RMSEA[3],
+            q$BIC, q$SABIC,
+            max(abs(q$residual[upper.tri(q$residual)])),
+            KMO(x)$MSA
+        )
     }
     Value <- as.character(round(Value, 3))
     if (!is.na(q$PVAL)) {
@@ -1573,7 +1573,7 @@ factoranalysis <- function(x, nfactors, rotate = "oblimin", fm = "minres",
 ## Needs: getItemText from iana, str_trim from stringr
 
 classifyItems <- function(fm, Df, min.loading = 0.4, max.loading = 0.3, max.complexity = 2, itemlength = 0, digits = 2, Df.name = deparse(substitute(Df)), return.res = FALSE) {
-
+    
     if(!inherits(fm, "fa") && !inherits(fm, "principal") ) 
         stop("fm was not computed with psych::fa oder psych::principal")
     
@@ -1608,18 +1608,18 @@ classifyItems <- function(fm, Df, min.loading = 0.4, max.loading = 0.3, max.comp
     lmat <- round(unclass(lmat), digits)
     communality <- round(communality, digits)
     if(inherits(fm, "fa")) complexity <- round(complexity, digits)
-
+    
     # Loadings 
-
+    
     if (!return.res) {
         cat("\nLOADINGS\n\n")
         cat("M = Marker, a_j = Factor loadings\n")
         cat("h2 = Communality, Cmpl = Factorial complexity\n")
     }
     ilength <- getOption("width") -  max(nchar(varnames)) - 3 -
-      (ncol(lmat) + 2) * (digits + 4)
+        (ncol(lmat) + 2) * (digits + 4)
     items <- getItemText(Df)
-
+    
     if (is.null(items)) {
         shortitems <- rep("-", length(communality))
         if (!return.res) {
@@ -1637,7 +1637,7 @@ classifyItems <- function(fm, Df, min.loading = 0.4, max.loading = 0.3, max.comp
     }
     
     if(inherits(fm, "principal")) complexity <- (rep("-", length(complexity)))
-        
+    
     x <- data.frame(F, marker, lmat, communality, complexity, shortitems)
     x <- x[order(x$F, -max.absload), ]
     colnames(x) <- c(
@@ -1647,7 +1647,7 @@ classifyItems <- function(fm, Df, min.loading = 0.4, max.loading = 0.3, max.comp
         "h2",
         "Cmpl",
         "Item"
-      )
+    )
     if (return.res) {
         loadingsDf <- x
     } else {
@@ -1664,7 +1664,7 @@ classifyItems <- function(fm, Df, min.loading = 0.4, max.loading = 0.3, max.comp
     if (!return.res) {
         cat("\n", mcount, "of", ncol(Df), "Items were classified as markers.\n")
     }
-
+    
     # Factor Correlations
     
     if (exists("Phi", fm)) {
@@ -1680,13 +1680,13 @@ classifyItems <- function(fm, Df, min.loading = 0.4, max.loading = 0.3, max.comp
     }
     
     # Code snippet
-
+    
     code <- "\n"
     for (i in (1:ncol(lmat))) {
         selected <- row.names(x[(x$F == i) & (x$M == "*"), ])
         selected <- paste(selected, collapse = ", ")
         code <- paste0(code, "F", i, " <- dplyr::select(", Df.name,
-                           ", ", selected, ")\n")
+            ", ", selected, ")\n")
     }
     if (!return.res) {
         cat("\nNOTE\n\nThe following code may be used to create data frames of items\nassigned to the factors. Some items may need to be inverted.\n", code)

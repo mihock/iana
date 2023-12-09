@@ -171,7 +171,7 @@ shinyUI(fluidPage(
                         plotOutput(outputId = "maptest.plot")
                     ),
                     
-                    # EFA ####
+                    # EFA ######################################################
                     tabPanel("Exploratory Factor Analysis",
                         h3("Exploratory Factor Analysis and Principal Components Analysis"),
                         helpText("Analyses are performed with iana::factoranalysis, which uses psych::principal, psych::fa, and psych::irt.fa."),
@@ -236,7 +236,7 @@ shinyUI(fluidPage(
                         verbatimTextOutput(outputId = "factorcode")
                     ),
                     
-                    # CFA ####
+                    # CFA ######################################################
                     tabPanel("Confirmatory Factor Analysis",
                         h3("Confirmatory Factor Analysis"),
                         helpText("Confirmatory factor analysis is performed with lavaan::cfa."),
@@ -393,10 +393,10 @@ shinyUI(fluidPage(
                                     'simplimax', 'bentlerT', 'bentlerQ', 
                                     'tandemI', 'tandemII', 'geominT', 'geominQ',
                                     'cfT', 'cfQ')
-                                #### Not included (some need an additional argument): 
-                                #### 'infomaxT', 'infomaxQ', 
-                                #### 'mccammon', 'bifactorT', 'bifactorQ'
-                                #### 'targetT', 'targetQ', 'pstT', 'pstQ', 
+                                ### Not included (some need an additional argument): 
+                                ### 'infomaxT', 'infomaxQ', 
+                                ### 'mccammon', 'bifactorT', 'bifactorQ'
+                                ### 'targetT', 'targetQ', 'pstT', 'pstQ', 
                             )),
                         column(6, 
                             selectInput(inputId = "mirt_method",

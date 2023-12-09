@@ -1,5 +1,5 @@
-require(shiny)
-require(shinyAce)
+require(shiny) ### also in ui.R
+require(shinyAce) ### also in ui.R
 require(ggplot2)
 require(tidyr)
 require(lavaan) ### Why needed? Better construct a "runCFA"-command?
@@ -9,7 +9,7 @@ log.output <- function(x = "") {
     cat("===", x, t, "\n", file = stderr())
 }
 
-#### Todo
+### Todo
 cmdLogFile <- path.expand(paste("~", "iana_cmd_log.R", sep = "/"))
 .old.mycmd <<- ""
 cat("# Command Log for IANA\n\n", file = cmdLogFile)
@@ -153,7 +153,7 @@ shinyServer(function(input, output) {
         iana::frequencies(x)
     }, rownames = TRUE, striped = TRUE, digits = 0)
     
-    # Reliability ####
+    # Reliability ##############################################################
     
     output$reliability <- renderPrint({
         log.output("reliability")
