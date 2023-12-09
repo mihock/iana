@@ -35,18 +35,11 @@ shinyServer(function(input, output) {
         # number is > 19, the names of all numeric variables are returned.
         
         maybeLikert <- function(x, unique.values = 9) {
-            is.int <- function(x) {
-                if (is.numeric(x)) {
-                    ceiling(x) == floor(x)
-                } else {
-                    return(FALSE)
-                }
-            }
+
             if (unique.values > 19) {
                 is.numeric(x)
             } else {
-                is.int(x) &&
-                    length(unique(x)) <= unique.values &&
+                length(unique(x)) <= unique.values &&
                     min(x) >= 0 &&
                     max(x) <= unique.values
             }
@@ -57,7 +50,6 @@ shinyServer(function(input, output) {
         if (nrow(Df) == 0) return()
         numvars <- logical(ncol(Df))
         for (i in 1:ncol(Df)) {
-            ### if (maybeLikert(Df[,i], unique.values)) numvars[i] <- TRUE # dplyr!
             if (maybeLikert(Df[[i]], unique.values)) numvars[i] <- TRUE
         }
         varnames <- names(Df)[numvars]
