@@ -88,19 +88,8 @@ shinyServer(function(input, output) {
     
     getVarRange <- reactive({
         log.output("getVarRange")
-        if (input$varrange == "") {
-            varrange <- getVarsInDf()
-            if (length(varrange) > 80) varrange <- varrange[1:80]
-        } else {
-            inpvarrange <- quo(input$varrange)
-            newDf <- try(dplyr::select(getSelectedDf(), !! inpvarrange))
-            if (inherits(newDf, "try-error")) {
-                log.output("Error in getVarRange")
-                return()
-            } else {
-                varrange <- names(newDf)
-            }
-        }
+        varrange <- getVarsInDf()
+        if (length(varrange) > 80) varrange <- varrange[1:80]
         varrange
     })
     
