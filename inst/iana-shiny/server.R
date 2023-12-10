@@ -132,11 +132,7 @@ shinyServer(function(input, output) {
 
         # The following 2 lines work because select supports 
         # character vectors (see last example in ?select).
-        ##### vnames <- enquo(vnames)
-        ##### Df <- dplyr::select(getSelectedDf(), !! vnames)
-        ##### New 2023-12-10
         Df <- dplyr::select(getSelectedDf(), all_of(vnames))
-        #####
         Df
     }
     

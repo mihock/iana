@@ -1340,9 +1340,6 @@ print.itemText <- function(x, ...) {
 getItemText <- function(x) {
     if (!is.data.frame(x)) stop("x must be a data frame")
     itemtext <- sapply(X = x, FUN = attr, which = "item.text")
-    #####
-    cat(paste("IIII", itemtext, "\n"))
-    
     if (is.list(itemtext)) return(NULL)
     names(itemtext) <- colnames(x)
     class(itemtext) <- c("itemText", "character")
