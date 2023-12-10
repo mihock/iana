@@ -35,11 +35,21 @@ shinyServer(function(input, output) {
         # number is > 19, the names of all numeric variables are returned.
         
         maybeLikert <- function(x, unique.values = 9) {
-
+            
+            # Checks whether all elements of a vector are whole numers.
+            is.whole <- function(x) {
+                if (is.numeric(x)) {
+                    all(floor(x) == ceiling(x))
+                } else {
+                    return(FALSE)
+                }
+            }
+            
             if (unique.values > 19) {
                 is.numeric(x)
             } else {
-                length(unique(x)) <= unique.values &&
+                is.whole(x) &&
+                    length(unique(x)) <= unique.values &&
                     min(x) >= 0 &&
                     max(x) <= unique.values
             }
