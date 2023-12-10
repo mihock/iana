@@ -27,6 +27,7 @@
 #' @importFrom mirt mirt
 #' @importFrom tidyr gather
 #' @importFrom dplyr select
+#' @importFrom rlang .data
 #' @import ggplot2 GPArotation lavaan eRm markdown stringr shiny shinythemes shinyAce
 #' @docType package
 #' @author Michael Hock (\email{michael.hock@@uni-bamberg.de})
@@ -795,11 +796,12 @@ parallelAnalysis <- function(x, fm = "ml", cor = "cor", n.factors = NULL, sim = 
     # Plot
     if (onlyFA) {
         mydata <- mydata[mydata$type == "Factor Analysis",]
-        pl <- ggplot2::ggplot(mydata, aes(Factor, ev, shape=sim, colour=sim)) +
+        # For use of '.data' see https://rlang.r-lib.org/reference/dot-data.html
+        pl <- ggplot2::ggplot(mydata, aes(.data$Factor, .data$ev, shape=sim, colour=sim)) +
             xlab("Factor")
         
     } else {
-        pl <- ggplot2::ggplot(mydata, aes(Factor, ev, shape= sim, colour= sim)) +
+        pl <- ggplot2::ggplot(mydata, aes(.data$Factor, .data$ev, shape= sim, colour= sim)) +
             xlab("Factor/Component") +
             facet_wrap(~ type)
         
@@ -1095,7 +1097,7 @@ empICC <- function(x,
     x.corrs <- min(x$scores)
     y.corrs <- max(x$value) + 0.25 ###
     
-    p <- ggplot(x, aes(scores, value)) +
+    p <- ggplot(x, aes(scores, .data$value)) +
         geom_jitter(width = jitter, height = jitter, alpha = I(alpha)) +
         facet_wrap(~variable) +
         xlab(xlab) + ylab("Item Score") +
