@@ -4,7 +4,7 @@
 #'
 #' Iana is a browser-based graphical user interface to R functions for the psychometric analysis of questionnaires and tests with an ordinal response format. Iana tries to integrate the essential statistical analysis steps into a convenient interface. Iana covers classical item and test analysis (reliability, item discrimation), dimensionality tests (parallel analysis and MAP test), principal components and exploratory factor analysis (including factor analysis based on polychoric correlations), one-factor confirmatory analysis, and item response models (partial credit model). Graphical output includes histograms of item and test scores, empirical item characteric curves, and person-item maps, among others.
 #'
-#' Iana is based on the \href{https://shiny.posit.co}{Shiny Web Framework for R}, which allows a fast bidirectional communication between the browser and R. Iana is "reactive", meaning that its output is instantly updated if any of the inputs (e.g., the selected variables) are changed by the user. This makes it easy to compare the impact of item selection and/or modeling options on the results. Iana keeps track of the R commands it constructs as a response to user input, so the analysis steps are documented and can be replicated. Iana comes with some built-in data sets, with which the interface can be tested. However, other data can easily be used.
+#' Iana is based on the \href{https://shiny.posit.co}{Shiny Web Framework for R}, which allows a fast bidirectional communication between the browser and R. Iana is "reactive", meaning that its output is instantly updated if any of the inputs (e.g., the selected variables) are changed by the user. This makes it easy to compare the impact of item selection and/or modeling options on the results. Iana comes with some built-in data sets, with which the interface can be tested
 #'
 #' The basic usage is documented in \code{\link{runiana}}.
 #'
@@ -91,16 +91,6 @@ getDataFramesIana <- function(min = 20) {
     x
 }
 
-##================================================================##
-###  In longer simulations, aka computer experiments,		 ###
-###  you may want to						 ###
-###  1) catch all errors and warnings (and continue)		 ###
-###  2) store the error or warning messages			 ###
-###								 ###
-###  Here's a solution	(see R-help mailing list, Dec 9, 2010):	 ###
-###  See: demo(error.catching)                                   ###
-##================================================================##
-
 #' Catch and Save Both Errors and Warnings
 #' 
 #' Catch and save both errors and warnings, and in the case of
@@ -165,17 +155,6 @@ tryPrintExpr <- function(x) {
 #'
 #' @export
 dfEFA <- function(p, m) {
-    # Degrees of freeddom for exploratory factor model (ML)
-    # p: number of variables, m = number of factors
-    # Brown 2009
-    #
-    #     Dof <- function(p, m) {
-    #         a <- (p*m) + ((m*(m+1)) / 2) + p -m^2 # Parameters in FA
-    #         b <- (p*(p+1)) / 2 # Elements of cov matrix to use
-    #         dif <- b - a
-    #         list(a, b, dif)
-    #     }
-    
     if (p < m) return(-1)
     dof <- 0.5 * ((p - m)^2 - p - m)
     dof
@@ -1271,14 +1250,12 @@ ggplotICC.RM <- function(object, empICC = NULL, empCI = NULL,
                 
                 cyf<-cbind(xy[,2] * nn, nn)
                 cy<-apply(cyf,1,function(x) CINT(x[1],x[2],empCI$clevel))
-                
-                
-                ###                apply(cbind(xy[,1],t(cy)),1,function(x)segments(x[1],x[2],x[1],x[3],lty=empCI$lty,col=empCI$col))
+                ### apply(cbind(xy[,1],t(cy)),1,function(x)segments(x[1],x[2],x[1],x[3],lty=empCI$lty,col=empCI$col))
             }
             
             #################################################################
-            #             # plots the point estimates of the empirical ICC
-            #             lines(xy[,1],xy[,2],type=empICC$type, pch=empICC$pch, col=empICC$col, lty=empICC$lty, ...)
+            ## plots the point estimates of the empirical ICC
+            # lines(xy[,1],xy[,2],type=empICC$type, pch=empICC$pch, col=empICC$col, lty=empICC$lty, ...)
             ###
             
             len <- length(xy[,1])
@@ -1288,14 +1265,6 @@ ggplotICC.RM <- function(object, empICC = NULL, empCI = NULL,
                         levels = c("Empirical", "Model"))),
                     Item = rep(textlab[i], len),
                     Theta = xy[,1], Probability = xy[,2]))
-            
-            #             geom_line(alpha = c(rep(1, p), rep(0.2, p*simu))) +
-            #                 geom_point(size = c(rep(5, p), rep(0, p*simu)),
-            #                     shape = c(rep(21, p), rep(21, p*simu)),
-            #                     fill = "white") +
-            
-            ###
-            
         }
     }
     
