@@ -16,7 +16,7 @@
 #'
 #' Because responses to ordered-category items are usually coded with integers ranging from 1 to the number of response categories (or from 0 to number of categories minus 1), and the number of categories is usually small (< 10), only variables with a limited range of non-negative integer values are shown. However, this may be changed by increasing the value in the numeric input box located above the variable list. Anyway, the items to be analyzed should be integers and, for some types of analysis (for example, partial credit models), these integers should fall within a small range. Otherwise, computations will probably fail.
 #'
-#' Missing values should be handled before Iana is launched. Iana removes rows with incomplete values in a data frame via \code{\link{na.omit}}, which can result in a substantial reduction of the number of cases.
+#' Missing values should be handled before Iana is launched. Iana removes rows with incomplete values in a data frame via \code{tidyr::drop_na}, which can result in a substantial reduction of the number of cases.
 #' 
 #' If a \code{data} argument is provided, the corresponding data frame is initially selected. Providing a data frame is recommended because Iana otherwise starts its compuations with first data frame it finds, which may not be the right one.
 #'

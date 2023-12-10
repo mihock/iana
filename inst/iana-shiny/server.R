@@ -26,7 +26,7 @@ shinyServer(function(input, output) {
     getSelectedDf <- reactive({
         log.output(paste("getSelectedDf:", input$selectedDf))
         Df <- get(input$selectedDf)
-        na.omit(Df)
+        tidyr::drop_na(Df)
     })
     
     getLikertLikeVars <- function(Df, unique.values = 9) {
@@ -130,10 +130,14 @@ shinyServer(function(input, output) {
     getSubset <- function(vnames, minNoVars = 2) {
         log.output("getSubset")
         req(vnames, length(vnames) >= minNoVars)
+
         # The following 2 lines work because select supports 
         # character vectors (see last example in ?select).
-        vnames <- enquo(vnames)
-        Df <- dplyr::select(getSelectedDf(), !! vnames)
+        ##### vnames <- enquo(vnames)
+        ##### Df <- dplyr::select(getSelectedDf(), !! vnames)
+        ##### New 2023-12-10
+        Df <- dplyr::select(getSelectedDf(), all_of(vnames))
+        #####
         Df
     }
     

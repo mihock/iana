@@ -25,7 +25,7 @@
 #' @importFrom psych describe principal fa irt.fa fa.parallel KMO skew kurtosi isCorrelation tetrachoric polychoric mixedCor YuleCor smc
 #' @importFrom semTools reliability
 #' @importFrom mirt mirt
-#' @importFrom tidyr gather
+#' @importFrom tidyr drop_na gather
 #' @importFrom dplyr select
 #' @importFrom rlang .data
 #' @import ggplot2 GPArotation lavaan eRm markdown stringr shiny shinythemes shinyAce
@@ -961,6 +961,7 @@ reliability <- function(x, invert = TRUE, digits = 3, dfname = NULL) {
     if (n < 2)
         stop("At least 2 items are needed.")
     cases.orig <- nrow(x)
+    ### Better use tidyr::drop_na? na.omit throws attributes away.
     x <- na.omit(x)
     cases <- nrow(x)
     if (cases < cases.orig) {
@@ -1063,7 +1064,7 @@ empICC <- function(x,
     
     if (!is.data.frame(x)) stop("x must be a data frame.")
     
-    x <- na.omit(x) ###
+    ### x <- na.omit(x)
     
     ###
     if (is.na(jitter)) jitter <- 0.4  #### needed for shiny (otherwise app crashes if values are outside the "allowed" range)
@@ -1370,6 +1371,9 @@ print.itemText <- function(x, ...) {
 getItemText <- function(x) {
     if (!is.data.frame(x)) stop("x must be a data frame")
     itemtext <- sapply(X = x, FUN = attr, which = "item.text")
+    #####
+    cat(paste("IIII", itemtext, "\n"))
+    
     if (is.list(itemtext)) return(NULL)
     names(itemtext) <- colnames(x)
     class(itemtext) <- c("itemText", "character")
@@ -1479,7 +1483,7 @@ factoranalysis <- function(x, nfactors, rotate = "oblimin", fm = "minres",
 #' @author Michael Hock \email{michael.hock@@uni-bamberg.de}
 #'
 #' @export
-## Needs: getItemText from iana, str_trim from stringr
+### Needs: getItemText from iana, str_trim from stringr
 
 classifyItems <- function(fm, Df, min.loading = 0.4, max.loading = 0.3, max.complexity = 2, itemlength = 0, digits = 2, Df.name = deparse(substitute(Df)), return.res = FALSE) {
     
@@ -1528,7 +1532,7 @@ classifyItems <- function(fm, Df, min.loading = 0.4, max.loading = 0.3, max.comp
     ilength <- getOption("width") -  max(nchar(varnames)) - 3 -
         (ncol(lmat) + 2) * (digits + 4)
     items <- getItemText(Df)
-    
+
     if (is.null(items)) {
         shortitems <- rep("-", length(communality))
         if (!return.res) {
