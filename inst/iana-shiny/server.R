@@ -9,16 +9,6 @@ log.output <- function(x = "") {
     cat("===", x, t, "\n", file = stderr())
 }
 
-### Todo
-cmdLogFile <- path.expand(paste("~", "iana_cmd_log.R", sep = "/"))
-.old.mycmd <<- ""
-cat("# Command Log for IANA\n\n", file = cmdLogFile)
-cmdLog <- function(cmd.string = "") {
-    cat(cmd.string, "\n", file = cmdLogFile, append = TRUE)
-}
-log.output(paste("Command log is in", cmdLogFile))
-###
-
 shinyServer(function(input, output) {
     
     # Data #####################################################################
@@ -147,8 +137,6 @@ shinyServer(function(input, output) {
     output$frequencies <-  renderTable({
         log.output("frequencies")
         x <- getSubset(checkedVars())
-        cmdLog("# Frequencies\n")
-        cmdLog("frequencies(myData)\n")
         iana::frequencies(x)
     }, rownames = TRUE, striped = TRUE, digits = 0)
     
@@ -157,12 +145,9 @@ shinyServer(function(input, output) {
     output$reliability <- renderPrint({
         log.output("reliability")
         x <- getSubset(checkedVars())
-        cmdLog("# Reliability")
         if (input$reliabDetailed){
-            cmdLog("alpha(myData)\n")
             print(psych::alpha(x))
         } else {
-            cmdLog("reliability(myData)\n")
             iana::reliability(x, dfname = input$selectedDf)
         }
     })
@@ -172,7 +157,6 @@ shinyServer(function(input, output) {
     output$hist <- renderPlot({
         log.output("hist")
         x <- getSubset(checkedVars(), 1)
-        ### cmdLog
         d <- tidyr::gather(x, key = "Item", value = "Score", names(x))
         if (input$histtypeitem == "count") {
             ggplot2::ggplot(d, aes(x = as.factor(Score))) +
@@ -251,7 +235,6 @@ shinyServer(function(input, output) {
         x <- getSubset(checkedVars())
         if (input$ICClinear) method <- "lm"
         else method <- "loess"
-        ### cmdLog
         iana::empICC(x, input$ICCscore, method = method, span = input$ICCloessspan,
             alpha = input$ICCalpha, jitter = input$ICCjitter)
     }, res = 96) ### check res
@@ -261,9 +244,6 @@ shinyServer(function(input, output) {
     output$parallelanalysis <- renderPlot({
         log.output("parallelanalysis")
         x <- getSubset(checkedVars())
-        cmdLog("# Parallel Analysis")
-        #cmdLog("ggscree.plot(myData)\n")
-        #iana::ggscree.plot(x)
         nfac <- input$nFactorsParallel
         if (nfac >= 21) nfac <- NULL
         iana::parallelAnalysis(x, 
@@ -293,9 +273,6 @@ shinyServer(function(input, output) {
         log.output("maptest.plot")
         x <- maptest()
         if (!is.null(x)) {
-            cmdLog("# MAP Test")
-            cmdLog("(mymaptest <- mapTest(myData))")
-            cmdLog("plot(mymaptest)\n")
             plot(x)
         }
     })
@@ -339,14 +316,6 @@ shinyServer(function(input, output) {
                 possible.rots = c("none", "varimax", "quartimax", "promax", 
                     "oblimin", "simplimax", "cluster")
                 if (farot %in% possible.rots) {
-                    cmdLog("# Principal Components Analysis")
-                    cmdLog(paste0(
-                        "factoranalysis(myData",
-                        ", ", numfac,
-                        ",\n    rotate = '", farot, "'",
-                        ",\n    fm = 'principal'",
-                        ")\n"
-                    ))
                     fa.res <- factoranalysis(Df, numfac, 
                         rotate = farot, 
                         fm = "principal", 
@@ -357,15 +326,6 @@ shinyServer(function(input, output) {
                     ### stop?
                 }
             } else {
-                cmdLog("# Exploratory Factor Analysis")
-                cmdLog(paste0(
-                    "factoranalysis(myData",
-                    ", ", numfac,
-                    ",\n    rotate = '", farot, "'",
-                    ",\n    fm = '", famethod, "'",
-                    ",\n    polychor = '", fairt, "'",
-                    ")\n"
-                ))
                 fa.res <- iana::factoranalysis(Df, numfac,
                     rotate = farot, 
                     fm = famethod, 
@@ -374,12 +334,10 @@ shinyServer(function(input, output) {
             incProgress(1, detail = "done")
         })
         
-        ### cmdLog
         classif <- iana::classifyItems(fa.res$res, Df, input$faMinloading, 
             input$faMaxloading, input$faComplexity, 
             input$faItemlength, input$faDigits, 
             Df.name = input$selectedDf, return.res = TRUE)
-        ##log.output("computeEFA: DONE")
         list(fa.res = fa.res$res, 
             fit = fa.res$stats,
             factorloadings = classif$factorloadings, 
@@ -467,10 +425,6 @@ shinyServer(function(input, output) {
         cat("\nReliability estimates:\n")
         print(semTools::reliability(fit))
         cat("\n")
-        cmdLog("# Confirmatory Factor Analysis")
-        cmdLog(modelCmd)
-        cmdLog(paste0("fit <- ", myCmd))
-        cmdLog("summary(fit, fit.measures = TRUE, standardized = TRUE)\n")
         summary(fit, fit.measures = TRUE, standardized = TRUE)
     })
     
@@ -659,15 +613,6 @@ shinyServer(function(input, output) {
             need(!(model == "Rasch" && nf > 1), 
                 "For Rasch models, only 1 dimension is possible. Please choose another model.")
         )
-        cmdLog(paste0(
-            "# IRT\n",
-            "res <- mirt(myData",
-            ",\n    model = ", nf, 
-            ",\n    itemtype = '", model, "'",
-            ",\n    method = '", input$mirt_method, "'",
-            ",\n    rotate = '", input$mirt_rotate, "'",
-            ",\n    SE = TRUE, verbose = FALSE)"
-        ))
         withProgress(message = 'MIRT', detail = "running", max = 1, {
             res <- mirt::mirt(x, 
                 model = nf, 
@@ -684,23 +629,16 @@ shinyServer(function(input, output) {
         log.output("mirt (output)")
         x <- computeMirt()
         cat("\nBASICS\n")
-        cmdLog("print(res)")
         print(x)
         cat("\nSUMMARY\n")
-        cmdLog(paste0("summary(res, rotate = ", input$mirt_rotate, ")"))
         summary(x, rotate = input$mirt_rotate)
-        #        cat("\nCOEFFICIENTS\n")
-        #        print(coef(x))
         cat("\nMODEL FIT\n")
-        cmdLog("print(mirt::M2(res))")
         print(mirt::M2(x), digits = 3)
         #        M2(x, residmat = TRUE, suppress = 0.1)
         #        cat("\nWALD TEST\n")
         #        print(mirt::wald(x), digits = 2)
         cat("\nITEMFIT\n")
-        cmdLog("mirt::itemfit(res)")
         mirt::itemfit(x)
-        #mirt::personfit(x)
     })
     
     # Help #####################################################################
