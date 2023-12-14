@@ -222,7 +222,8 @@ fluidPage(
                         fluidRow(
                             column(4, sliderInput(inputId = "faDigits", 
                                 label = "Digits to show:",
-                                min = 2, max = 8, value = 2, step = 1)),
+                                min = 2, max = 8, value = 2, step = 1, 
+                                ticks = FALSE)),
                             column(4, sliderInput(inputId = "faItemlength", 
                                 label = "Trim item text (characters):",
                                 min = 20, max = 500, value = 250, step = 10))
