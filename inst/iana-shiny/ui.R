@@ -3,9 +3,9 @@ library(shiny)
 library(shinythemes)
 library(shinyAce)
 
-shinyUI(fluidPage(
+fluidPage(
     theme = shinytheme("flatly"),
-
+    
     sidebarLayout(
         position = "right",
         
@@ -427,8 +427,4 @@ shinyUI(fluidPage(
             )
         )
     )
-))
-
-
-
-
+)

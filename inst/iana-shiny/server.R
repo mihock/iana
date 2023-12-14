@@ -9,8 +9,7 @@ log.output <- function(x = "") {
     cat("===", x, t, "\n", file = stderr())
 }
 
-shinyServer(function(input, output) {
-    
+server <- function(input, output) {    
     # Data #####################################################################
     
     getSelectedDf <- reactive({
@@ -646,4 +645,4 @@ shinyServer(function(input, output) {
     output$info <- renderPrint({
         paste0("Working directory: ", getwd(), ", Temp dir: ", tempdir())
     })
-})
+}
