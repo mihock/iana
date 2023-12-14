@@ -5,7 +5,7 @@ library(shinyAce)
 
 shinyUI(fluidPage(
     theme = shinytheme("flatly"),
-    
+
     sidebarLayout(
         position = "right",
         

@@ -168,7 +168,7 @@ shinyServer(function(input, output) {
             ggplot2::ggplot(d, aes(x = as.factor(Score))) +
                 facet_wrap(~Item) +
                 geom_bar(aes(y = 100*(after_stat(count)) /
-                        tapply(after_stat(count),..PANEL..,sum)[..PANEL..]),
+                        tapply(after_stat(count), after_stat(PANEL), sum)[after_stat(PANEL)]),
                     colour = "black", fill = "white") +
                 xlab("Response") + ylab("Percent of total") +
                 theme(text = element_text(size = 14))
@@ -209,12 +209,12 @@ shinyServer(function(input, output) {
         } else { # density
             p <- p + 
                 ylab("Density") +
-                geom_histogram(aes(y = ..density..), 
+                geom_histogram(aes(y = after_stat(density)), 
                     color = mycolor, fill = myfill,
                     binwidth=binw) +
                 stat_function(fun=dnorm, 
                     args=list(mean=mean(d$Total), sd=sd(d$Total)),
-                    colour = "darkgreen", size = 2, alpha = 0.5
+                    color = "darkgreen", linewidth = 2, alpha = 0.5
                 ) +
                 geom_density(color="blue")
         }
