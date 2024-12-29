@@ -1322,6 +1322,7 @@ setItemText <- function(x, items = NULL) {
     invisible(x)
 }
 
+#' @export
 print.itemText <- function(x, ...) {
     print(data.frame(Item = x), right = FALSE)
 }
